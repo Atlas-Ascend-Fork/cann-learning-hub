@@ -377,26 +377,72 @@ cd cann-learning-hub
 
 ### 全栈课程体系地图
 
-按 **技术领域 × 难度等级** 双维度组织，高手可直接跳过入门内容，精准定位高阶课程。
+按 **技术领域 × 难度等级** 双维度组织（11 个技术领域 × 3 级难度），高手可直接跳过入门内容，精准定位高阶课程。
 
-<details open>
-<summary><b>折叠全栈课程体系地图</b>（11 个技术领域 × 3 级难度）</summary>
-
-| 技术领域 | 初级课程 | 中级课程 | 高级课程 |
-| :--- | :--- | :--- | :--- |
-| **⚙️ 算子开发 · Ascend C** | [Kernel 直调版](./tutorials/ascendc_operator_development_light) | — | — |
-| **⚙️ 算子开发 · PyASC** | [PyASC 初级（概述/核函数基础）](./tutorials/pyasc_operator_development) | [PyASC 中级（Vector/Matmul）](./tutorials/pyasc_operator_development) | [PyASC 高级（融合/调优）](./tutorials/pyasc_operator_development) |
-| **⚙️ 算子开发 · PyPTO** | [PyPTO 初级（概述/基础/实践）](./tutorials/pypto_development) | [PyPTO 中级（中高级算子实践）](./tutorials/pypto_development) | — |
-| **⚙️ 算子开发实战** | — | Vector 🚧 · matmul 🚧 · [Conv 实战](./tutorials/conv_operator_development) | [MC2 融合算子](./tutorials/MC2_fused_operator_development) · MoE 🚧 · FA 🚧 |
-| **🧠 大模型推理** | [推理理论课件初级](./tutorials/llm_inference/slides/intermediate) · [Qwen3-8B 实践初级](./tutorials/llm_inference/qwen3_8b) | [推理理论课件中级](./tutorials/llm_inference/slides/intermediate) · [Qwen3-8B 实践中级](./tutorials/llm_inference/qwen3_8b) | [推理理论课件高级](./tutorials/llm_inference/slides/advance) · [Qwen3-8B 实践高级](./tutorials/llm_inference/qwen3_8b) · [Sana-Video](./reference_practice/model_inference_optimization/sana_video) · [PyTorch 算子优化](./reference_practice/pytorch_online_inference_operator_optimize) |
-| **🏋️ 大模型训练** | [SFT 初阶](./tutorials/sft_training_pipeline) · [RL 初阶](./tutorials/rl_training_pipeline) · [SwanLab 微调](#swanlab) | [SFT 中阶](./tutorials/sft_training_pipeline) · [RL 中阶](./tutorials/rl_training_pipeline) | SFT/RL 高阶 🚧 |
-| **📊 推荐系统** | [CTR 预测](./contrib/tutorials/torch-rechub/00_QuickStart_CTR_DeepFM.ipynb) · [DIN](./contrib/tutorials/torch-rechub/01_Ranking_DIN.ipynb) · [DSSM](./contrib/tutorials/torch-rechub/02_Matching_DSSM.ipynb) · [MMOE](./contrib/tutorials/torch-rechub/03_MultiTask_MMOE.ipynb) · [实验跟踪](./contrib/tutorials/torch-rechub/04_Experiment_Tracking_Light.ipynb) · [模型导出](./contrib/tutorials/torch-rechub/05_Model_Export_and_Serving.ipynb) | [DIN 多进程控核推理](./contrib/tutorials/torch-rechub/10_NPU_DIN_Inference_MultiInstance_CoreControl.ipynb) | — |
-| **🔗 图框架** | [GE 图引擎](./tutorials/ge_development) · [TorchAir](./tutorials/TorchAir_development) · [AutoFusion](./tutorials/autofusion_development) | [GE 图编译与优化](./tutorials/ge_development) · [TorchAir 进阶](./tutorials/TorchAir_development/README.md) · [AutoFusion 融合原理](./tutorials/autofusion_development/02_autofusion_principles) | [GE 实践与问题定位](./tutorials/ge_development/05_practice_and_troubleshooting) · [TorchAir 实践](./tutorials/TorchAir_development/04_advanced_features) · [AutoFusion 实战](./tutorials/autofusion_development/03_practice_and_debugging) |
-| **📡 通信** | [HiXL 单边通信](./tutorials/hixl_development) · [集合通信](./tutorials/hccl_development) | [HiXL 传输优化](./tutorials/hixl_development) · [HCCL 算子开发](./tutorials/hccl_development) | [HCCL AIV 引擎算子开发](./tutorials/hccl_development/slides/07_hccl_aiv_engine.pdf) · [AI 大集群问题定位](./tutorials/hccl_development/slides/08_troubleshooting_hccl_for_ai_clusters.pdf) |
-| **📱 应用开发** | [YOLOv13 离线推理](./reference_practice/yolov13_offline_inference) | — | — |
-| **🤖 CANNBot** | [CANNBot](https://gitcode.com/cann/cannbot-skills) · [Notebook 实操篇](./tutorials/CANNBot/notebooks/README.md) · [CANNBot 基础](./tutorials/CANNBot/README.md#初级课程cannbot基础) | [CANNBot 算子开发进阶](./tutorials/CANNBot/README.md#中级课程cannbot算子开发进阶) | — |
-
-</details>
+<table>
+<tr>
+<th>技术领域</th><th>初级课程</th><th>中级课程</th><th>高级课程</th>
+</tr>
+<tr>
+<td><b>⚙️ 算子开发 · Ascend C</b></td>
+<td colspan="3" align="center"><a href="./tutorials/ascendc_operator_development_light">Kernel 直调版</a> · <a href="./tutorials/ascendc_operator_development">Kernel 工程版</a></td>
+</tr>
+<tr>
+<td><b>⚙️ 算子开发 · PyASC</b></td>
+<td><a href="./tutorials/pyasc_operator_development">PyASC 初级（概述/核函数基础）</a></td>
+<td><a href="./tutorials/pyasc_operator_development">PyASC 中级（Vector/Matmul）</a></td>
+<td><a href="./tutorials/pyasc_operator_development">PyASC 高级（融合/调优）</a></td>
+</tr>
+<tr>
+<td><b>⚙️ 算子开发 · PyPTO</b></td>
+<td><a href="./tutorials/pypto_development">PyPTO 初级（概述/基础/实践）</a></td>
+<td colspan="2" align="center"><a href="./tutorials/pypto_development">PyPTO 进阶（中高级算子实践）</a></td>
+</tr>
+<tr>
+<td><b>⚙️ 算子开发实战（Ascend 950）</b></td>
+<td>Vector 🚧</td>
+<td>Matmul 🚧 · <a href="./tutorials/conv_operator_development">Conv 实战</a></td>
+<td><a href="./tutorials/MC2_fused_operator_development">MC2 融合算子</a> · MoE 🚧 · FA 🚧</td>
+</tr>
+<tr>
+<td><b>🧠 大模型推理</b></td>
+<td><a href="./tutorials/llm_inference/slides/intermediate">大模型推理初级</a> · <a href="./tutorials/llm_inference/qwen3_1.7B">Qwen3_1.7B 实践</a></td>
+<td><a href="./tutorials/llm_inference/slides/intermediate">大模型推理中级</a> · <a href="./tutorials/llm_inference/qwen3_8b">Qwen3-8B 实践</a></td>
+<td><a href="./tutorials/llm_inference/slides/advance">大模型推理高级</a> · <a href="./reference_practice/model_inference_optimization/sana_video">Sana-Video</a> · <a href="./reference_practice/pytorch_online_inference_operator_optimize">PyTorch 算子优化</a></td>
+</tr>
+<tr>
+<td><b>🏋️ 大模型训练</b></td>
+<td><a href="./tutorials/sft_training_pipeline">SFT 初阶</a> · <a href="./tutorials/rl_training_pipeline">RL 初阶</a> · <a href="#swanlab">SwanLab 微调</a></td>
+<td colspan="2" align="center"><a href="./tutorials/sft_training_pipeline">SFT 进阶</a> · <a href="./tutorials/rl_training_pipeline">RL 进阶</a></td>
+</tr>
+<tr>
+<td><b>📊 推荐系统</b></td>
+<td><a href="./contrib/tutorials/torch-rechub/00_QuickStart_CTR_DeepFM.ipynb">CTR 预测</a> · <a href="./contrib/tutorials/torch-rechub/01_Ranking_DIN.ipynb">DIN</a> · <a href="./contrib/tutorials/torch-rechub/02_Matching_DSSM.ipynb">DSSM</a> · <a href="./contrib/tutorials/torch-rechub/03_MultiTask_MMOE.ipynb">MMOE</a> · <a href="./contrib/tutorials/torch-rechub/04_Experiment_Tracking_Light.ipynb">实验跟踪</a> · <a href="./contrib/tutorials/torch-rechub/05_Model_Export_and_Serving.ipynb">模型导出</a></td>
+<td colspan="2" align="center"><a href="./contrib/tutorials/torch-rechub/10_NPU_DIN_Inference_MultiInstance_CoreControl.ipynb">DIN 多进程控核推理</a></td>
+</tr>
+<tr>
+<td><b>🔗 图框架</b></td>
+<td><a href="./tutorials/ge_development">GE 图引擎</a> · <a href="./tutorials/TorchAir_development">TorchAir</a> · <a href="./tutorials/autofusion_development">AutoFusion</a></td>
+<td><a href="./tutorials/ge_development">GE 图编译与优化</a> · <a href="./tutorials/TorchAir_development/README.md">TorchAir 进阶</a> · <a href="./tutorials/autofusion_development/02_autofusion_principles">AutoFusion 融合原理</a></td>
+<td><a href="./tutorials/ge_development/05_practice_and_troubleshooting">GE 实践与问题定位</a> · <a href="./tutorials/TorchAir_development/04_advanced_features">TorchAir 实践</a> · <a href="./tutorials/autofusion_development/03_practice_and_debugging">AutoFusion 实战</a></td>
+</tr>
+<tr>
+<td><b>📡 通信</b></td>
+<td><a href="./tutorials/hixl_development">HiXL 单边通信</a> · <a href="./tutorials/hccl_development">集合通信</a></td>
+<td><a href="./tutorials/hixl_development">HiXL 传输优化</a> · <a href="./tutorials/hccl_development">HCCL 算子开发</a></td>
+<td><a href="./tutorials/hccl_development/slides/07_hccl_aiv_engine.pdf">HCCL AIV 引擎算子开发</a> · <a href="./tutorials/hccl_development/slides/08_troubleshooting_hccl_for_ai_clusters.pdf">AI 大集群问题定位</a></td>
+</tr>
+<tr>
+<td><b>📱 应用开发</b></td>
+<td colspan="3" align="center"><a href="./reference_practice/yolov13_offline_inference">YOLOv13 离线推理</a></td>
+</tr>
+<tr>
+<td><b>🤖 CANNBot</b></td>
+<td><a href="https://gitcode.com/cann/cannbot-skills">CANNBot技能仓</a> · <a href="./tutorials/CANNBot/README.md"> CANNBot零基础</a></td>
+<td><a href="./tutorials/CANNBot/README.md"> CANNBot中级</a></td>
+<td><a href="./tutorials/CANNBot/README.md"> CANNBot高级</a></td>
+</tr>
+</table>
 
 ---
 
