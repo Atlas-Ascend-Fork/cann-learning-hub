@@ -5,10 +5,11 @@
 ## 算子
 | 案例名称 | 案例介绍 | 发布时间 |
 | --- | --- | --- |
-| [Reg矢量计算编程优化实践](./operator/reg_vector_programming_optimization/reg_vector_programming_optimization.md) | 以 BF16/FP32 混合精度矢量融合算子为例，介绍利用 ZERO/ONE 寄存器布局将 BF16 拆分为两组 FP32 计算链路的 Reg 矢量编程优化思路，使向量粒度与寄存器利用率翻倍。 | 2026.8 |
+| [Reg矢量计算编程优化实践](./operator/reg_vector_programming_optimization/reg_vector_programming_optimization.md) | 以 BF16/FP32 混合精度矢量融合算子为例，介绍利用 ZERO/ONE 寄存器布局将 BF16 拆成两组 FP32 计算链路的 Reg 矢量编程优化思路，使向量粒度与寄存器利用率翻倍。 | 2026.8 |
 | [多Vendor自定义算子并行编译实践](./operator/multi_vendor_operator_parallel_compilation/multi_vendor_operator_parallel_compilation.md) | 通过顶层构建入口统一调度多个独立 Vendor 子工程，并行完成自定义算子编译、打包和产物隔离，降低多算子包的维护与交付成本。 | 2026.7 |
 | [TileLang与xLLM驱动Qwen3.5昇腾算子适配](./operator/tilelang_xllm_qwen35_operator_adaptation/tilelang_xllm_qwen35_operator_adaptation.md) | 以 TileLang Python DSL 为算子开发入口，结合 xLLM 完成 Qwen3.5 昇腾算子适配，形成可复用的模型算子接入流程。 | 2026.7 |
 | [昇腾950 AIV直驱URMA的SHMEM跨PE通信实践](./operator/ascend950_aiv_urma_shmem_communication/ascend950_aiv_urma_shmem_communication.md) | 介绍 AIV 在 Device 侧构造 WQE，并借助 URMA 与 SHMEM 完成跨 PE 远端写和通知，减少 Host 往返与阶段同步开销。 | 2026.7 |
+| [基于PyPTO与Agent，2周完成模型QAT算子开发与优化](./operator/pypto_agent_qat_operator_development/pypto_agent_qat_operator_development.md) | 结合 PyPTO 高层张量 API 与 Agent 辅助编程，2周完成 QAT 算子功能开发、jit/unroll_list/tile_shape 三大参数化性能调优和整网接入，模型量化感知训练性能提升 12%。 | 2026.7 |
 | [GroupedMatmul MX量化矩阵乘的深度性能优化实践](./operator/grouped_matmul_mx_optimization/grouped_matmul_mx_optimization.md) | 围绕 cann-samples 的 GroupedMatmul MX 量化矩阵乘样例，介绍 group 间/M 轴/尾轮三种负载均衡、scalar 优化、私有格式搬运、双页表与 3-Buffer 等深度性能优化实践。 | 2026.6 |
 | [DSA算子开源贡献实践](./operator/dsa_operator_open_source_contribution/dsa_operator_open_source_contribution.md) | 围绕 DSA 长序列训练算子的 FP32 支持，展示从业务需求、算子定制和调试验证到反向贡献 ops-transformer 社区的完整路径。 | 2026.6 |
 | [Scalar对昇腾NPU算子性能的影响与优化](./operator/scalar_npu_operator_performance_optimization/scalar_npu_operator_performance_optimization.md) | 从寄存器 Spill、I-Cache、指针解引用和常量传播等角度分析 ScalarBound，并给出可复用的诊断与编码优化方法。 | 2026.5 |
