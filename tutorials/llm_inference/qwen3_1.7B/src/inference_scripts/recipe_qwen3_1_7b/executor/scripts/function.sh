@@ -116,6 +116,8 @@ function launch_infer_task()
     fi
     core_gap=$(expr $avg_core_per_rank \- 1)
 
+    local -a worker_pids=()
+    local worker_pid
     for((i=0; i<${MA_NUM_GPUS}; i++))
     do
         start=$(expr $i \* $avg_core_per_rank)
@@ -126,11 +128,25 @@ function launch_infer_task()
         cmd=(taskset -c "$cmdopt" python3 "${INFER_PATH}" --yaml_file_path="${YAML}")
         if [ $i -eq 0 ] && [[ ${LAUNCH_MODE:-0} -ne 1 ]]; then
             "${cmd[@]}" 2>&1 | tee ${WORK_DIR}/${RES_PATH}/log_${LOCAL_RANK}.log &
+            worker_pids+=("$!")
         else
             "${cmd[@]}" &> ${WORK_DIR}/${RES_PATH}/log_${LOCAL_RANK}.log &
+            worker_pids+=("$!")
         fi
     done
-    wait
+    local worker_status=0
+    local worker_exit
+    for worker_pid in "${worker_pids[@]}"; do
+        if wait "$worker_pid"; then
+            continue
+        else
+            worker_exit=$?
+            if [ "$worker_status" -eq 0 ]; then
+                worker_status=$worker_exit
+            fi
+        fi
+    done
+    return "$worker_status"
 }
 
 function check_result()
