@@ -1,0 +1,42 @@
+{
+  "op": "gelu_approx",
+  "mode": "baseline",
+  "rows": [
+    {
+      "case": "L_gelu_2d",
+      "numel": 2555392,
+      "ms": 0.1629,
+      "gbps": 125.5
+    },
+    {
+      "case": "L_gelu_1d",
+      "numel": 71934,
+      "ms": 0.1661,
+      "gbps": 3.5
+    },
+    {
+      "case": "M_gelu_3d",
+      "numel": 25004304,
+      "ms": 0.2616,
+      "gbps": 764.8
+    },
+    {
+      "case": "S_gelu_small",
+      "numel": 9,
+      "ms": 0.16,
+      "gbps": 0.0
+    },
+    {
+      "case": "S_gelu_2d",
+      "numel": 1060,
+      "ms": 0.1638,
+      "gbps": 0.1
+    },
+    {
+      "case": "A_gelu_align",
+      "numel": 2617218,
+      "ms": 0.1711,
+      "gbps": 122.4
+    }
+  ]
+}

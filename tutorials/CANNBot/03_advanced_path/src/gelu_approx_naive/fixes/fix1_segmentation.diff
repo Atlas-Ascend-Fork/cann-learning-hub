@@ -1,0 +1,80 @@
+--- a/csrc/ops/gelu_approx/op_kernel/gelu_approx_kernel.cpp
++++ b/csrc/ops/gelu_approx/op_kernel/gelu_approx_kernel.cpp
+@@ -13,8 +13,10 @@
+ 
+ namespace {
+ constexpr int32_t PIPELINE_DEPTH = 2;
+-constexpr int64_t UB_BYTES_PER_ELEM = 56;
++constexpr int64_t UB_BYTES_PER_ELEM = 76;
+ constexpr int64_t MAX_TILE_ELEMS = 2048;
++// Compare/Compares count 模式的 256B 对齐要求折算的元素对齐数（fp32：256/4=64）
++constexpr static int64_t CMP_ALIGN_ELEMS = 64;
+ }  // namespace
+ 
+ template <typename T>
+@@ -38,6 +40,12 @@
+     pipe.InitBuffer(bufHalf, tileElems * sizeof(T));
+     pipe.InitBuffer(bufOne, tileElems * sizeof(T));
+     pipe.InitBuffer(bufTemp, tileElems * sizeof(T));
++    // 分段缓冲（修复·算法层）：0 常量、|x|、两个比较掩码（uint8，1B/元素保守上界）
++    AscendC::TBuf<AscendC::TPosition::VECCALC> bufAbsX, bufZero, bufMBig, bufMNeg;
++    pipe.InitBuffer(bufAbsX, tileElems * sizeof(T));
++    pipe.InitBuffer(bufZero, tileElems * sizeof(T));
++    pipe.InitBuffer(bufMBig, tileElems);
++    pipe.InitBuffer(bufMNeg, tileElems);
+ 
+     // 常量
+     {
+@@ -45,6 +53,8 @@
+         AscendC::Duplicate(half, static_cast<T>(0.5), static_cast<int32_t>(tileElems));
+         auto one = bufOne.Get<T>();
+         AscendC::Duplicate(one, static_cast<T>(1.0), static_cast<int32_t>(tileElems));
++        auto zero = bufZero.Get<T>();
++        AscendC::Duplicate(zero, static_cast<T>(0.0), static_cast<int32_t>(tileElems));
+     }
+ 
+     xGm.SetGlobalBuffer((__gm__ T *)x + blockLength * AscendC::GetBlockIdx());
+@@ -61,7 +71,11 @@
+     for (int64_t i = 0; i < totalTiles; ++i) {
+         int64_t offset = i * tileElems;
+         int64_t validCount = (i < tileNum) ? tileElems : tailTileElementNum;
+-        int64_t computeCount = validCount;
++        // 计算数按 64 元素对齐（Compare/Compares count 模式 256B 约束）；
++        // 尾块对齐部分为 UB 残留数据，结果不写出（CopyOut 仅搬运 validCount）
++        int64_t computeCount = (i < tileNum)
++            ? tileElems
++            : (tailTileElementNum + CMP_ALIGN_ELEMS - 1) / CMP_ALIGN_ELEMS * CMP_ALIGN_ELEMS;
+ 
+         AscendC::DataCopyExtParams copyParams{
+             1, static_cast<uint32_t>(validCount * sizeof(T)), 0, 0, 0};
+@@ -110,6 +124,30 @@
+         // Step 8: z = result * 0.5
+         AscendC::Mul(zLocal, result, half, cnt32);
+ 
++        // ---- 分段（修复·算法层）：|x| > 6 时 z = x（正）或 0·x（负） ----
++        // 阈值依据精度预算：|z_true(±6)| ≤ 1e-10 << atol=1e-7，饱和区
++        // 可跳过整条计算链（同时消除对 x³ 溢出/饱和语义的依赖）。
++        // 负侧用 0·x 而非字面 0：有限负值 → ∓0（保号），x=−Inf → NaN
++        // （Inf·0），与 golden 参考链的特殊值语义精确一致。
++        // NaN 经 Compare 恒为假 → 走计算链分支自然传播；±Inf 走分段分支。
++        auto absX = bufAbsX.Get<T>();
++        auto zero = bufZero.Get<T>();
++        auto mBig = bufMBig.Get<uint8_t>();
++        auto mNeg = bufMNeg.Get<uint8_t>();
++        auto segVal = bufResult.Get<T>();  // 复用 Step7 缓冲
++        AscendC::Abs(absX, xLocal, cnt32);
++        AscendC::Compares(mBig, absX, static_cast<T>(6.0),
++                          AscendC::CMPMODE::GT, cntU32);              // |x| > 6
++        AscendC::Compares(mNeg, xLocal, static_cast<T>(0.0),
++                          AscendC::CMPMODE::LT, cntU32);              // x < 0
++        AscendC::Mul(segVal, zero, xLocal, cnt32);                    // 0·x
++        AscendC::Select(segVal, mNeg, segVal, xLocal,
++                        AscendC::SELMODE::VSEL_TENSOR_TENSOR_MODE,
++                        cntU32);                                      // x<0 ? 0·x : x
++        AscendC::Select(zLocal, mBig, segVal, zLocal,
++                        AscendC::SELMODE::VSEL_TENSOR_TENSOR_MODE,
++                        cntU32);                                      // |x|>6 ? 分段 : 链式
++
+         outQueueZ.EnQue(zLocal);
+         inQueueX.FreeTensor(xLocal);
+ 

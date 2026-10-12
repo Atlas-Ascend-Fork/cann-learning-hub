@@ -1,0 +1,21 @@
+diff --git a/ops/ascendc-performance-best-practices/references/elementwise/vector_efficiency_design.md b/ops/ascendc-performance-best-practices/references/elementwise/vector_efficiency_design.md
+index 65d92420..34dbe57d 100644
+--- a/ops/ascendc-performance-best-practices/references/elementwise/vector_efficiency_design.md
++++ b/ops/ascendc-performance-best-practices/references/elementwise/vector_efficiency_design.md
+@@ -201,3 +201,16 @@ else:
+ - [ ] 循环展开后尾块处理正确（`repTimes % unrollFactor`）
+ - [ ] 寄存器预算 ≤ 32 RegTensor
+ - [ ] 验证通过：与 naive 实现对比，结果一致
++
++### 多步计算链的精度预算（gelu/tanh 类激活函数）
++
++> **实测依据**：课程 Lab（Ascend 910B3 / dav-2201，gelu_approx 8 步指令链，2026-10）：Tanh 向量指令在特定输入域精度差于 rtol=1e-5；x³ 中间值在大 |x| 时精度损失累积。
++
++**精度预算方法**：
++- 8 步链（Mul→Mul→Add→Mul→Tanh→Add→Mul→Mul）中每步引入舍入误差，最终误差 ≈ √N · ulp（N=步数）
++- **分段实现**：|x| > 阈值（如 20）时直接 z = x（正）或 z = 0（负），跳过多项式计算
++- **Tanh 精度替代**：若 Tanh 指令精度不足，用恒等式 tanh(y) = 2·sigmoid(2y) - 1 替代（Sigmoid 指令精度更高）
++- **中间值缩放**：x³ 前先除以缩放因子，乘回时再补偿，避免大 |x| 时中间值精度损失
++
++**配套纪律**：精度预算应在需求阶段声明（golden 口径 + 容差），实现阶段用分段 dump 验证每步误差是否在预算内。
++

@@ -1,0 +1,18 @@
+--- a/csrc/ops/gelu_approx/op_kernel/gelu_approx_kernel.cpp
++++ b/csrc/ops/gelu_approx/op_kernel/gelu_approx_kernel.cpp
+@@ -98,8 +98,13 @@
+         // Step 4: tanhIn = inner * sqrt(2/pi)
+         AscendC::Muls(tanhIn, inner, static_cast<T>(0.7978845608), cnt32);
+ 
+-        // Step 5: tanhOut = tanh(tanhIn)  (坑1: Tanh 指令精度)
+-        AscendC::Tanh(tanhOut, tanhIn, cnt32);
++        // Step 5: tanhOut = tanh(tanhIn) = 2·sigmoid(2·tanhIn) − 1
++        // （修复·指令层：Tanh 向量指令在 dav-2201 精度不足（≈2^-21 相对），
++        //   负值带 |z|~1e-7 量级时误差超过 atol；Sigmoid 指令精度更高）
++        AscendC::Muls(tanhOut, tanhIn, static_cast<T>(2.0), cnt32);
++        AscendC::Sigmoid(tanhOut, tanhOut, cnt32);
++        AscendC::Muls(tanhOut, tanhOut, static_cast<T>(2.0), cnt32);
++        AscendC::Sub(tanhOut, tanhOut, one, cnt32);
+ 
+         // Step 6: tanhOut += 1
+         AscendC::Add(tanhOut, tanhOut, one, cnt32);
