@@ -67,6 +67,7 @@
 ## 训练
 | 案例名称 | 案例介绍 | 发布时间 |
 | --- | --- | --- |
+| [基于昇腾集群的词元星火RL优化实践](./training/token_spark_rl_optimization/token_spark_rl_optimization.md) | 围绕万卡昇腾集群上的 MoE 专家负载均衡、P/D 两阶段采样、统一 KVStore 与 Decode 动态调度，实现 RL 采样推理加速 30%、端到端训练效率提升约 16%。 | 2026.9 |
 | [基于昇腾的AReaL全异步RL训练](./training/areal_async_rl_training/基于昇腾的AReaL全异步RL训练.md) | 基于全异步 RL、Single Controller 和解耦式 Agentic RL 架构提升训练效率与可靠性，并完成昇腾平台开箱即用适配。 | 2026.3 |
 | [大模型训练故障恢复方案FlashRecovery](./training/flashrecovery_training_fault_recovery/大模型训练故障恢复方案FlashRecovery.md) | FlashRecovery 面向大模型长周期训练降低故障恢复成本，减少检查点 I/O 与回滚重算损失，让训练任务更快恢复到正常执行。 | 2025.12 |
 | [基于昇腾的SAM投机解码长序列强化学习训练](./training/sam_speculative_decoding_rl_training/基于昇腾的SAM投机解码长序列强化学习训练.md) | 以无辅助模型的 SAM 投机解码降低 RL 训练 Rollout 延迟，在保证精度无损前提下带来超过 35% 的长尾阶段加速收益。 | 2025.12 |
