@@ -31,7 +31,6 @@ add_custom_template_pytorch/
     ```
 
 ## 自定义算子入图关键步骤解析
-  可以在test_add_custom_graph.py文件查看相关注册实现。
   - 根据Ascend C工程产生的REG_OP算子原型填充torchair.ge.custom_op的参数。
 
     AddCustom的REG_OP原型为：
@@ -72,21 +71,10 @@ add_custom_template_pytorch/
 
   - 样例执行
 
-    样例执行过程中会自动生成测试数据，然后运行pytorch样例，最后检验运行结果。具体过程可参见build_and_run.sh脚本。
+    该脚本会编译适配层代码生成wheel包，并安装到当前环境。具体过程可参见build_and_run.sh脚本。
     ```bash
     bash build_and_run.sh
     ```
-
-#### 其他样例运行说明
-  - 环境安装完成后，样例支持单独执行：eager模式与compile模式的测试用例
-    - 执行pytorch eager模式的自定义算子测试文件
-      ```bash
-      python3 test_add_custom.py
-      ```
-    - 执行pytorch torch.compile模式的自定义算子测试文件
-      ```bash
-      python3 test_add_custom_graph.py
-      ```
 
 ### 其他说明
     更加详细的Pytorch适配算子开发指导可以参考[LINK](https://gitee.com/ascend/op-plugin/wikis)中的“算子适配开发指南”。
