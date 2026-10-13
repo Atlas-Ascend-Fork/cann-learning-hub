@@ -90,6 +90,8 @@ cd cann-learning-hub
 
 ### [CANN 基础（第一课）](./quick_start/cann_basics)
 
+> 📖 **配套课件**：[CANN 基础](./standard_course/00_atomic_courses/02_framework/01_overview/artificial_intelligence_basics.pptx)
+
 点击「在线体验」，在浏览器中运行你的第一个 Notebook，无需任何环境配置。
 
 这是所有学习路径的**公共基础**（阶段一：CANN 基础，约 2 小时），也是后续五条学习主线的共同起点：
@@ -142,7 +144,7 @@ cd cann-learning-hub
 <details>
 <summary><b>阶段三：SFT/RL 初阶课程</b></summary>
 
-> 📖 **配套课件**：[SFT 训练流程](./tutorials/sft_training_pipeline/slides)，[RL 训练流程](./tutorials/rl_training_pipeline/slides)
+> 📖 **配套课件**：[SFT 训练流程](./tutorials/sft_training_pipeline/slides/01_sft_training_pipeline.pptx)，[RL 训练流程](./tutorials/rl_training_pipeline/slides/01_rl_training_pipeline.pptx)
 
 | 序号 | 课程（实践） | 课程内容 | 运行方式 |
 | :---: | :--- | :--- | :--- |
@@ -153,6 +155,8 @@ cd cann-learning-hub
 
 <details>
 <summary><b>阶段四：SFT/RL 中阶课程</b></summary>
+
+> 📖 **配套课件**：[SFT 训练流程](./tutorials/sft_training_pipeline/slides/02_sft_training_pipeline.pptx)，[RL 训练流程](./tutorials/rl_training_pipeline/slides/02_rl_training_pipeline.pptx)
 
 | 序号 | 课程 | 课程内容 | 状态 |
 | :---: | :--- | :--- | :---: |
@@ -385,7 +389,7 @@ cd cann-learning-hub
 </tr>
 <tr>
 <td><b>⚙️ 算子开发 · Ascend C</b></td>
-<td colspan="3" align="center"><a href="./tutorials/ascendc_operator_development_light">Kernel 直调版</a> · <a href="./tutorials/ascendc_operator_development">Kernel 工程版</a></td>
+<td colspan="3" align="center"><a href="./tutorials/ascendc_operator_development_light">Ascend C算子开发系列（Kernel 直调版）</a> · <a href="./tutorials/ascendc_operator_development">Ascend C算子开发系列(工程版)</a> · Ascend C算子开发Ascend 950系列 🚧</td>
 </tr>
 <tr>
 <td><b>⚙️ 算子开发 · PyASC</b></td>
