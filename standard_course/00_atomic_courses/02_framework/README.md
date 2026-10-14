@@ -4,8 +4,8 @@
 
 | 子目录 | 子方向 | 课程数 | 编号范围 |
 |--------|--------|--------|---------|
-| [01_framework_basics/](./01_framework_basics/) | 2.1 框架基础 | 4 | L2-01~03、L2-29 |
-| [02_training_techniques/](./02_training_techniques/) | 2.2 训练技术 | 10 | L2-04~10、L2-20~22 |
-| [03_inference_techniques/](./03_inference_techniques/) | 2.3 推理技术 | 8 | L2-11~15、L2-23~25 |
-| [04_advanced_topics/](./04_advanced_topics/) | 2.4 进阶主题 | 4 | L2-16~19 |
-| [05_graph_frameworks/](./05_graph_frameworks/) | 2.5 图框架 | 3 | L2-26~28 |
+| [02_framework_basics/](./02_framework_basics/) | 2.1 框架基础 | 4 | L2-01~03、L2-29 |
+| [03_training_techniques/](./03_training_techniques/) | 2.2 训练技术 | 10 | L2-04~10、L2-20~22 |
+| [04_inference_techniques/](./04_inference_techniques/) | 2.3 推理技术 | 8 | L2-11~15、L2-23~25 |
+| [05_advanced_topics/](./05_advanced_topics/) | 2.4 进阶主题 | 4 | L2-16~19 |
+| [06_graph_frameworks/](./06_graph_frameworks/) | 2.5 图框架 | 3 | L2-26~28 |

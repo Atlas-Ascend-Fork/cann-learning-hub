@@ -37,7 +37,8 @@
 
 | 序号 | 主题 | 主要内容 | 课件 |
 |---|---|---|---|
-| 01 | RL 强化学习 | verl/vLLM-Ascend 环境、RL 与 GRPO 原理、Wordle AgentLoop、奖励设计、训练指标与稳定性调优 | [01_rl_training_pipeline.pptx](slides/01_rl_training_pipeline.pptx) |
+| 01 | RL 强化学习（初阶） | verl/vLLM-Ascend 环境、RL 与 GRPO 原理、Wordle AgentLoop、奖励设计、训练指标与稳定性调优 | [01_rl_training_pipeline.pptx](slides/01_rl_training_pipeline.pptx) |
+| 02 | RL 强化学习（中阶） | TorchTitan-NPU 后端切换、FSDP2/offload/TND/CP 核心特性、Wordle 训练实践与问题排查 | [02_rl_training_pipeline.pptx](slides/02_rl_training_pipeline.pptx) |
 
 
 ## 教程结构
