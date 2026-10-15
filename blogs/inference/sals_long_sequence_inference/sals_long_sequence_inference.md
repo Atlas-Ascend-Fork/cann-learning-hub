@@ -38,11 +38,11 @@ $\text{LSE}_{\text{block}}(\mathbf{S}; b) = \left[ \underbrace{\max(\mathbf{S}_i
 
 2. 反量化：$\mathbf{S} = \mathbf{S}_{\text{int}} \odot \left( \mathbf{s}_q \otimes \mathbf{s}_k \right)$
 
-1. 块级 Log-Sum-Exp (LSE) 计算：将 Key 序列按块大小 $SparseBlockSize$ 划分为 $B$ 个块，对每个块（排除固定尾部块）计算 LSE 值（用于近似该块的 Attention 权重总和）
+3. 块级 Log-Sum-Exp (LSE) 计算：将 Key 序列按块大小 $SparseBlockSize$ 划分为 $B$ 个块，对每个块（排除固定尾部块）计算 LSE 值（用于近似该块的 Attention 权重总和）
 
-2. 排序与 Top-$k$ 选择
+4. 排序与 Top-$k$ 选择
 
-3. 拼接固定尾部索引
+5. 拼接固定尾部索引：将固定尾部块 $\mathcal{Fix}$ 对应的 token 索引并入最终输出索引集合
 
 ## QSI算子 Tiling 设计
 
