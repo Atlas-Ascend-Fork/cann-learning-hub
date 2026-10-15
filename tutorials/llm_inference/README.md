@@ -44,6 +44,18 @@
 <tr><td>08</td><td>GE Graph o_proj 权重预取验证</td><td>—</td><td>✅</td></tr>
 </table>
 
+## LongCat-Next 实践
+
+[LongCat-Next 单卡推理实践](./longcat_next/README.md)面向原生多模态 MoE 模型的单卡部署：通过 MoE / N-gram 权重 CPU offload 在单张 Atlas A3（64GB HBM）上运行完整 151GB 权重，覆盖文本、图像、语音多类任务。该实践权重体积大，仅在本地 NPU 环境运行（不支持在线体验），环境与权重准备见[实践 README](./longcat_next/README.md)。
+
+<table>
+<tr><th>序号</th><th>实践内容</th></tr>
+<tr><td>01</td><td>章节介绍：模型架构与单卡 CPU offload 原理</td></tr>
+<tr><td>02</td><td>Baseline 冒烟跑通（1/3-token）</td></tr>
+<tr><td>03</td><td>文本生成体验：请求清单与采样参数</td></tr>
+<tr><td>04</td><td>多模态任务：图理解、语音转写、语音合成与图像生成</td></tr>
+</table>
+
 ## 目录结构
 
 ```text
@@ -53,7 +65,8 @@ llm_inference/
 │   ├── intermediate/   # 初&中级课程 PDF 课件（01–05）
 │   └── advance/        # 高级课程 PPTX 课件（01–07）
 ├── qwen3_1.7B/   # Qwen3-1.7B 第 01–04 章 Notebook、实践代码与运行说明
-└── qwen3_8b/     # Qwen3-8B 第 01–08 章 Notebook、实践代码与运行说明
+├── qwen3_8b/     # Qwen3-8B 第 01–08 章 Notebook、实践代码与运行说明
+└── longcat_next/ # LongCat-Next 第 01–04 章 Notebook、实践代码与运行说明（本地运行；推理框架运行时克隆上游 cann-recipes-infer 并应用单卡 patch，见该目录 README）
 ```
 
 建议先按编号阅读初&中级课件，再按需学习高级课件，然后根据硬件资源选择 Qwen3-1.7B 或 Qwen3-8B Notebook。实践所需的 CANN、Python 依赖、模型权重和硬件条件以所选实践目录的说明为准。

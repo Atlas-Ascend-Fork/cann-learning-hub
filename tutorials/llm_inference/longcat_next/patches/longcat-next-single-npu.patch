@@ -1,0 +1,1506 @@
+From ec74e3d12cd70fb992ffa62bf25408e669eafb66 Mon Sep 17 00:00:00 2001
+From: fa9527 <1911961660@qq.com>
+Date: Mon, 12 Oct 2026 20:05:14 +0800
+Subject: [PATCH] =?UTF-8?q?[feat]=20=E6=96=B0=E5=A2=9E=20LongCat-Next=20?=
+ =?UTF-8?q?=E5=8D=95=E5=8D=A1=20CPU=20offload=20=E6=8E=A8=E7=90=86?=
+ =?UTF-8?q?=E6=A0=B7=E4=BE=8B?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- modeling/model_infer 新增单卡路径：MoE/N-gram 权重 CPU offload、
+  单卡配置校验与请求清单驱动入口（多卡路径不受影响）
+- 新增 4 个单卡 YAML（冒烟/文本/多模态/图像生成）与随附请求清单
+- README 增加单卡章节：约束说明、素材软链、执行命令与参考耗时
+---
+ models/longcat_next/README.md                 |  28 +-
+ ...cat_next_image_gen_single_npu_offload.yaml |  73 ++++
+ ...at_next_multimodal_single_npu_offload.yaml |  73 ++++
+ ...t_multimodal_single_npu_offload_smoke.yaml |  73 ++++
+ .../longcat_next_text_single_npu_offload.yaml |  73 ++++
+ .../models/components/cosy24k_vocoder.py      |   2 +-
+ .../models/components/image_refiner.py        |   2 +-
+ .../components/modular_longcat_next_audio.py  |  27 +-
+ .../components/modular_longcat_next_visual.py |   6 +
+ .../components/processing_longcat_next.py     |   4 +-
+ .../models/components/refiner_modules.py      | 122 +++++--
+ models/longcat_next/models/model_infer.py     | 105 ++++--
+ .../models/modeling_longcat_next.py           | 312 ++++++++++++++++--
+ models/longcat_next/requests/image_gen.json   |  26 ++
+ models/longcat_next/requests/multimodal.json  |  41 +++
+ models/longcat_next/requests/text.json        |  16 +
+ 16 files changed, 875 insertions(+), 108 deletions(-)
+ create mode 100644 models/longcat_next/config/longcat_next_image_gen_single_npu_offload.yaml
+ create mode 100644 models/longcat_next/config/longcat_next_multimodal_single_npu_offload.yaml
+ create mode 100644 models/longcat_next/config/longcat_next_multimodal_single_npu_offload_smoke.yaml
+ create mode 100644 models/longcat_next/config/longcat_next_text_single_npu_offload.yaml
+ create mode 100644 models/longcat_next/requests/image_gen.json
+ create mode 100644 models/longcat_next/requests/multimodal.json
+ create mode 100644 models/longcat_next/requests/text.json
+
+diff --git a/models/longcat_next/README.md b/models/longcat_next/README.md
+index 8060b99..be5c2a3 100644
+--- a/models/longcat_next/README.md
++++ b/models/longcat_next/README.md
+@@ -2,7 +2,7 @@
+ 
+ ## 概述
+ 
+-本样例基于 LongCat-Next 开源代码进行迁移，并完成对应的 NPU 优化适配，覆盖 Paged Attention 缓存管理、TP/EP 多卡并行、多模态生成图模式加速与官方生成状态机接入。
++本样例基于 LongCat-Next 开源代码进行迁移，并完成对应的 NPU 优化适配，覆盖 Paged Attention 缓存管理、TP/EP 多卡并行、多模态生成图模式加速与官方生成状态机接入；单卡场景通过 MoE/N-gram 权重 CPU offload 运行完整 151GB 权重（见下文"单卡推理"）。
+ 
+ - HuggingFace: [meituan-longcat/LongCat-Next](https://huggingface.co/meituan-longcat/LongCat-Next)
+ - 架构: 原生多模态（文本 + 图像 + 语音）
+@@ -63,6 +63,7 @@ pip3 install -r models/longcat_next/requirements.txt
+    随附配置为示例，并行度由 `world_size` 与各 `tp_size` 字段决定：
+    - `config/longcat_next_multimodal_tp4_ep4.yaml` — 多模态示例（4 卡 TP4 + EP4）
+    - `config/longcat_next_text_tp4_ep4_eager.yaml` — 纯文本示例（框架通用流程）
++   - `config/longcat_next_*_single_npu_offload*.yaml` — 单卡 CPU offload 示例（见下文"单卡推理"）
+ 
+    文本配置不含 `custom_params.multimodal`，不进入本样例的多模态适配，其输入方式见第 2 步末尾。
+ 
+@@ -146,6 +147,31 @@ pip3 install -r models/longcat_next/requirements.txt
+ 
+    如需采集性能数据，将 yaml 内 `model_config.enable_profiler` 置为 `true` 后重新拉起，采集方式与结果目录同仓库其他样例。
+ 
++## 单卡推理（CPU offload）
++
++完整 BF16 权重约 151GB，超出单卡 64GB HBM。单卡配置通过 **MoE 专家权重与 N-gram 嵌入的 CPU offload** 运行完整权重：主干稠密权重常驻 NPU，offload 部分驻留 CPU 内存（mmap），推理时按需搬运。框架在配置校验阶段强制这一约束：`world_size: 1` 时必须同时开启 `custom_params.enable_moe_cpu_offload` 与 `enable_ngram_cpu_offload`，否则直接报错；主机需有足量可用内存（权重 mmap 与 CPU 专家计算，≥ 64GB 可用，推荐 ≥ 128GB）。
++
++单卡配置（`world_size: 1`，双 offload 已开启）：
++
++- `config/longcat_next_multimodal_single_npu_offload_smoke.yaml` — 冒烟基线（随附 `requests/text.json` 请求的 3-token 短版本，输出上限由 `scheduler_config.max_new_tokens` 控制）
++- `config/longcat_next_text_single_npu_offload.yaml` — 文本生成（128 token）
++- `config/longcat_next_multimodal_single_npu_offload.yaml` — 多模态（图理解 / 语音转写 / 语音合成）
++- `config/longcat_next_image_gen_single_npu_offload.yaml` — 图像生成（16×16 视觉码）
++
++随附请求清单位于 `requests/`（`text.json` / `multimodal.json` / `image_gen.json`），字段格式与上节一致。多模态素材按相对路径 `assets/...` 引用，运行前将权重目录自带的官方素材软链到清单目录：
++
++```bash
++ln -sfn <权重目录>/assets models/longcat_next/requests/assets
++```
++
++执行方式与多卡一致（`model_config.model_path` 必改，其余字段可直接使用）：
++
++```bash
++bash executor/scripts/infer.sh --model longcat_next --yaml longcat_next_multimodal_single_npu_offload_smoke.yaml
++```
++
++参考耗时（Atlas A3 单卡、BF16、eager）：冒烟（3-token）生成约 30 秒，128-token 文本生成约 5 分钟，语音合成约 9 分钟；每 token 延迟约 2.3s，瓶颈为 CPU 专家计算与 H2D 搬运。
++
+ ## 优化点参考
+ 
+ 本样例主干与 LongCat-Flash 同源，优化点与性能 Benchmark 参见[基于Atlas A3训练/推理集群的LongCat-Flash模型推理性能优化实践](../../docs/models/longcat_flash/longcat_flash_optimization.md)。
+diff --git a/models/longcat_next/config/longcat_next_image_gen_single_npu_offload.yaml b/models/longcat_next/config/longcat_next_image_gen_single_npu_offload.yaml
+new file mode 100644
+index 0000000..59b9e89
+--- /dev/null
++++ b/models/longcat_next/config/longcat_next_image_gen_single_npu_offload.yaml
+@@ -0,0 +1,73 @@
++model_name: longcat_next
++world_size: 1
++
++model_config:
++  model_name: longcat_next
++  model_path: /path/to/LongCat-Next
++  dtype: bfloat16
++  with_ckpt: True
++  exe_mode: eager
++  enable_cache_compile: False
++  enable_dynamic_graph: True
++  enable_static_kernel: False
++  enable_profiler: False
++  force_eplb: False
++  next_n: 0
++  custom_params:
++    moe_chunk_max_len: 1024
++    decompose_post_attn0_rmsnorm: True
++    enable_moe_cpu_offload: True
++    enable_ngram_cpu_offload: True
++    multimodal:
++      request_file: requests/image_gen.json
++      head_tp_size: 1
++      head_exe_mode: eager
++      head_enable_cache_compile: False
++      enable_thinking: False
++      image_decoder_path: image_decoder/image_decoder.safetensors
++      vocoder_path: cosy24k_vocoder/hift.pt
++      generation:
++        do_sample: False
++        temperature: 0.7
++        top_p: 0.9
++        top_k: 50
++      visual_generation_config:
++        do_sample: True
++        temperature: 0.5
++        top_p: 0.75
++        top_k: 1024
++        custom_params:
++          cfg_scale: 1.8
++          token_h: 37
++          token_w: 37
++          anyres_prefix: "<longcat_img_token_size>{h} {w}</longcat_img_token_size>"
++      audio_generation_config:
++        audio_parallel_decoding: False
++        do_sample: False
++        temperature: 0.5
++        top_k: 5
++        top_p: 0.85
++        repetition_penalty: 1.3
++        custom_params:
++          sampling_rate: 24000
++          wave_concat_overlap: 1200
++
++data_config:
++  dataset: longcat_multimodal
++  input_truncated_len: 256
++  seed: 336
++
++parallel_config:
++  world_size: 1
++  attn_tp_size: 1
++  dense_tp_size: 1
++  moe_tp_size: 1
++  embed_tp_size: 1
++  lmhead_tp_size: 1
++  o_proj_tp_size: 1
++
++scheduler_config:
++  block_size: 128
++  max_new_tokens: 4096
++  max_prefill_tokens: 256
++  batch_size: 1
+diff --git a/models/longcat_next/config/longcat_next_multimodal_single_npu_offload.yaml b/models/longcat_next/config/longcat_next_multimodal_single_npu_offload.yaml
+new file mode 100644
+index 0000000..ec815b5
+--- /dev/null
++++ b/models/longcat_next/config/longcat_next_multimodal_single_npu_offload.yaml
+@@ -0,0 +1,73 @@
++model_name: longcat_next
++world_size: 1
++
++model_config:
++  model_name: longcat_next
++  model_path: /path/to/LongCat-Next
++  dtype: bfloat16
++  with_ckpt: True
++  exe_mode: eager
++  enable_cache_compile: False
++  enable_dynamic_graph: True
++  enable_static_kernel: False
++  enable_profiler: False
++  force_eplb: False
++  next_n: 0
++  custom_params:
++    moe_chunk_max_len: 1024
++    decompose_post_attn0_rmsnorm: True
++    enable_moe_cpu_offload: True
++    enable_ngram_cpu_offload: True
++    multimodal:
++      request_file: requests/multimodal.json
++      head_tp_size: 1
++      head_exe_mode: eager
++      head_enable_cache_compile: False
++      enable_thinking: False
++      image_decoder_path: image_decoder/image_decoder.safetensors
++      vocoder_path: cosy24k_vocoder/hift.pt
++      generation:
++        do_sample: False
++        temperature: 0.7
++        top_p: 0.9
++        top_k: 50
++      visual_generation_config:
++        do_sample: True
++        temperature: 0.5
++        top_p: 0.75
++        top_k: 1024
++        custom_params:
++          cfg_scale: 1.8
++          token_h: 37
++          token_w: 37
++          anyres_prefix: "<longcat_img_token_size>{h} {w}</longcat_img_token_size>"
++      audio_generation_config:
++        audio_parallel_decoding: False
++        do_sample: False
++        temperature: 0.5
++        top_k: 5
++        top_p: 0.85
++        repetition_penalty: 1.3
++        custom_params:
++          sampling_rate: 24000
++          wave_concat_overlap: 1200
++
++data_config:
++  dataset: longcat_multimodal
++  input_truncated_len: 4096
++  seed: 336
++
++parallel_config:
++  world_size: 1
++  attn_tp_size: 1
++  dense_tp_size: 1
++  moe_tp_size: 1
++  embed_tp_size: 1
++  lmhead_tp_size: 1
++  o_proj_tp_size: 1
++
++scheduler_config:
++  block_size: 128
++  max_new_tokens: 512
++  max_prefill_tokens: 4096
++  batch_size: 1
+diff --git a/models/longcat_next/config/longcat_next_multimodal_single_npu_offload_smoke.yaml b/models/longcat_next/config/longcat_next_multimodal_single_npu_offload_smoke.yaml
+new file mode 100644
+index 0000000..82ae91e
+--- /dev/null
++++ b/models/longcat_next/config/longcat_next_multimodal_single_npu_offload_smoke.yaml
+@@ -0,0 +1,73 @@
++model_name: longcat_next
++world_size: 1
++
++model_config:
++  model_name: longcat_next
++  model_path: /path/to/LongCat-Next
++  dtype: bfloat16
++  with_ckpt: True
++  exe_mode: eager
++  enable_cache_compile: False
++  enable_dynamic_graph: True
++  enable_static_kernel: False
++  enable_profiler: False
++  force_eplb: False
++  next_n: 0
++  custom_params:
++    moe_chunk_max_len: 1024
++    decompose_post_attn0_rmsnorm: True
++    enable_moe_cpu_offload: True
++    enable_ngram_cpu_offload: True
++    multimodal:
++      request_file: requests/text.json
++      head_tp_size: 1
++      head_exe_mode: eager
++      head_enable_cache_compile: False
++      enable_thinking: False
++      image_decoder_path: image_decoder/image_decoder.safetensors
++      vocoder_path: cosy24k_vocoder/hift.pt
++      generation:
++        do_sample: False
++        temperature: 0.7
++        top_p: 0.9
++        top_k: 50
++      visual_generation_config:
++        do_sample: True
++        temperature: 0.5
++        top_p: 0.75
++        top_k: 1024
++        custom_params:
++          cfg_scale: 1.8
++          token_h: 37
++          token_w: 37
++          anyres_prefix: "<longcat_img_token_size>{h} {w}</longcat_img_token_size>"
++      audio_generation_config:
++        audio_parallel_decoding: False
++        do_sample: False
++        temperature: 0.5
++        top_k: 5
++        top_p: 0.85
++        repetition_penalty: 1.3
++        custom_params:
++          sampling_rate: 24000
++          wave_concat_overlap: 1200
++
++data_config:
++  dataset: longcat_multimodal
++  input_truncated_len: 256
++  seed: 336
++
++parallel_config:
++  world_size: 1
++  attn_tp_size: 1
++  dense_tp_size: 1
++  moe_tp_size: 1
++  embed_tp_size: 1
++  lmhead_tp_size: 1
++  o_proj_tp_size: 1
++
++scheduler_config:
++  block_size: 128
++  max_new_tokens: 3
++  max_prefill_tokens: 256
++  batch_size: 1
+diff --git a/models/longcat_next/config/longcat_next_text_single_npu_offload.yaml b/models/longcat_next/config/longcat_next_text_single_npu_offload.yaml
+new file mode 100644
+index 0000000..9a0c047
+--- /dev/null
++++ b/models/longcat_next/config/longcat_next_text_single_npu_offload.yaml
+@@ -0,0 +1,73 @@
++model_name: longcat_next
++world_size: 1
++
++model_config:
++  model_name: longcat_next
++  model_path: /path/to/LongCat-Next
++  dtype: bfloat16
++  with_ckpt: True
++  exe_mode: eager
++  enable_cache_compile: False
++  enable_dynamic_graph: True
++  enable_static_kernel: False
++  enable_profiler: False
++  force_eplb: False
++  next_n: 0
++  custom_params:
++    moe_chunk_max_len: 1024
++    decompose_post_attn0_rmsnorm: True
++    enable_moe_cpu_offload: True
++    enable_ngram_cpu_offload: True
++    multimodal:
++      request_file: requests/text.json
++      head_tp_size: 1
++      head_exe_mode: eager
++      head_enable_cache_compile: False
++      enable_thinking: False
++      image_decoder_path: image_decoder/image_decoder.safetensors
++      vocoder_path: cosy24k_vocoder/hift.pt
++      generation:
++        do_sample: True
++        temperature: 0.7
++        top_p: 0.9
++        top_k: 50
++      visual_generation_config:
++        do_sample: True
++        temperature: 0.5
++        top_p: 0.75
++        top_k: 1024
++        custom_params:
++          cfg_scale: 1.8
++          token_h: 37
++          token_w: 37
++          anyres_prefix: "<longcat_img_token_size>{h} {w}</longcat_img_token_size>"
++      audio_generation_config:
++        audio_parallel_decoding: False
++        do_sample: False
++        temperature: 0.5
++        top_k: 5
++        top_p: 0.85
++        repetition_penalty: 1.3
++        custom_params:
++          sampling_rate: 24000
++          wave_concat_overlap: 1200
++
++data_config:
++  dataset: longcat_multimodal
++  input_truncated_len: 256
++  seed: 336
++
++parallel_config:
++  world_size: 1
++  attn_tp_size: 1
++  dense_tp_size: 1
++  moe_tp_size: 1
++  embed_tp_size: 1
++  lmhead_tp_size: 1
++  o_proj_tp_size: 1
++
++scheduler_config:
++  block_size: 128
++  max_new_tokens: 128
++  max_prefill_tokens: 256
++  batch_size: 1
+diff --git a/models/longcat_next/models/components/cosy24k_vocoder.py b/models/longcat_next/models/components/cosy24k_vocoder.py
+index 80f0189..289c80b 100644
+--- a/models/longcat_next/models/components/cosy24k_vocoder.py
++++ b/models/longcat_next/models/components/cosy24k_vocoder.py
+@@ -35,7 +35,7 @@ from torch.nn.utils import remove_weight_norm
+ from torch.nn.utils import weight_norm
+ from torch.distributions.uniform import Uniform
+ from torch.nn import Parameter
+-from torch import pow as torch_pow, sin
++from torch import nn, pow as torch_pow, sin
+ 
+ logger = logging.getLogger(__name__)
+ 
+diff --git a/models/longcat_next/models/components/image_refiner.py b/models/longcat_next/models/components/image_refiner.py
+index 6423767..b75b33d 100644
+--- a/models/longcat_next/models/components/image_refiner.py
++++ b/models/longcat_next/models/components/image_refiner.py
+@@ -140,7 +140,7 @@ class RefinerImageProcessor(VaeImageProcessor):
+ 
+     def get_new_height_width(
+         self,
+-        image: Union["Image.Image", np.ndarray, torch.Tensor],
++        image: Union["PIL.Image.Image", np.ndarray, torch.Tensor],
+         height: Optional[int] = None,
+         width: Optional[int] = None,
+         max_pixels: Optional[int] = None,
+diff --git a/models/longcat_next/models/components/modular_longcat_next_audio.py b/models/longcat_next/models/components/modular_longcat_next_audio.py
+index 17ab7c0..9b70637 100644
+--- a/models/longcat_next/models/components/modular_longcat_next_audio.py
++++ b/models/longcat_next/models/components/modular_longcat_next_audio.py
+@@ -1751,7 +1751,7 @@ class LongcatNextAudioVQBridger(nn.Module):
+             residual_encoding = residual_encoding.to(inputs.dtype)
+             return residual_encoding, code_ids_i
+ 
+-        residual_encoding = inputs
++        cmt_loss, residual_encoding = 0, inputs
+         code_ids_list = []
+         for i, vq_layer in enumerate(self.vq_list):
+             residual_encoding, code_ids_i = rvq_layer_op(vq_layer, residual_encoding, output_length)
+@@ -1952,6 +1952,10 @@ class LongcatNextAudioFlowMatchingDecoder(nn.Module):
+         """
+         self.forward_step += 1
+ 
++        orig_dtype = refined_mel.dtype
++        prenet_mae_metric = torch.tensor(0.0).to(refined_mel.device)
++        prenet_regression_loss = torch.tensor(0.0).to(refined_mel.device)
++
+         if self.prenet is not None:
+             refined_mel = refined_mel[:, : torch.max(input_length), :]
+             if mel_labels_length is None:
+@@ -2019,19 +2023,16 @@ def decode_save_concat2(  # pylint: disable=huawei-too-many-arguments
+     wave_list = []
+     for response in response_list:
+         wave_list.extend([wave_i for wave_i in decode_wave_vocoder2(response, vocoder, model) if wave_i is not None])
+-    if not wave_list:
+-        raise ValueError("No valid audio frames to save")
+-
+-    full_wave = wave_list[0]
++    new_wave_list = [wave_list[0]]
+     for w in wave_list[1:]:
+-        prev = full_wave
+-        if 0 < wave_concat_overlap <= min(prev.shape[1], w.shape[1]):
+-            fade_out = torch.linspace(1.0, 0.0, wave_concat_overlap, device=prev.device)[None, :]
+-            fade_in = torch.linspace(0.0, 1.0, wave_concat_overlap, device=prev.device)[None, :]
+-            blend = prev[:, -wave_concat_overlap:] * fade_out + w[:, :wave_concat_overlap] * fade_in
+-            full_wave = torch.cat((prev[:, :-wave_concat_overlap], blend, w[:, wave_concat_overlap:]), dim=1)
+-        else:
+-            full_wave = torch.cat((full_wave, w), dim=1)
++        if new_wave_list[-1].shape[1] > wave_concat_overlap and w.shape[1] > wave_concat_overlap:
++            new_wave_list.append((
++                new_wave_list[-1][:, -wave_concat_overlap:]
++                * torch.linspace(1.0, 0.0, wave_concat_overlap, device=new_wave_list[-1].device)[None, :]
++                + w[:, :wave_concat_overlap]
++                * torch.linspace(0.0, 1.0, wave_concat_overlap, device=new_wave_list[-1].device)[None, :]))
++        new_wave_list.append(w)
++    full_wave = torch.cat(new_wave_list, dim=1) if len(new_wave_list) > 1 else new_wave_list[0]
+     torchaudio.save(path, full_wave, sampling_rate)
+ 
+ 
+diff --git a/models/longcat_next/models/components/modular_longcat_next_visual.py b/models/longcat_next/models/components/modular_longcat_next_visual.py
+index 1e5785a..3234775 100644
+--- a/models/longcat_next/models/components/modular_longcat_next_visual.py
++++ b/models/longcat_next/models/components/modular_longcat_next_visual.py
+@@ -34,6 +34,7 @@ from .image_refiner import (
+     RefinerImageProcessor,
+     RefinerPipeline,
+     de_transform,
++    tensor2pil,
+ )
+ from .refiner_modules import FlowMatchEulerDiscreteScheduler
+ 
+@@ -629,6 +630,11 @@ class LongcatNextVisualTokenizer(nn.Module):
+             decoder_out = self.image_decoder(emb_2d, grid_thw_batch, return_pixel_features=False)
+ 
+         decoded_tensors = decoder_out.get("images") or []
++        decoded_images = [tensor2pil(t, image_mean, image_std) for t in decoded_tensors]
++        decoded_path = save_path.replace(".png", "_decoded.png")
++        # decoded_images[0].save(decoded_path)
++
++
+         ref_input = []
+         for t in decoded_tensors:
+             img_01 = de_transform(t, mean=image_mean, std=image_std, rescale_factor=1 / 255)
+diff --git a/models/longcat_next/models/components/processing_longcat_next.py b/models/longcat_next/models/components/processing_longcat_next.py
+index f3b54bd..0c6d210 100644
+--- a/models/longcat_next/models/components/processing_longcat_next.py
++++ b/models/longcat_next/models/components/processing_longcat_next.py
+@@ -9,7 +9,7 @@
+ # Copyright (c) 2026 Huawei Technologies Co., Ltd.
+ 
+ import re
+-from typing import List, Optional, Tuple, Union
++from typing import Union, List
+ from types import SimpleNamespace
+ 
+ import torch
+@@ -262,7 +262,7 @@ class LongcatNextProcessor(ProcessorMixin):
+         self,
+         text: str,
+         **kwargs,
+-    ) -> Tuple[BatchFeature, Optional[BatchFeature], Optional[BatchFeature]]:
++    ) -> List["LongcatNextProcessorOutput"]:
+ 
+         if text is None:
+             raise ValueError("You need to specify either a `text` input to process.")
+diff --git a/models/longcat_next/models/components/refiner_modules.py b/models/longcat_next/models/components/refiner_modules.py
+index bb837d8..45f2fb3 100644
+--- a/models/longcat_next/models/components/refiner_modules.py
++++ b/models/longcat_next/models/components/refiner_modules.py
+@@ -157,6 +157,24 @@ class TeaCacheParams:
+     is_first_or_last_step: bool = False
+ 
+ 
++def derivative_approximation(*args, **kwargs):
++    pass
++
++
++def taylor_formula(*args, **kwargs):
++    pass
++
++
++def taylor_cache_init(*args, **kwargs):
++    pass
++
++
++
++
++def cal_type(*args, **kwargs):
++    pass
++
++
+ class LuminaRMSNormZero(nn.Module):
+     """
+     Norm layer adaptive RMS normalization zero.
+@@ -619,31 +637,69 @@ class TransformerBlock(nn.Module):
+         image_rotary_emb: torch.Tensor,
+         temb: Optional[torch.Tensor] = None,
+     ) -> torch.Tensor:
+-        if self.modulation:
+-            if temb is None:
+-                raise ValueError("temb must be provided when modulation is enabled")
+-
+-            norm_hidden_states, gate_msa, scale_mlp, gate_mlp = self.norm1(hidden_states, temb)
+-            attn_output = self.attn(
+-                hidden_states=norm_hidden_states,
+-                encoder_hidden_states=norm_hidden_states,
+-                attention_mask=attention_mask,
+-                image_rotary_emb=image_rotary_emb,
+-            )
+-            hidden_states = hidden_states + gate_msa.unsqueeze(1).tanh() * self.norm2(attn_output)
+-            mlp_output = self.feed_forward(self.ffn_norm1(hidden_states) * (1 + scale_mlp.unsqueeze(1)))
+-            hidden_states = hidden_states + gate_mlp.unsqueeze(1).tanh() * self.ffn_norm2(mlp_output)
++        enable_taylorseer = getattr(self, 'enable_taylorseer', False)
++        if enable_taylorseer:
++            if self.modulation:
++                if temb is None:
++                    raise ValueError("temb must be provided when modulation is enabled")
++
++                if self.current['type'] == 'full':
++                    self.current['module'] = 'total'
++                    taylor_cache_init(cache_dic=self.cache_dic, current=self.current)
++
++                    norm_hidden_states, gate_msa, scale_mlp, gate_mlp = self.norm1(hidden_states, temb)
++                    attn_output = self.attn(
++                        hidden_states=norm_hidden_states,
++                        encoder_hidden_states=norm_hidden_states,
++                        attention_mask=attention_mask,
++                        image_rotary_emb=image_rotary_emb,
++                    )
++                    hidden_states = hidden_states + gate_msa.unsqueeze(1).tanh() * self.norm2(attn_output)
++                    mlp_output = self.feed_forward(self.ffn_norm1(hidden_states) * (1 + scale_mlp.unsqueeze(1)))
++                    hidden_states = hidden_states + gate_mlp.unsqueeze(1).tanh() * self.ffn_norm2(mlp_output)
++
++                    derivative_approximation(cache_dic=self.cache_dic, current=self.current, feature=hidden_states)
++
++                elif self.current['type'] == 'Taylor':
++                    self.current['module'] = 'total'
++                    taylor_formula(cache_dic=self.cache_dic, current=self.current)
++            else:
++                norm_hidden_states = self.norm1(hidden_states)
++                attn_output = self.attn(
++                    hidden_states=norm_hidden_states,
++                    encoder_hidden_states=norm_hidden_states,
++                    attention_mask=attention_mask,
++                    image_rotary_emb=image_rotary_emb,
++                )
++                hidden_states = hidden_states + self.norm2(attn_output)
++                mlp_output = self.feed_forward(self.ffn_norm1(hidden_states))
++                hidden_states = hidden_states + self.ffn_norm2(mlp_output)
+         else:
+-            norm_hidden_states = self.norm1(hidden_states)
+-            attn_output = self.attn(
+-                hidden_states=norm_hidden_states,
+-                encoder_hidden_states=norm_hidden_states,
+-                attention_mask=attention_mask,
+-                image_rotary_emb=image_rotary_emb,
+-            )
+-            hidden_states = hidden_states + self.norm2(attn_output)
+-            mlp_output = self.feed_forward(self.ffn_norm1(hidden_states))
+-            hidden_states = hidden_states + self.ffn_norm2(mlp_output)
++            if self.modulation:
++                if temb is None:
++                    raise ValueError("temb must be provided when modulation is enabled")
++
++                norm_hidden_states, gate_msa, scale_mlp, gate_mlp = self.norm1(hidden_states, temb)
++                attn_output = self.attn(
++                    hidden_states=norm_hidden_states,
++                    encoder_hidden_states=norm_hidden_states,
++                    attention_mask=attention_mask,
++                    image_rotary_emb=image_rotary_emb,
++                )
++                hidden_states = hidden_states + gate_msa.unsqueeze(1).tanh() * self.norm2(attn_output)
++                mlp_output = self.feed_forward(self.ffn_norm1(hidden_states) * (1 + scale_mlp.unsqueeze(1)))
++                hidden_states = hidden_states + gate_mlp.unsqueeze(1).tanh() * self.ffn_norm2(mlp_output)
++            else:
++                norm_hidden_states = self.norm1(hidden_states)
++                attn_output = self.attn(
++                    hidden_states=norm_hidden_states,
++                    encoder_hidden_states=norm_hidden_states,
++                    attention_mask=attention_mask,
++                    image_rotary_emb=image_rotary_emb,
++                )
++                hidden_states = hidden_states + self.norm2(attn_output)
++                mlp_output = self.feed_forward(self.ffn_norm1(hidden_states))
++                hidden_states = hidden_states + self.ffn_norm2(mlp_output)
+ 
+         return hidden_states
+ 
+@@ -943,6 +999,10 @@ class Transformer2DModel(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginal
+         attention_kwargs: Optional[Dict[str, Any]] = None,
+         return_dict: bool = False,
+     ) -> Union[torch.Tensor, Transformer2DModelOutput]:
++        enable_taylorseer = getattr(self, 'enable_taylorseer', False)
++        if enable_taylorseer:
++            cal_type(self.cache_dic, self.current)
++
+         if attention_kwargs is not None:
+             attention_kwargs = attention_kwargs.copy()
+             lora_scale = attention_kwargs.pop("scale", 1.0)
+@@ -1064,7 +1124,16 @@ class Transformer2DModel(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginal
+                         hidden_states = layer(hidden_states, attention_mask, rotary_emb, temb)
+                 self.teacache_params.previous_residual = hidden_states - ori_hidden_states
+         else:
+-            for layer in self.layers:
++            if enable_taylorseer:
++                self.current['stream'] = 'layers_stream'
++
++            for layer_idx, layer in enumerate(self.layers):
++                if enable_taylorseer:
++                    layer.current = self.current
++                    layer.cache_dic = self.cache_dic
++                    layer.enable_taylorseer = True
++                    self.current['layer'] = layer_idx
++
+                 if torch.is_grad_enabled() and self.gradient_checkpointing:
+                     hidden_states = self._gradient_checkpointing_func(
+                         layer, hidden_states, attention_mask, rotary_emb, temb
+@@ -1089,6 +1158,9 @@ class Transformer2DModel(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginal
+         if USE_PEFT_BACKEND:
+             unscale_lora_layers(self, lora_scale)
+ 
++        if enable_taylorseer:
++            self.current['step'] += 1
++
+         if not return_dict:
+             return output
+         return Transformer2DModelOutput(sample=output)
+diff --git a/models/longcat_next/models/model_infer.py b/models/longcat_next/models/model_infer.py
+index bed4a40..e442d33 100644
+--- a/models/longcat_next/models/model_infer.py
++++ b/models/longcat_next/models/model_infer.py
+@@ -57,6 +57,7 @@ from transformers import PreTrainedModel
+ from transformers.modeling_outputs import BaseModelOutputWithPast
+ from transformers.utils import can_return_tuple
+ import numpy as np
++import torch_npu
+ from accelerate import init_empty_weights
+ from transformers import GenerationConfig
+ from models.longcat_next.models import modeling_longcat_next as longcat_model
+@@ -875,6 +876,8 @@ def build_hf_adapter(config, executor, components, device, tokenizer):
+                 use_cache=None, **kwargs):
+             if not isinstance(past_key_values, FrameworkCache) or inputs_embeds is None:
+                 raise ValueError("Multimodal bridge requires composed embeddings and FrameworkCache")
++            if attention_mask is not None and not bool(attention_mask.bool().all()):
++                raise ValueError("Initial multimodal adapter accepts unpadded single requests only")
+             b, s, _ = inputs_embeds.shape
+             if cache_position is None:
+                 cache_position = torch.arange(past_key_values.framework_length,
+@@ -932,7 +935,6 @@ def build_hf_adapter(config, executor, components, device, tokenizer):
+             # the inherited HF forward, including its audio text-track rules.
+             plain = (multimodal_generation_status is not None
+                      and multimodal_generation_status.mode == "text"
+-                     and not multimodal_generation_status.has_placeholder
+                      and input_ids is not None and input_ids.shape[0] == 1
+                      and inputs_embeds is None and labels is None and use_cache
+                      and isinstance(past_key_values, FrameworkCache)
+@@ -940,6 +942,11 @@ def build_hf_adapter(config, executor, components, device, tokenizer):
+                      and all(v is None or v.numel() == 0 for v in (visual_ids, audio_ids, audio_text_ids))
+                      and isinstance(logits_to_keep, int) and logits_to_keep in (0, 1))
+             if plain:
++                mask = self.model.get_placeholder_mask(input_ids[:1])
++                plain = not bool(torch.stack(mask).any())
++            if plain:
++                if attention_mask is not None and not bool(attention_mask.bool().all()):
++                    raise ValueError("Multimodal text requires an unpadded request")
+                 b, s = input_ids.shape
+                 if cache_position is None:
+                     cache_position = torch.arange(past_key_values.framework_length,
+@@ -983,8 +990,11 @@ class CollectiveExecutor:
+         self.failed = False
+         # CPU control traffic may wait while the owner runs a decoder/refiner.
+         # Do not keep an HCCL device operation waiting through file processing.
+-        self.control = control if control is not None else dist.new_group(
+-            ranks=list(range(world_size)), backend="gloo", timeout=timedelta(hours=1))
++        if world_size == 1:
++            self.control = None
++        else:
++            self.control = control if control is not None else dist.new_group(
++                ranks=list(range(world_size)), backend="gloo", timeout=timedelta(hours=1))
+ 
+     def _exchange(self, command=None, tensors=(), arguments=None):
+         if self.rank == 0:
+@@ -1024,15 +1034,21 @@ class CollectiveExecutor:
+     def call(self, command, *tensors, **arguments):
+         if self.rank != 0:
+             raise RuntimeError("Only rank0 may issue generation commands")
++        if self.world_size == 1:
++            return self.handlers[command](*tensors, **arguments)
+         return self._exchange(command, tensors, arguments)[1]
+ 
+     def serve(self):
++        if self.world_size == 1:
++            return
+         while True:
+             command, _ = self._exchange()
+             if command == "stop":
+                 return
+ 
+     def stop(self, error=None):
++        if self.world_size == 1:
++            return
+         if self.failed:
+             # All ranks have already received the command failure and left
+             # serve(); a second broadcast would have no receivers.
+@@ -1065,25 +1081,14 @@ def require_versions():
+             )
+ 
+ 
+-def _merge_generation_config(base, override):
+-    merged = copy.deepcopy(base)
+-    for name, value in override.items():
+-        if isinstance(value, dict) and isinstance(merged.get(name), dict):
+-            merged[name] = _merge_generation_config(merged[name], value)
+-        else:
+-            merged[name] = copy.deepcopy(value)
+-    return merged
+-
+-
+-def generation_options(config, request):
+-    options = config.model_config.custom_params["multimodal"]
+-    defaults = dict(options["generation"])
+-    for name in ("visual_generation_config", "audio_generation_config"):
+-        defaults[name] = _merge_generation_config(options[name], defaults.get(name, {}))
+-    settings = _merge_generation_config(defaults, request.get("generation", {}))
++def generation_options(config, options, request):
++    settings = dict(options["generation"])
++    settings.update(request.get("generation", {}))
+     settings.setdefault("max_new_tokens", config.scheduler_config.max_new_tokens)
+     if settings["max_new_tokens"] > config.scheduler_config.max_new_tokens:
+         raise ValueError("Request max_new_tokens exceeds scheduler cache reservation")
++    for name in ("visual_generation_config", "audio_generation_config"):
++        settings.setdefault(name, options[name])
+     forbidden = {"past_key_values", "inputs", "input_ids", "use_cache", "return_dict_in_generate",
+                  "synced_gpus", "num_beams", "num_return_sequences", "prefill_chunk_size"}
+     if forbidden & settings.keys():
+@@ -1094,15 +1099,20 @@ def generation_options(config, request):
+ def run_multimodal(config, yaml_path):
+     require_versions()
+     options = config.model_config.custom_params["multimodal"]
+-    validate_config(config)
++    validate_config(config, options)
+     world = config.parallel_config.world_size
+     config.model_config.model_path = str(resolve_path(config.model_config.model_path))
+     if not Path(config.model_config.model_path).is_dir():
+-        raise FileNotFoundError(config.model_config.model_path)
++        raise FileNotFoundError(
++            f"权重目录不存在: {config.model_config.model_path}。"
++            "请通过 Notebook 运行（自动复用已下载权重或远程下载），"
++            "或将 YAML 中 model_config.model_path 改为本地权重目录"
++            "（需包含 model.safetensors.index.json、assets/、image_decoder/ 与"
++            " cosy24k_vocoder/，参见本样例 README 的模型权重说明）。")
+     requests = load_requests(resolve_path(options["request_file"]))
+     # Check user-controlled generation settings before loading any weights.
+-    request_settings = [generation_options(config, request) for request in requests]
+-    template_settings = [chat_template_options(config, request) for request in requests]
++    request_settings = [generation_options(config, options, request) for request in requests]
++    template_settings = [chat_template_options(options, request) for request in requests]
+     head_batches = head_graph_batches(requests, request_settings)
+     tasks = {r["task"] for r in requests}
+     visual = any("image" in task for task in tasks)
+@@ -1157,12 +1167,19 @@ def run_multimodal(config, yaml_path):
+     engine = ExecutionEngine(config)
+     model_cls, config_cls = load_model_classes("longcat_next")
+     engine.init(config_cls, model_cls)
+-    control = dist.new_group(ranks=list(range(world)), backend="gloo", timeout=timedelta(hours=1))
++    world_size = config.parallel_config.world_size
++    control = None
++    if world_size > 1:
++        control = dist.new_group(
++            ranks=list(range(world_size)), backend="gloo", timeout=timedelta(hours=1)
++        )
+     # This entry warms its own text/features interfaces before measured requests;
+     # it does not compile the normal executor's unrelated main_decode wrapper.
+-    tp = options.get("head_tp_size", 4)
++    tp = options.get("head_tp_size", world_size)
+     cm = engine.comm_manager
+-    cm.register_group("multimodal_head_tp_group", group_num=world // tp, group_size=tp)
++    cm.register_group(
++        "multimodal_head_tp_group", group_num=world_size // tp, group_size=tp
++    )
+     group = cm.get_group("multimodal_head_tp_group")
+     head_rank = cm.get_rank("multimodal_head_tp_group")
+     components, heads = {}, {}
+@@ -1188,8 +1205,10 @@ def run_multimodal(config, yaml_path):
+         load_components(config.model_config.model_path, components, engine.device, tuple(heads.values()))
+     except Exception as exc:
+         startup_error = f"rank{rank}: {type(exc).__name__}: {exc}"
+-    startup_errors = [None] * world
+-    dist.all_gather_object(startup_errors, startup_error, group=control)
++    startup_errors = [startup_error]
++    if world_size > 1:
++        startup_errors = [None] * world_size
++        dist.all_gather_object(startup_errors, startup_error, group=control)
+     if any(startup_errors):
+         raise RuntimeError("Multimodal initialization failed: " + "; ".join(e for e in startup_errors if e))
+     session = BackboneSession(engine, hf_config)
+@@ -1225,7 +1244,9 @@ def run_multimodal(config, yaml_path):
+         "visual_head": lambda hidden, ids, level: head_call(hidden, ids, level, "visual"),
+         "audio_head": lambda hidden, ids, level: head_call(hidden, ids, level, "audio"),
+     }
+-    executor = CollectiveExecutor(rank, world, engine.device, handlers, control=control)
++    executor = CollectiveExecutor(
++        rank, world_size, engine.device, handlers, control=control
++    )
+     if rank != 0:
+         try:
+             with torch.inference_mode():
+@@ -1239,7 +1260,7 @@ def run_multimodal(config, yaml_path):
+         tokenizer = LongcatNextTokenizer.from_pretrained(config.model_config.model_path,
+                                                         local_files_only=True, fix_mistral_regex=True)
+         processor = LongcatNextProcessor.from_pretrained(config.model_config.model_path,
+-                                                        local_files_only=True)
++                                                        local_files_only=True, fix_mistral_regex=True)
+         processor.tokenizer = tokenizer
+         model, cache_cls = build_hf_adapter(hf_config, executor, components, engine.device, tokenizer)
+         generation_file = Path(config.model_config.model_path) / "generation_config.json"
+@@ -1400,9 +1421,8 @@ def build_messages(request):
+     return [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
+ 
+ 
+-def chat_template_options(config, request):
++def chat_template_options(options, request):
+     """Forward the official template switch without losing media start suffixes."""
+-    options = config.model_config.custom_params["multimodal"]
+     value = request.get("enable_thinking", options.get("enable_thinking"))
+     if value is not None and not isinstance(value, bool):
+         raise ValueError("enable_thinking must be true, false or null, outside generation")
+@@ -1457,7 +1477,7 @@ def validate_parallelism(parallel, hf_config):
+                 f"{label}={size} is not divisible by shard size {shard}: {why}")
+ 
+ 
+-def validate_config(config):
++def validate_config(config, options):
+     """Check what the framework cannot know.
+ 
+     ``world_size`` divisibility for every tp_size, ``num_experts % moe_ep_size``
+@@ -1466,8 +1486,25 @@ def validate_config(config):
+     validate_model_config), so this function only covers adapter boundaries and
+     the MoE relation the framework does not express.
+     """
+-    options = config.model_config.custom_params["multimodal"]
+     p = config.parallel_config
++    custom = config.model_config.custom_params or {}
++    single_card_offload = (
++        p.world_size == 1
++        and bool(custom.get("enable_moe_cpu_offload", False))
++        and bool(custom.get("enable_ngram_cpu_offload", False))
++    )
++    if p.world_size == 1 and not single_card_offload:
++        raise ValueError(
++            "world_size=1 requires both enable_moe_cpu_offload and "
++            "enable_ngram_cpu_offload"
++        )
++    if p.world_size == 1:
++        for name in (
++            "attn_tp_size", "dense_tp_size", "embed_tp_size",
++            "lmhead_tp_size", "o_proj_tp_size",
++        ):
++            if getattr(p, name) != 1:
++                raise ValueError(f"single-card offload requires {name}=1")
+     # ---- boundaries of this entry point (functionality not implemented here)
+     if p.attn_dp_size != 1:
+         # Requests are driven by one rank-0 command channel over one DP group;
+diff --git a/models/longcat_next/models/modeling_longcat_next.py b/models/longcat_next/models/modeling_longcat_next.py
+index 5762128..129f02e 100644
+--- a/models/longcat_next/models/modeling_longcat_next.py
++++ b/models/longcat_next/models/modeling_longcat_next.py
+@@ -45,7 +45,6 @@ from transformers.generation import GenerationMixin
+ from transformers.generation.configuration_utils import GenerationConfig
+ from transformers.generation.logits_process import LogitsProcessorList
+ from transformers.generation.stopping_criteria import StoppingCriteriaList
+-from transformers.generation.streamers import BaseStreamer
+ from transformers.generation.utils import (
+     GenerateDecoderOnlyOutput, GenerateEncoderDecoderOutput, GenerateNonBeamOutput,
+ )
+@@ -912,6 +911,128 @@ class LongcatFlashTopkRouter(nn.Module):
+         return topk_weights, topk_indices.to(torch.int32)
+ 
+ 
++class CPUExpertStore:
++    """Host-resident expert weights used by the single-NPU offload path.
++
++    The store deliberately is not an ``nn.Module`` and its tensors are not
++    registered buffers/parameters, so the framework's blanket ``model.to(npu)``
++    cannot move them back into HBM.  Checkpoint shards are retained on CPU.
++    """
++
++    def __init__(self, num_experts, hidden_size, intermediate_size, dtype):
++        self.num_experts = num_experts
++        self.hidden_size = hidden_size
++        self.intermediate_size = intermediate_size
++        self.dtype = dtype
++        self._loaded = {}
++
++    def load_shard(self, expert_id, shard_id, weight):
++        if not 0 <= expert_id < self.num_experts:
++            raise IndexError(f"expert_id={expert_id} is out of range")
++        expected = {
++            "w1": (self.intermediate_size, self.hidden_size),
++            "w2": (self.hidden_size, self.intermediate_size),
++            "w3": (self.intermediate_size, self.hidden_size),
++        }[shard_id]
++        if tuple(weight.shape) != expected:
++            raise ValueError(
++                f"expert {expert_id} {shard_id} shape={tuple(weight.shape)}, expected={expected}"
++            )
++        entry = self._loaded.setdefault(expert_id, {})
++        entry[shard_id] = weight.detach().to(device="cpu", dtype=self.dtype).contiguous()
++
++    def get_expert(self, expert_id):
++        loaded = self._loaded.get(expert_id)
++        if loaded is None:
++            raise RuntimeError(f"expert {expert_id} was not loaded from checkpoint")
++        missing = {"w1", "w2", "w3"} - loaded.keys()
++        if missing:
++            raise RuntimeError(
++                f"expert {expert_id} checkpoint is incomplete; missing {sorted(missing)}"
++            )
++        return loaded
++
++    def validate_loaded(self):
++        """Fail before inference when a real checkpoint is incomplete."""
++        missing_experts = []
++        incomplete_experts = {}
++        expected_shards = {"w1", "w2", "w3"}
++        for expert_id in range(self.num_experts):
++            shards = self._loaded.get(expert_id)
++            if shards is None:
++                missing_experts.append(expert_id)
++                continue
++            missing = expected_shards - shards.keys()
++            if missing:
++                incomplete_experts[expert_id] = sorted(missing)
++        if missing_experts or incomplete_experts:
++            missing_preview = missing_experts[:16]
++            raise RuntimeError(
++                "CPU expert checkpoint is incomplete: "
++                f"loaded={len(self._loaded)}/{self.num_experts}, "
++                f"missing_experts={missing_preview}"
++                f"{'...' if len(missing_experts) > len(missing_preview) else ''}, "
++                f"incomplete_experts={incomplete_experts}"
++            )
++        tensors = [tensor for shards in self._loaded.values() for tensor in shards.values()]
++        return {
++            "experts": len(self._loaded),
++            "tensors": len(tensors),
++            "bytes": sum(tensor.numel() * tensor.element_size() for tensor in tensors),
++        }
++
++
++class CPUOffloadedEmbedding(nn.Module):
++    """CPU row lookup whose backing table is invisible to ``Module.to``."""
++
++    def __init__(self, num_embeddings, embedding_dim, padding_idx=None,
++                 dtype=torch.bfloat16):
++        super().__init__()
++        self.num_embeddings = num_embeddings
++        self.embedding_dim = embedding_dim
++        self.padding_idx = padding_idx
++        self.dtype = dtype
++        self.weight_cpu = None
++
++    def load_weight(self, weight):
++        expected = (self.num_embeddings, self.embedding_dim)
++        if tuple(weight.shape) != expected:
++            raise ValueError(
++                f"CPU embedding shape={tuple(weight.shape)}, expected={expected}"
++            )
++        self.weight_cpu = weight.detach().to(device="cpu", dtype=self.dtype).contiguous()
++
++    def validate_loaded(self):
++        """Return an inventory entry or fail when the checkpoint table is absent."""
++        if self.weight_cpu is None:
++            raise RuntimeError(
++                "CPU offloaded embedding checkpoint weight was not loaded: "
++                f"expected shape=({self.num_embeddings}, {self.embedding_dim})"
++            )
++        if tuple(self.weight_cpu.shape) != (self.num_embeddings, self.embedding_dim):
++            raise RuntimeError(
++                f"CPU offloaded embedding has shape={tuple(self.weight_cpu.shape)}, "
++                f"expected=({self.num_embeddings}, {self.embedding_dim})"
++            )
++        return {
++            "tables": 1,
++            "tensors": 1,
++            "bytes": self.weight_cpu.numel() * self.weight_cpu.element_size(),
++        }
++
++    def forward(self, input_ids):
++        output_device = input_ids.device
++        ids_cpu = input_ids.detach().to(device="cpu", dtype=torch.long)
++        if ids_cpu.numel() and (
++            int(ids_cpu.min()) < 0 or int(ids_cpu.max()) >= self.num_embeddings
++        ):
++            raise IndexError("CPU offloaded embedding index is out of range")
++        if self.weight_cpu is None:
++            raise RuntimeError("CPU embedding weight was not loaded from checkpoint")
++        result = F.embedding(ids_cpu, self.weight_cpu, self.padding_idx)
++        return result.to(device=output_device, non_blocking=False)
++
++
+ # ---------------------------------------------------------------------------
+ # MoE with full fusion (gating_top_k + init_routing_v2 + grouped_matmul + finalize_routing)
+ # ---------------------------------------------------------------------------
+@@ -929,8 +1050,10 @@ class LongcatFlashMoE(nn.Module):
+     """
+ 
+ 
+-    def __init__(self, config, infer_config: InferenceConfig, comm_manager: CommManager):
++    def __init__(self, config, infer_config: InferenceConfig, comm_manager: CommManager,
++                 layer_idx: int = 0):
+         super().__init__()
++        self.layer_idx = layer_idx
+         self.config = config
+         self.hidden_size = config.hidden_size
+         self.n_routed_experts = config.n_routed_experts
+@@ -938,6 +1061,11 @@ class LongcatFlashMoE(nn.Module):
+         self.total_experts = self.n_routed_experts + self.zero_expert_num
+         self.comm_manager = comm_manager
+ 
++        custom = getattr(infer_config.model_config, "custom_params", {}) or {}
++        self.enable_cpu_offload = bool(custom.get("enable_moe_cpu_offload", False))
++        if self.enable_cpu_offload and infer_config.parallel_config.world_size != 1:
++            raise RuntimeError("MoE CPU offload requires world_size=1")
++
+         self.moe_tp_size = infer_config.parallel_config.moe_tp_size
+         self.moe_ep_size = infer_config.parallel_config.moe_ep_size
+         self.use_ep = (self.moe_tp_size == 1 and self.moe_ep_size > 1)
+@@ -960,7 +1088,6 @@ class LongcatFlashMoE(nn.Module):
+             # model exceeds the A2 cap. Override via
+             # ``custom_params.enable_moe_mc2_dispatch``.
+             platform = infer_config.model_config.platform_version
+-            platform = getattr(platform, "value", platform)
+             cp = infer_config.model_config.custom_params or {}
+             default_mc2 = not (platform == "A2" and self.experts_per_rank > 24)
+             self.enable_moe_mc2_dispatch = bool(cp.get("enable_moe_mc2_dispatch", default_mc2))
+@@ -977,18 +1104,29 @@ class LongcatFlashMoE(nn.Module):
+         # Single FusedMoEGMM constructor that takes both tp and ep knobs;
+         # FusedMoEGMM internally routes shard layout based on tp/ep sizes.
+         # Matches qwen3_moe / longcat-flash convention.
+-        self.experts = FusedMoEGMM(
+-            num_experts=self.n_routed_experts,
+-            hidden_size=self.hidden_size,
+-            intermediate_size=config.expert_ffn_hidden_size,
+-            bias=False,
+-            quant_config=quant_config,
+-            tp_size=self.moe_tp_size,
+-            tp_rank=self.tp_rank,
+-            ep_size=self.moe_ep_size,
+-            ep_rank=self.ep_rank,
+-            prefix="experts",
+-        )
++        if self.enable_cpu_offload:
++            if quant_config is not None:
++                raise RuntimeError("MoE CPU offload supports BF16 checkpoints only")
++            self.experts = None
++            self.expert_store = CPUExpertStore(
++                num_experts=self.n_routed_experts,
++                hidden_size=self.hidden_size,
++                intermediate_size=config.expert_ffn_hidden_size,
++                dtype=torch.bfloat16,
++            )
++        else:
++            self.experts = FusedMoEGMM(
++                num_experts=self.n_routed_experts,
++                hidden_size=self.hidden_size,
++                intermediate_size=config.expert_ffn_hidden_size,
++                bias=False,
++                quant_config=quant_config,
++                tp_size=self.moe_tp_size,
++                tp_rank=self.tp_rank,
++                ep_size=self.moe_ep_size,
++                ep_rank=self.ep_rank,
++                prefix="experts",
++            )
+ 
+     def forward(
+         self,
+@@ -1002,6 +1140,11 @@ class LongcatFlashMoE(nn.Module):
+         internally; callers (DecoderLayer) thread packed 2D throughout
+         so the entry / exit shape stays consistent.
+         """
++        if self.enable_cpu_offload:
++            topk_weight, topk_idx = self.router(hidden_states)
++            return self.forward_cpu_offload_with_routing(
++                hidden_states, topk_weight, topk_idx
++            )
+         if self.use_ep:
+             # Prefill: always double-routing AllToAll (unconstrained, every chip).
+             # Decode: MC2 dispatch_v2/combine_v2 when enabled (A3 graph mode);
+@@ -1014,6 +1157,41 @@ class LongcatFlashMoE(nn.Module):
+             return self._forward_ep_decode(hidden_states)
+         return self._forward_tp(hidden_states)
+ 
++    def forward_cpu_offload_with_routing(
++        self, hidden_states, topk_weight, topk_idx
++    ):
++        """Reference CPU MoE path for the single-NPU offload mode."""
++        original_device = hidden_states.device
++        original_dtype = hidden_states.dtype
++        hidden_cpu = hidden_states.detach().to(device="cpu", dtype=torch.bfloat16)
++        weights_cpu = topk_weight.detach().to(device="cpu", dtype=torch.float32)
++        indices_cpu = topk_idx.detach().to(device="cpu", dtype=torch.long)
++        output = torch.zeros(
++            hidden_cpu.shape[0], hidden_cpu.shape[1], dtype=torch.float32, device="cpu"
++        )
++
++        routed = indices_cpu < self.n_routed_experts
++        routed_ids = torch.unique(indices_cpu[routed]).tolist()
++        with torch.inference_mode():
++            for expert_id in routed_ids:
++                positions = torch.nonzero(indices_cpu == expert_id, as_tuple=False)
++                token_ids = positions[:, 0]
++                slot_ids = positions[:, 1]
++                expert_input = hidden_cpu.index_select(0, token_ids)
++                expert = self.expert_store.get_expert(int(expert_id))
++                gate = F.linear(expert_input, expert["w1"])
++                up = F.linear(expert_input, expert["w3"])
++                expert_output = F.linear(F.silu(gate) * up, expert["w2"]).float()
++                scale = weights_cpu[token_ids, slot_ids].unsqueeze(-1)
++                output.index_add_(0, token_ids, expert_output * scale)
++
++        identity_scale = (
++            weights_cpu * (indices_cpu >= self.n_routed_experts)
++        ).sum(dim=-1, keepdim=True)
++        output.add_(hidden_cpu.float() * identity_scale)
++        result = output.to(dtype=original_dtype).to(device=original_device)
++        return result
++
+     # ----- TP path (existing fast path: init_routing_v2 + GMM + finalize_routing) -----
+ 
+     def _forward_tp(self, hidden_states):
+@@ -1343,7 +1521,9 @@ class LongcatFlashDecoderLayer(nn.Module):
+         self._main_aic_num = str(custom.get("main_aic_num", 16))
+         self._main_aiv_num = str(custom.get("main_aiv_num", 32))
+ 
+-        self.mlp = LongcatFlashMoE(config, infer_config, comm_manager)
++        self.mlp = LongcatFlashMoE(
++            config, infer_config, comm_manager, layer_idx=layer_idx
++        )
+ 
+         self.self_attn = nn.ModuleList([
+             LongcatFlashMLA(config, infer_config, comm_manager, layer_idx * 2 + i,
+@@ -1452,6 +1632,7 @@ class NgramEmbedding(nn.Module):
+         ngram_tp_size: Optional[int] = None,
+         ngram_tp_rank: Optional[int] = None,
+         ngram_tp_group=None,
++        cpu_offload: bool = False,
+     ):
+         super().__init__()
+         self.config = config
+@@ -1468,6 +1649,9 @@ class NgramEmbedding(nn.Module):
+         # Cache the comm group: None => fall back to embed_tp_group via
+         # comm_manager (legacy path); explicit group for independent ngram TP.
+         self._ngram_tp_group = ngram_tp_group
++        self.cpu_offload = cpu_offload
++        if self.cpu_offload and self.embed_tp_size != 1:
++            raise RuntimeError("N-gram CPU offload requires ngram TP size 1")
+ 
+         # LongCat-Next hashes text token IDs, not the full multimodal
+         # embedding vocabulary.  The official HF implementation uses
+@@ -1511,7 +1695,16 @@ class NgramEmbedding(nn.Module):
+             ) * self.embed_tp_size
+             self.embedder_vocab_sizes.append(vocab_size)
+             self.embedder_padded_vocab_sizes.append(padded_vocab_size)
+-            if self.embed_tp_size > 1:
++            if self.cpu_offload:
++                embedders.append(
++                    CPUOffloadedEmbedding(
++                        vocab_size,
++                        emb_dim,
++                        padding_idx=config.pad_token_id,
++                        dtype=torch.bfloat16,
++                    )
++                )
++            elif self.embed_tp_size > 1:
+                 embedders.append(
+                     VocabParallelEmbedding(
+                         padded_vocab_size,
+@@ -1960,6 +2153,11 @@ class LongcatNextModel(nn.Module):
+         # the framework's ParallelConfig per "no public framework changes"
+         # rule). Default 0 means "follow embed_tp_size" (legacy behavior).
+         custom = getattr(infer_config.model_config, "custom_params", {}) or {}
++        enable_ngram_cpu_offload = bool(
++            custom.get("enable_ngram_cpu_offload", False)
++        )
++        if enable_ngram_cpu_offload and infer_config.parallel_config.world_size != 1:
++            raise RuntimeError("N-gram CPU offload P0 currently requires world_size=1")
+         ngram_tp = int(custom.get("ngram_embed_tp_size", 0))
+         if ngram_tp == 0 or ngram_tp == self.embed_tp_size:
+             # Reuse embed_tp_group (legacy path; NgramEmbedding falls back to
+@@ -1986,6 +2184,7 @@ class LongcatNextModel(nn.Module):
+             ngram_tp_size=ngram_tp_size,
+             ngram_tp_rank=ngram_tp_rank,
+             ngram_tp_group=ngram_tp_group,
++            cpu_offload=enable_ngram_cpu_offload,
+         ) if ENABLE_NGRAM_EMBEDDING else None
+ 
+         self.layers = nn.ModuleList([
+@@ -2395,7 +2594,55 @@ class LongcatNextForCausalLM(nn.Module):
+         logits = logits[..., :self.lm_head_raw_vocab_size]
+         return logits
+ 
++    def validate_cpu_offload_weights(self):
++        """Validate and report the complete host-resident checkpoint inventory.
++
++        Real checkpoint runs fail before the first forward instead of waiting
++        for a routed expert or N-gram row to expose a missing tensor.
++        """
++        if not self.infer_config.model_config.with_ckpt:
++            return None
++
++        expert_layers = 0
++        expert_count = 0
++        expert_tensors = 0
++        ngram_tables = 0
++        host_bytes = 0
++        for layer in self.model.layers:
++            moe = layer.mlp
++            if not getattr(moe, "enable_cpu_offload", False):
++                continue
++            stats = moe.expert_store.validate_loaded()
++            expert_layers += 1
++            expert_count += stats["experts"]
++            expert_tensors += stats["tensors"]
++            host_bytes += stats["bytes"]
++
++        ngram = getattr(self.model, "ngram_embeddings", None)
++        if ngram is not None and getattr(ngram, "cpu_offload", False):
++            for embedder in ngram.embedders:
++                if not isinstance(embedder, CPUOffloadedEmbedding):
++                    raise RuntimeError(
++                        "N-gram CPU offload is enabled but an embedder is not "
++                        "CPUOffloadedEmbedding"
++                    )
++                stats = embedder.validate_loaded()
++                ngram_tables += stats["tables"]
++                host_bytes += stats["bytes"]
++
++        inventory = {
++            "expert_layers": expert_layers,
++            "experts": expert_count,
++            "expert_tensors": expert_tensors,
++            "ngram_tables": ngram_tables,
++            "host_bytes": host_bytes,
++        }
++        logger.info("CPU offload checkpoint inventory: %s", inventory)
++        self.cpu_offload_checkpoint_inventory = inventory
++        return inventory
++
+     def process_weights_after_loading(self):
++        self.validate_cpu_offload_weights()
+         # Initialize absorb weights BEFORE transpose/NZ conversion.
+         # init_absorb_weights expects kv_b_proj.weight in its original
+         # (out_features, in_features) layout. After quant_method processing,
+@@ -2538,6 +2785,7 @@ class LongcatNextForCausalLM(nn.Module):
+         )
+ 
+         params_dict = dict(self.named_parameters())
++        modules_dict = dict(self.named_modules())
+         loaded_params: set = set()
+ 
+         for name, loaded_weight in weights:
+@@ -2565,6 +2813,12 @@ class LongcatNextForCausalLM(nn.Module):
+ 
+             if ".ngram_embeddings.embedders." in name and name.endswith(".weight"):
+                 if name not in params_dict:
++                    parts = name.split(".")
++                    embedder_idx = int(parts[parts.index("embedders") + 1])
++                    embedder = self.model.ngram_embeddings.embedders[embedder_idx]
++                    if isinstance(embedder, CPUOffloadedEmbedding):
++                        embedder.load_weight(loaded_weight)
++                        loaded_params.add(name)
+                     continue
+                 parts = name.split(".")
+                 embedder_idx = int(parts[parts.index("embedders") + 1])
+@@ -2602,6 +2856,16 @@ class LongcatNextForCausalLM(nn.Module):
+                         continue
+                     name = name.replace(weight_name, param_name)
+                     if name not in params_dict:
++                        module_name = name.split(".experts.", 1)[0]
++                        moe_module = modules_dict.get(module_name)
++                        if (
++                            isinstance(moe_module, LongcatFlashMoE)
++                            and moe_module.enable_cpu_offload
++                        ):
++                            moe_module.expert_store.load_shard(
++                                expert_id, shard_id, loaded_weight
++                            )
++                            break
+                         continue
+                     param = params_dict[name]
+                     weight_loader = param.weight_loader
+@@ -2678,15 +2942,11 @@ class LongcatNextForCausalLMGenerationStatus:
+         self.anyres_prefix = self.visual_generation_config.custom_params["anyres_prefix"].format(h=self.h, w=self.w)
+         self.audio_generation_config = audio_generation_config
+         self.audio_parallel_decoding = audio_generation_config.audio_parallel_decoding
+-        # Keep the multimodal route after media placeholders enter the sequence.
+-        self.has_placeholder = False
+ 
+     def switch_to(self, modal):
+         if not (modal in ["text", "visual", "audio"]):
+             raise AssertionError
+         self.mode = modal
+-        if modal in ("visual", "audio"):
+-            self.has_placeholder = True
+         self.current_image_token_num = 0 if modal == "visual" else -1
+         self.is_audio_text_end = False
+         self.is_audio_start = False
+@@ -3338,15 +3598,6 @@ class LongcatNextForGeneration(PreTrainedModel, GenerationMixin):
+         multimodal_generation_status = LongcatNextForCausalLMGenerationStatus(
+             visual_generation_config, audio_generation_config)
+ 
+-        # Validate request-wide invariants once; decode only reads this Python
+-        # flag instead of synchronizing NPU reductions at every token.
+-        placeholder_mask = self.model.get_placeholder_mask(input_ids[:1])
+-        multimodal_generation_status.has_placeholder = bool(
+-            torch.stack(placeholder_mask).any().item())
+-        attention_mask = model_kwargs.get("attention_mask")
+-        if attention_mask is not None and not bool(attention_mask.bool().all().item()):
+-            raise ValueError("Multimodal text requires an unpadded request")
+-
+         pbar = tqdm(iter(int, 1), desc="Generating", unit="tok")
+         while self._has_unfinished_sequences(this_peer_finished, synced_gpus, device=input_ids.device):
+             # prepare model inputs
+@@ -3482,7 +3733,6 @@ class LongcatNextForGeneration(PreTrainedModel, GenerationMixin):
+                          and multimodal_generation_status.is_audio_text_end):
+                     next_tokens = self.model.audiotext_start_token_id.to(input_ids.device)
+ 
+-
+             # finished sentences should have their next token be a padding token
+             if has_eos_stopping_criteria:
+                 next_tokens = next_tokens * unfinished_sequences + pad_token_id * (1 - unfinished_sequences)
+diff --git a/models/longcat_next/requests/image_gen.json b/models/longcat_next/requests/image_gen.json
+new file mode 100644
+index 0000000..f04ad3b
+--- /dev/null
++++ b/models/longcat_next/requests/image_gen.json
+@@ -0,0 +1,26 @@
++{
++  "schema_version": 1,
++  "requests": [
++    {
++      "id": "image_gen_kitten_sign",
++      "task": "image_generation",
++      "prompt": "A small kitten sitting naturally on a moss-covered forest floor, centered in the frame, holding a rectangular wooden sign gently with its front paws. The sign reads \"Hello CANN\" in clean, sharp black text. The environment is a lush forest with tall trees and soft green foliage. Lighting is soft, diffused sunlight filtering through the trees. Realistic photography style, natural colors, high detail.",
++      "generation": {
++        "max_new_tokens": 4096,
++        "do_sample": true,
++        "visual_generation_config": {
++          "do_sample": true,
++          "temperature": 0.5,
++          "top_p": 0.75,
++          "top_k": 1024,
++          "custom_params": {
++            "cfg_scale": 1.8,
++            "token_h": 16,
++            "token_w": 16,
++            "anyres_prefix": "<longcat_img_token_size>{h} {w}</longcat_img_token_size>"
++          }
++        }
++      }
++    }
++  ]
++}
+diff --git a/models/longcat_next/requests/multimodal.json b/models/longcat_next/requests/multimodal.json
+new file mode 100644
+index 0000000..7465250
+--- /dev/null
++++ b/models/longcat_next/requests/multimodal.json
+@@ -0,0 +1,41 @@
++{
++  "schema_version": 1,
++  "requests": [
++    {
++      "id": "image_understanding_book",
++      "task": "image_understanding",
++      "prompt": "What book is this?",
++      "media": {
++        "image": "assets/book.png"
++      },
++      "generation": {
++        "max_new_tokens": 128,
++        "do_sample": false
++      }
++    },
++    {
++      "id": "audio_to_text_math",
++      "task": "audio_to_text",
++      "prompt": "请仔细听这段音频，并逐字转写其中的内容。",
++      "media": {
++        "audio": "assets/math1.wav"
++      },
++      "generation": {
++        "max_new_tokens": 128,
++        "do_sample": false
++      }
++    },
++    {
++      "id": "speech_synthesis_intro",
++      "task": "speech_synthesis",
++      "prompt": "欢迎使用昇腾CANN平台。大模型推理优化是一个充满乐趣的过程，希望你能在这里有所收获。",
++      "media": {
++        "reference_audio": "assets/system_audio.wav"
++      },
++      "generation": {
++        "max_new_tokens": 512,
++        "do_sample": false
++      }
++    }
++  ]
++}
+diff --git a/models/longcat_next/requests/text.json b/models/longcat_next/requests/text.json
+new file mode 100644
+index 0000000..f0f70d6
+--- /dev/null
++++ b/models/longcat_next/requests/text.json
+@@ -0,0 +1,16 @@
++{
++  "schema_version": 1,
++  "requests": [
++    {
++      "id": "text_story",
++      "task": "text",
++      "prompt": "你是一个小说家。请续写下面的故事，不少于三段：\n深夜的图书馆里只剩下守夜人老陈。凌晨两点十七分，他照例巡视到三楼古籍区，却发现原本上锁的阅览室门虚掩着，里面透出一盏昏黄的灯。",
++      "generation": {
++        "do_sample": true,
++        "temperature": 0.7,
++        "top_p": 0.9,
++        "repetition_penalty": 1.05
++      }
++    }
++  ]
++}
+-- 
+2.33.0
+

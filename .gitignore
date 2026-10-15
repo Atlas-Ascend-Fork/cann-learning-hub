@@ -99,6 +99,10 @@ ut_report.txt
 tbetoolkits-*.log
 *_result.csv
 
+# tutorial notebook runtime workspace (run YAML / metrics / logs /
+# cloned cann-recipes-infer repo with the single-NPU patch applied)
+Sources/
+
 # Jetbrain
 .idea
 cmake-build-debug
