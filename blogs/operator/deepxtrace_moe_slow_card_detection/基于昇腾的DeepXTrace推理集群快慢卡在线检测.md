@@ -132,9 +132,9 @@ dispatch_fullmesh分核策略是，将worldSize_张卡的数据尽可能均匀�
 
 #### 4.3.1 跨机通信分核接收Rank数据的策略
 
-dispatch分层跨机通信分核策略是，前serverNum个核处理发送任务，第serverNum+1个核负责计算outer表，剩下的核用接收来自serverNum台机器的数据，多个核会负责接收来自同一个server的数据，总核心数为48个。
+dispatch分层跨机通信分核策略是，前serverNum个核处理发送任务，第serverNum+1个核负责计算outer表，剩下的核用于接收来自serverNum台机器的数据，多个核会负责接收来自同一个server的数据，总核心数为48个。
 
-以8机64卡为例，core0-7核处理发送任务，core8核负责计算outer表，剩余的核平均分配给8台机器，每台server分配到(48-8-1)/8=4个核，因此core9-12处理server0的跨机数据发送，core13-16处理server1的跨机数据发送，以此类推。
+以8机64卡为例，core0-7核处理发送任务，core8核负责计算outer表，剩余的核平均分配给8台机器，每台server分配到(48-8-1)/8=4个核，因此core9-12处理server0的跨机数据发送，core13-16处理server1的跨机数据发送，以此类推，多出的核空出不用。
 
 ![hierarchy_cross_server_send_core_assignment](images/hierarchy_cross_server_send_core_assignment.png)
 
@@ -298,7 +298,7 @@ if rank == 0:
 
 ![hierarchy_dispatch_anomaly_detection_result](images/hierarchy_dispatch_anomaly_detection_result.png)
 
-根据异常点检测逻辑，异常点阈值设置为5.0，[9,1]处的归一化值计算为5.52，超出阈值，工具报告[9,1]为异常点。同理，[12,4]=761也是异常点。
+根据异常点检测逻辑，异常点阈值设置为5.0，[9,1]处的归一化值计算为5.52，超出阈值，工具报告[9,1]为异常点。同理，[12,4]处的归一化值同样超出阈值5.0（原始值为761），工具报告[12,4]为异常点。
 
 ### 发送端异常场景
 
