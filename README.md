@@ -698,14 +698,18 @@ cd cann-learning-hub
 | [npugraph_ex 第三方框架集成](./blogs/inference/npugraph_ex_third_party_framework_integration) | 图编译与编译缓存能力接入，降低冷启动耗时 | 2026.2 |
 
 <details>
-<summary><b>查看全部技术博客</b>（算子 23 / 推理 23 / 训练 3，共 49 篇）</summary>
+<summary><b>查看全部技术博客</b>（算子 27 / 推理 23 / 训练 4，共 54 篇）</summary>
 
 <table style="table-layout:fixed;width:100%">
 <tr><th width="35%">博客</th><th width="55%">简介</th><th width="10%">时间</th></tr>
 <tr><th colspan="3" align="left">算子</th></tr>
+<tr><td><a href="./blogs/operator/pypto_cannbot_kda_operator_delivery">PyPTO+CANNBot 7 日交付实践：KDA 算子快速实现</a></td><td>PyPTO Tensor API + CANNBot Agent，7 天完成百灵 Ling-3.0-flash KDA 融合算子开发与调优</td><td>2026.8</td></tr>
+<tr><td><a href="./blogs/operator/reg_vector_programming_optimization">Reg 矢量计算编程优化实践</a></td><td>ZERO/ONE 寄存器布局将 BF16 拆为两组 FP32 计算链路，向量粒度与寄存器利用率翻倍</td><td>2026.8</td></tr>
 <tr><td><a href="./blogs/operator/ascend950_aiv_urma_shmem_communication">昇腾950 AIV 直驱 URMA 的 SHMEM 跨 PE 通信实践</a></td><td>AIV 在 Device 侧构造 WQE，借助 URMA 与 SHMEM 完成跨 PE 远端写和通知，减少 Host 往返</td><td>2026.7</td></tr>
 <tr><td><a href="./blogs/operator/multi_vendor_operator_parallel_compilation">多 Vendor 自定义算子并行编译实践</a></td><td>统一调度多个独立 Vendor 子工程，并行完成算子编译、打包和产物隔离</td><td>2026.7</td></tr>
 <tr><td><a href="./blogs/operator/tilelang_xllm_qwen35_operator_adaptation">TileLang 与 xLLM 驱动 Qwen3.5 昇腾算子适配</a></td><td>以 TileLang Python DSL 为开发入口，结合 xLLM 完成 Qwen3.5 算子适配</td><td>2026.7</td></tr>
+<tr><td><a href="./blogs/operator/pypto_agent_qat_operator_development">基于 PyPTO 与 Agent，2 周完成模型 QAT 算子开发与优化</a></td><td>PyPTO 张量 API + Agent 辅助编程，2 周完成 QAT 算子功能开发、三大调优与整网接入</td><td>2026.7</td></tr>
+<tr><td><a href="./blogs/operator/grouped_matmul_mx_optimization">GroupedMatmul MX 量化矩阵乘深度性能优化实践</a></td><td>三种负载均衡、scalar 优化、私有格式搬运、双页表与 3-Buffer 等 GMM MX 优化实践</td><td>2026.6</td></tr>
 <tr><td><a href="./blogs/operator/dsa_operator_open_source_contribution">DSA 算子开源共建之路</a></td><td>围绕 DSA 长序列训练算子 FP32 支持，从需求到反向贡献 ops-transformer 社区</td><td>2026.6</td></tr>
 <tr><td><a href="./blogs/operator/ascend950_rmsnormquant_optimization">Ascend 950 RmsNormQuant 算子分阶段优化</a></td><td>Gamma 预加载、多核并行、寄存器数据流、Double Buffer 与二分累加优化</td><td>2026.5</td></tr>
 <tr><td><a href="./blogs/operator/moe_dispatch_combine_optimization">MoE Dispatch 与 Combine 算子优化</a></td><td>跨 Rank 通信去重、本地加权合并、AIV 直驱 RDMA 与多流并行</td><td>2026.5</td></tr>
@@ -751,6 +755,7 @@ cd cann-learning-hub
 <tr><td><a href="./blogs/inference/superkernel_inference_acceleration">SuperKernel 技术综述</a></td><td>整网编译为大算子，性能再提升 10%-20%</td><td>2025.11</td></tr>
 <tr><td><a href="./blogs/inference/vllm_ascend_inference_optimization">vLLM-Ascend 推理优化</a></td><td>PagedAttention + 昇腾适配，提升吞吐</td><td>2025.11</td></tr>
 <tr><th colspan="3" align="left">训练</th></tr>
+<tr><td><a href="./blogs/training/token_spark_rl_optimization">基于昇腾集群的词元星火 RL 优化实践</a></td><td>MoE 专家负载均衡、P/D 两阶段采样、统一 KVStore 与 Decode 动态调度，推理加速 30%</td><td>2026.9</td></tr>
 <tr><td><a href="./blogs/training/areal_async_rl_training">AReaL 全异步 RL 训练</a></td><td>全异步 RL + Single Controller，解耦式 Agentic RL</td><td>2026.3</td></tr>
 <tr><td><a href="./blogs/training/flashrecovery_training_fault_recovery">FlashRecovery 训练故障恢复</a></td><td>降低检查点 I/O 与回滚重算损失</td><td>2025.12</td></tr>
 <tr><td><a href="./blogs/training/sam_speculative_decoding_rl_training">SAM 投机解码 RL 训练</a></td><td>无辅助模型 SAM 投机解码，超 35% 长尾加速</td><td>2025.12</td></tr>
