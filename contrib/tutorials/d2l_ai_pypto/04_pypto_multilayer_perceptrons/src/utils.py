@@ -16,6 +16,38 @@ import matplotlib.pyplot as plt
 from IPython import display
 import numpy as np
 
+# ── 环境适配：修复打印 NPU 浮点张量时的 double 回退告警 ─────────────────
+#
+# 根因：打印浮点张量时，torch._tensor_str._Formatter 会先把数据转到
+# float64 做格式化计算（见 torch/_tensor_str.py 的 tensor_totype()）。
+# 该函数对 MPS 和不支持 fp64 的 XPU 已降级为 float32，但未覆盖 NPU——
+# 昇腾 NPU 同样不支持 double，torch_npu 只能回退成 float 并打印
+# "Device do not support double dtype now" 告警。
+#
+# 修复：按 torch 对 MPS/XPU 的相同语义补上 NPU 分支——NPU 张量改用
+# float32 做格式化计算，从源头避免发起不受支持的 double 转换（而非
+# 过滤告警）。float32 只参与 min/max 与科学计数法判定，逐元素格式化
+# 仍逐项读取原张量值，打印结果与原生行为一致。
+
+def _patch_tensor_totype_for_npu():
+    """让 tensor 打印格式化路径在 NPU 上使用 float32 而非 float64（幂等）。"""
+    import torch._tensor_str as _tensor_str
+
+    if getattr(_tensor_str, '_npu_totype_patched', False):
+        return
+    _orig = _tensor_str.tensor_totype
+
+    def _totype(t):
+        if t.device.type == 'npu':
+            return t.to(torch.float32)
+        return _orig(t)
+
+    _tensor_str.tensor_totype = _totype
+    _tensor_str._npu_totype_patched = True
+
+
+_patch_tensor_totype_for_npu()
+
 # ── 数据加载 ──────────────────────────────────────────────────────────────
 
 def load_data_fashion_mnist(batch_size, resize=None, root='../data',

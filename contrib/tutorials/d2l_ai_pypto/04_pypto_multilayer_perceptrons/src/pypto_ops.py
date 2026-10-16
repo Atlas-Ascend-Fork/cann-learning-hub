@@ -8,6 +8,16 @@
 导出清单见 ``__all__``。其中三个 ``autograd.Function`` 子类
 （``PyPTOMatmul`` / ``PyPTOBiasAdd`` / ``PyPTOReLUOp``）可被 ``nn.Module``
 进一步封装；``loss_fn`` 是带 ``.mean()`` 聚合的 softmax+交叉熵损失入口。
+
+性能说明（与 4.2 节教学版的对应关系）：
+- 逐算子 kernel（``matmul_*`` / ``bias_add_*`` / ``softmax_*`` /
+  ``cross_entropy_*``）与 4.2 节 notebook 内逐行讲解的实现保持一致，全部导出。
+- 本模块作为 4.3 起的共享路径，额外提供两个**数学等价**的融合 kernel：
+  ``linear_bias_fwd/bwd_kernel``（全连接层 Y = X@W + b 前向/反向各一次发射）
+  与 ``softmax_ce_forward/backward_kernel``（softmax+交叉熵前向/反向各一次
+  发射，反向为链式法则代入化简后的 (y - onehot) * g 形式）。pypto 单次调用
+  host 开销 ~92μs、小 kernel 墙钟由启动开销主导，融合后每层每方向省 1 次发射。
+  ``PyPTOLinear`` 与 ``loss_fn`` 默认走融合路径。
 """
 
 import pypto
@@ -161,6 +171,56 @@ def cross_entropy_backward_kernel(
 
 
 # ---------------------------------------------------------------------------
+# softmax + 交叉熵（融合版）：与上面 4.2 节逐算子讲解的 kernel 数学等价，
+# 但前向/反向各合并为**单个** kernel 发射，省一半的 kernel 启动开销
+# （pypto 单次调用 host 开销 ~92μs，小 kernel 场景下墙钟由启动开销主导）。
+#
+# 前向融合：softmax → gather → -log 一气呵成（同一 kernel 内必须先
+# gather 消费中间结果、再 move 写回，顺序颠倒会触发 GatherElements
+# nullptr 报错——NPU 实测结论，见 kernel 内注释）。
+# 反向融合：把链式法则两步
+#     grad_ce = -(g / y[label]) * onehot
+#     grad_x  = y * (grad_ce - sum(grad_ce * y, -1, keepdim=True))
+# 代入化简为一步（与 d2l 第 3 章交叉熵梯度的教科书形式一致）：
+#     grad_x  = (y - onehot) * g
+# 两种写法在 fp32 下逐位差异 ~1e-7（舍入顺序不同），对训练动态无影响。
+# ---------------------------------------------------------------------------
+@pypto.frontend.jit(runtime_options={"run_mode": pypto.RunMode.NPU})
+def softmax_ce_forward_kernel(
+    x: pypto.Tensor([], pypto.DT_FP32),
+    y_1d: pypto.Tensor([], pypto.DT_INT32),
+    softmax_out: pypto.Tensor([], pypto.DT_FP32),
+    ce_out: pypto.Tensor([], pypto.DT_FP32),
+    num_classes: int,
+):
+    rows, cols = _softmax_vec_tile_shapes(num_classes)
+    pypto.set_vec_tile_shapes(rows, cols)
+    s = pypto.softmax(x, dim=-1)
+    # 注意：必须先消费 s（gather）再 move 写回，否则 s 被消费后变 nullptr
+    y_2d = pypto.reshape(y_1d, [-1, 1])
+    selected = pypto.gather(s, -1, y_2d)
+    softmax_out.move(s)
+    # 裁剪到一个极小正数，避免 softmax 下溢出 0 时 log(0) = -inf 传播为 NaN 梯度
+    ce_out.move(pypto.neg(pypto.log(pypto.maximum(selected, 1e-12))))
+
+
+@pypto.frontend.jit(runtime_options={"run_mode": pypto.RunMode.NPU})
+def softmax_ce_backward_kernel(
+    grad_out: pypto.Tensor([], pypto.DT_FP32),
+    y: pypto.Tensor([], pypto.DT_FP32),
+    y_1d: pypto.Tensor([], pypto.DT_INT32),
+    grad_x: pypto.Tensor([], pypto.DT_FP32),
+    num_classes: int,
+):
+    rows, cols = _softmax_vec_tile_shapes(num_classes)
+    # one_hot 要求 tile 末维严格等于 num_classes（TiledOneHot 约束），不可对齐到 8/16 的倍数
+    pypto.set_vec_tile_shapes(rows, num_classes)
+    one_hot_y = pypto.cast(pypto.one_hot(y_1d, num_classes), pypto.DT_FP32)
+    pypto.set_vec_tile_shapes(rows, cols)
+    grad_x.move((y - one_hot_y) * grad_out)
+
+
+# ---------------------------------------------------------------------------
 # 工厂函数：把 (fwd_kernel, bwd_kernel) 包装成 torch.autograd.Function 子类
 # ---------------------------------------------------------------------------
 def make_pypto_matmul(fwd, bwd):
@@ -224,19 +284,21 @@ def make_pypto_relu(fwd, bwd):
 
 
 # ---------------------------------------------------------------------------
-# softmax + 交叉熵：前向 PyTorch 调度 + 两个 NPU kernel，反向链式法则手动串联
+# softmax + 交叉熵：PyTorch 调度 + 融合 NPU kernel（前向/反向各一次发射）。
+#
+# 逐算子的两-kernel 版本（softmax_forward/backward + cross_entropy_forward/
+# backward，链式法则逐步展开）在 4.2 节 notebook 内逐行讲解，保留导出供教学
+# 对照；本类为 4.3 起共享路径，采用数学等价的融合 kernel（见上方注释），
+# 每个训练 step 少 2 次 kernel 发射。
 # ---------------------------------------------------------------------------
 class PyPTOSoftmaxCrossEntropyLossFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, y, num_classes):
         x_c = x.contiguous()
-        # softmax
         softmax_out = torch.empty_like(x_c)
-        softmax_forward_kernel(x_c, softmax_out, num_classes)
-        # cross_entropy on softmax output
-        y_i32_1d = y.to(torch.int32).contiguous()
         ce_out = torch.empty((x.shape[0], 1), dtype=x.dtype, device=x.device)
-        cross_entropy_forward_kernel(softmax_out, y_i32_1d, ce_out, num_classes)
+        y_i32_1d = y.to(torch.int32).contiguous()
+        softmax_ce_forward_kernel(x_c, y_i32_1d, softmax_out, ce_out, num_classes)
         ctx.save_for_backward(softmax_out, y_i32_1d)
         ctx.num_classes = num_classes
         return ce_out.view(-1)
@@ -245,15 +307,10 @@ class PyPTOSoftmaxCrossEntropyLossFunction(torch.autograd.Function):
     def backward(ctx, grad_out):
         softmax_out, y_i32_1d = ctx.saved_tensors
         num_classes = ctx.num_classes
-        # gradient of cross_entropy w.r.t. softmax_out
+        # kernel 要求连续内存：autograd 传入的 grad_out 可能非连续
         grad_out_c = grad_out.view(-1, 1).contiguous()
-        grad_ce = torch.empty_like(softmax_out)
-        cross_entropy_backward_kernel(
-            grad_out_c, softmax_out, y_i32_1d, grad_ce, num_classes
-        )
-        # gradient of softmax w.r.t. x
         grad_x = torch.empty_like(softmax_out)
-        softmax_backward_kernel(grad_ce.contiguous(), softmax_out, grad_x, num_classes)
+        softmax_ce_backward_kernel(grad_out_c, softmax_out, y_i32_1d, grad_x, num_classes)
         return grad_x, None, None
 
 
@@ -342,6 +399,69 @@ def mse_loss(y_hat, y, reduction='mean'):
 
 
 # ---------------------------------------------------------------------------
+# 全连接层融合 kernel：Y = X @ W + b 的前向/反向各合并为**单个** kernel 发射。
+#
+# 与 4.2 节逐算子版本（matmul_fwd/bias_add_fwd 两次前向发射、matmul_bwd +
+# bias_add_bwd 两次反向发射）数学等价：
+#   前向  c = matmul(X, W) 后在 kernel 内接一个 vector 广播加 c + b；
+#   反向  grad_X = grad_Y @ W^T、grad_W = X^T @ grad_Y、grad_b = sum(grad_Y, 0)
+#         三个梯度同 kernel 输出（grad_b 的 sum 归约不在归约轴上切分，
+#         tile (16,16) 与第 7 章 PyPTOLinearFuseModule 生产版一致）。
+# pypto 单次调用 host 开销 ~92μs 且小 kernel 墙钟由启动开销主导，故每层
+# 前向/反向各省 1 次发射 ≈ 0.24ms。4.3 起 ``PyPTOLinear`` 默认走此路径。
+# ---------------------------------------------------------------------------
+@pypto.frontend.jit(runtime_options={"run_mode": pypto.RunMode.NPU})
+def linear_bias_fwd_kernel(
+    x: pypto.Tensor([], pypto.DT_FP32),
+    w: pypto.Tensor([], pypto.DT_FP32),
+    b: pypto.Tensor([], pypto.DT_FP32),
+    y: pypto.Tensor([], pypto.DT_FP32),
+):
+    pypto.set_cube_tile_shapes([32, 32], [64, 64], [64, 64])
+    c = pypto.matmul(x, w, pypto.DT_FP32)
+    pypto.set_vec_tile_shapes(128, 128)
+    y.move(c + b)
+
+
+@pypto.frontend.jit(runtime_options={"run_mode": pypto.RunMode.NPU})
+def linear_bias_bwd_kernel(
+    a: pypto.Tensor([], pypto.DT_FP32),
+    b: pypto.Tensor([], pypto.DT_FP32),
+    grad_c: pypto.Tensor([], pypto.DT_FP32),
+    grad_a: pypto.Tensor([], pypto.DT_FP32),
+    grad_b: pypto.Tensor([], pypto.DT_FP32),
+    grad_bias: pypto.Tensor([], pypto.DT_FP32),
+):
+    pypto.set_cube_tile_shapes([32, 32], [64, 64], [64, 64])
+    grad_a.move(pypto.matmul(grad_c, b, pypto.DT_FP32, b_trans=True))
+    grad_b.move(pypto.matmul(a, grad_c, pypto.DT_FP32, a_trans=True))
+    pypto.set_vec_tile_shapes(16, 16)
+    grad_bias.move(pypto.sum(grad_c, 0, True))
+
+
+class PyPTOLinearFunction(torch.autograd.Function):
+    """Y = X @ W + b 的融合实现（前向/反向各一次 kernel 发射）。"""
+
+    @staticmethod
+    def forward(ctx, x, w, b):
+        x_c, w_c = x.contiguous(), w.contiguous()
+        y = torch.empty(x.shape[0], w.shape[1], device=x.device, dtype=x.dtype)
+        linear_bias_fwd_kernel(x_c, w_c, b, y)
+        ctx.save_for_backward(x_c, w_c)
+        return y
+
+    @staticmethod
+    def backward(ctx, grad_c):
+        x, w = ctx.saved_tensors
+        grad_c = grad_c.contiguous()
+        grad_x = torch.empty_like(x)
+        grad_w = torch.empty_like(w)
+        grad_b = torch.empty(1, w.shape[1], device=x.device, dtype=x.dtype)
+        linear_bias_bwd_kernel(x, w, grad_c, grad_x, grad_w, grad_b)
+        return grad_x, grad_w, grad_b.squeeze(0)
+
+
+# ---------------------------------------------------------------------------
 # nn.Module 用户层封装：从 [4.3 节](./04.03_mlp_concise.ipynb) inline 移植，
 # 并扩展 PyPTOLinear 支持 bias 开关（4.4 多项式回归用 bias=False）。
 # ---------------------------------------------------------------------------
@@ -369,10 +489,9 @@ class PyPTOLinear(nn.Module):
         self.bias = nn.Parameter(torch.zeros(out_features)) if bias else None
 
     def forward(self, x):
-        y = PyPTOMatmul.apply(x, self.weight)
         if self.bias is not None:
-            y = PyPTOBiasAdd.apply(y, self.bias)
-        return y
+            return PyPTOLinearFunction.apply(x, self.weight, self.bias)
+        return PyPTOMatmul.apply(x, self.weight)
 
 
 class PyPTOReLU(nn.Module):
@@ -510,16 +629,21 @@ __all__ = [
     "softmax_backward_kernel",
     "cross_entropy_forward_kernel",
     "cross_entropy_backward_kernel",
+    "softmax_ce_forward_kernel",
+    "softmax_ce_backward_kernel",
     "make_pypto_matmul",
     "make_pypto_bias_add",
     "make_pypto_relu",
     # 新增（4.4-4.6）
     "PyPTOLinear",
     "PyPTOReLU",
+    "PyPTOLinearFunction",
     "PyPTOSquaredLossFunction",
     "mse_loss",
     "squared_loss_fwd_kernel",
     "squared_loss_bwd_kernel",
+    "linear_bias_fwd_kernel",
+    "linear_bias_bwd_kernel",
     "PyPTODropoutFunction",
     "PyPTODropout",
     "make_dropout_kernels",
