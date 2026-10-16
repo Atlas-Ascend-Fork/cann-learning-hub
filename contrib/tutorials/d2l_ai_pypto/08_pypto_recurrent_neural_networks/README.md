@@ -8,7 +8,7 @@
 ## 在线阅读
 | 文档 | Link | 状态 |
 |--|--|--|
-| 08.00 章节介绍 | [在线阅读](./08.00_chapter_info.ipynb) | ✅ 已发布 |
+| 08.00 章节介绍 | [在线阅读](08.00_chapter_intro.ipynb) | ✅ 已发布 |
 | 08.01 序列模型 | [在线阅读](./08.01_sequence.ipynb) | ✅ 已发布 |
 | 08.02 文本预处理 | [在线阅读](./08.02_text_preprocessing.ipynb) | ✅ 已发布 |
 | 08.03 语言模型和数据集 | [在线阅读](./08.03_language_models_and_dataset.ipynb) | ✅ 已发布 |

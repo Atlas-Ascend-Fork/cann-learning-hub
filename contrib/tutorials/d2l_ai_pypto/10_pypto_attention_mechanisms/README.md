@@ -7,7 +7,7 @@
 ## 在线阅读
 | 文档 | Link | 状态 |
 |--|--|--|
-| 10.00 章节介绍 | [在线阅读](./10.00_chapter_info.ipynb) | ✅ 已发布 |
+| 10.00 章节介绍 | [在线阅读](10.00_chapter_intro.ipynb) | ✅ 已发布 |
 | 10.01 注意力提示 | [在线阅读](./10.01_attention_cues.ipynb) | ✅ 已发布 |
 | 10.02 注意力汇聚：Nadaraya-Watson 核回归 | [在线阅读](./10.02_nadaraya_waston.ipynb) | ✅ 已发布 |
 | 10.03 注意力评分函数 | [在线阅读](./10.03_attention_scoring_functions.ipynb) | ✅ 已发布 |

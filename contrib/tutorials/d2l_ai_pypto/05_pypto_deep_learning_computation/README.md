@@ -8,7 +8,7 @@
 ## 在线阅读
 | 文档 | Link | 状态 |
 |--|--|--|
-| 05.00 章节介绍 | [在线阅读](./05.00_chapter_info.ipynb) | ✅ 已发布 |
+| 05.00 章节介绍 | [在线阅读](05.00_chapter_intro.ipynb) | ✅ 已发布 |
 | 05.01 层和块 | [在线阅读](./05.01_model_construction.ipynb) | ✅ 已发布 |
 | 05.02 参数管理 | [在线阅读](./05.02_parameters.ipynb) | ✅ 已发布 |
 | 05.03 延后初始化 | [在线阅读](./05.03_deferred_init.ipynb) | ✅ 已发布 |

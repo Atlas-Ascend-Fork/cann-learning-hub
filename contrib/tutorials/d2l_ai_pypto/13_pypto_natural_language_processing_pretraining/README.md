@@ -7,7 +7,7 @@
 ## 在线阅读
 | 文档 | Link | 状态 |
 |--|--|--|
-| 13.00 章节介绍 | [在线阅读](./13.00_chapter_info.ipynb) | ✅ 已发布 |
+| 13.00 章节介绍 | [在线阅读](13.00_chapter_intro.ipynb) | ✅ 已发布 |
 | 13.01 词嵌入（word2vec） | [在线阅读](./13.01_word2vec.ipynb) | ✅ 已发布 |
 | 13.02 近似训练 | [在线阅读](./13.02_approx_training.ipynb) | ✅ 已发布 |
 | 13.03 用于预训练词嵌入的数据集 | [在线阅读](./13.03_word_embedding_dataset.ipynb) | ✅ 已发布 |
