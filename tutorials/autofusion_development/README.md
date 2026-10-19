@@ -32,7 +32,7 @@
 | cann-learning-hub 在线体验 notebook | cann_9.0.0_py3.11-A2-arm | Python 3.11.15 | 各 Notebook 表格中的"在线体验"链接可直接打开运行                                                                                                  |
 | CANNLab 云开发环境                  | cann_9.0.0_py3.11-A2-arm | Python 3.11.4  | 参考[CANNLab 环境体验指南](https://gitcode.com/cann/cann-learning-hub/blob/master/docs/CANNLab_env_experience_guide.md)创建CANNLab环境运行notebook |
 
-> **注意：** 如在本地环境离线体验，需自行安装配套的 CANN 软件，具体请参考 [CANN 安装指南](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/600alpha003/softwareinstall/instg/atlasdeploy_03_0001.html)。另外，仅第四章课程执行要用 A3 版本环境。
+> **注意：** 如在本地环境离线体验，需自行安装配套的 CANN 软件，具体请参考 [CANN 安装指南](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/600alpha003/softwareinstall/instg/atlasdeploy_03_0001.html)。另外，仅第四章课程执行要用 A3 版本环境，且 CANN 软件版本要求9.1.0正式版本。
 
 ## 课程目录
 
