@@ -1,11 +1,11 @@
 # YOLOv13 Offline Inference Sample
 
-This sample demonstrates the complete workflow of YOLOv13 object detection on an Ascend AI processor: ONNX model export, ATC offline compilation, ACL inference, and result post-processing. It also covers multi-stream parameter tuning based on `aclmdlExecute` latency statistics.
+This sample demonstrates the complete workflow of [YOLOv13](https://ai.gitcode.com/Ascend-SACT/Yolov13) object detection on an Ascend AI processor: ONNX model export, ATC offline compilation, ACL inference, and result post-processing. It also covers multi-stream parameter tuning based on `aclmdlExecute` latency statistics.
 
 The tutorial contains the following:
-- Notebooks: covering environment preparation, model conversion, offline inference, result visualization, and performance tuning. They can be run in the GitCode Notebook or a local Jupyter environment.
+- Notebooks: covering environment preparation, model conversion, offline inference, result visualization, and performance tuning. They can be run in the [GitCode Notebook](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/01_chapter_intro.ipynb) or a local Jupyter environment.
 - `src`: the ACL C++ inference program and its build dependencies.
-- `scripts`: image preprocessing, result visualization, build, and run scripts.
+- `scripts`: image preprocessing, result visualization, weight downloading, build, and run scripts.
 - `answers`: reference answers for the chapter exercises.
 
 > **Notes:**
@@ -35,13 +35,13 @@ This sample supports both of the following environments:
 
 ## Notebooks
 
-| Notebook | Content |
-|--|--|
-| [1. Chapter introduction](./01_chapter_intro.ipynb) | Learning objectives and workflow |
-| [2. Model preparation and conversion](./02_model_prepare.ipynb) | Prepare YOLOv13, export ONNX, and generate OM with ATC |
-| [3. ACL offline inference](./03_acl_offline_inference.ipynb) | Build and run the ACL C++ inference program |
-| [4. Result processing and performance tuning](./04_result_and_tuning.ipynb) | Post-processing, visualization, and multi-stream tuning |
-| [5. Chapter practice](./05_chapter_practice.ipynb) | Exercises for model conversion, inference, and tuning |
+| Notebook | Content | Online |
+|--|--|--|
+| [1. Chapter introduction](./01_chapter_intro.ipynb) | Learning objectives and workflow | [Run online](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/01_chapter_intro.ipynb) |
+| [2. Model preparation and conversion](./02_model_prepare.ipynb) | Prepare YOLOv13, export ONNX, and generate OM with ATC | [Run online](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/02_model_prepare.ipynb) |
+| [3. ACL offline inference](./03_acl_offline_inference.ipynb) | Build and run the ACL C++ inference program | [Run online](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/03_acl_offline_inference.ipynb) |
+| [4. Result processing and performance tuning](./04_result_and_tuning.ipynb) | Post-processing, visualization, and multi-stream tuning | [Run online](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/04_result_and_tuning.ipynb) |
+| [5. Chapter practice](./05_chapter_practice.ipynb) | Exercises for model conversion, inference, and tuning | [Run online](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/05_chapter_practice.ipynb) |
 
 ## Directory Structure
 
@@ -58,7 +58,8 @@ reference_practice/yolov13_offline_inference/
 │   ├── build.sh
 │   ├── run.sh
 │   ├── preprocess.py
-│   └── draw_boxes.py
+│   ├── draw_boxes.py
+│   └── download_weight.py
 ├── src/
 │   ├── CMakeLists.txt
 │   ├── acl.json
@@ -95,26 +96,25 @@ The Notebook automatically reads `Chip Name` and `NPU Name` via `npu-smi info -t
 
 1. Download the YOLOv13 weights.
 
-   Download `yolov13n.pt` from the [YOLOv13 Release page](https://github.com/iMoonLab/yolov13/releases/tag/yolov13):
+   The weight file `yolov13n.pt` is hosted in the GitCode model repository [Yolov13](https://ai.gitcode.com/hf_mirrors/atalaydenknalbant/Yolov13) (stored with Git LFS). Run the script provided with this sample to download it:
 
    ```
-   wget https://github.com/iMoonLab/yolov13/releases/download/yolov13/yolov13n.pt
+   python3 scripts/download_weight.py --output=yolov13n.pt
    ```
 
-   > **Note**: Please use a stable proxy for GitHub downloads. If the download is unstable, you can manually download via browser from the link above.
+   > **Note**: The script downloads via the Git LFS API and does not require git-lfs. If the download is unstable, you can also open the model repository page in a browser and download the file manually.
 
 2. Install YOLOv13 dependencies.
 
-   YOLOv13 uses custom modules that the standard `ultralytics` package cannot load directly. You need to install the forked version of ultralytics from the YOLOv13 source repository:
+   YOLOv13 uses custom modules that the standard `ultralytics` package cannot load directly. You need to install the forked version of ultralytics from the YOLOv13 source repository (GitCode mirror):
 
    ```
    # Download the YOLOv13 source repository (includes forked ultralytics)
-   curl -L -o yolov13.zip "https://codeload.github.com/iMoonLab/yolov13/zip/refs/heads/main"
-   unzip yolov13.zip
+   git clone --depth 1 https://gitcode.com/gh_mirrors/yo/yolov13.git
 
    # Install forked ultralytics (uninstall standard version first if present)
    pip3 uninstall ultralytics -y 2>/dev/null
-   pip3 install --no-deps yolov13-main/
+   pip3 install --no-deps yolov13/
 
    # Install missing dependencies
    pip3 install huggingface_hub seaborn py-cpuinfo
@@ -153,11 +153,11 @@ The Notebook automatically reads `Chip Name` and `NPU Name` via `npu-smi info -t
 
 ### 2. Prepare the test image and preprocess
 
-1. Download the test image from the YOLOv13 official repository and place it in the `data/` directory:
+1. Download the test image from the YOLOv13 repository (GitCode mirror) and place it in the `data/` directory:
 
    ```
    cd data/
-   wget https://raw.githubusercontent.com/iMoonLab/yolov13/main/ultralytics/assets/bus.jpg
+   wget https://raw.gitcode.com/gh_mirrors/yo/yolov13/files/main/ultralytics/assets/bus.jpg
    ```
 
 2. Run the preprocessing script in the image directory to convert jpg to bin:

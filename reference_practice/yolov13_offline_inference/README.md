@@ -1,11 +1,11 @@
 # YOLOv13 离线推理应用案例
 
-本案例以 YOLOv13 目标检测模型为例，展示在昇腾 AI 处理器上完成 ONNX 模型导出、ATC 离线编译、ACL 推理和结果后处理的完整流程，并通过 `aclmdlExecute` 时延统计完成多流参数调优。
+本案例以 [YOLOv13](https://ai.gitcode.com/Ascend-SACT/Yolov13) 目标检测模型为例，展示在昇腾 AI 处理器上完成 ONNX 模型导出、ATC 离线编译、ACL 推理和结果后处理的完整流程，并通过 `aclmdlExecute` 时延统计完成多流参数调优。
 
 教程包含以下内容：
-- Notebooks：包含环境准备、模型转换、离线推理、结果可视化和性能调优步骤，可在 GitCode Notebook 或本地 Jupyter 环境中学习。
+- Notebooks：包含环境准备、模型转换、离线推理、结果可视化和性能调优步骤，可在 [GitCode Notebook](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/01_chapter_intro.ipynb) 或本地 Jupyter 环境中学习。
 - `src`：包含 ACL C++ 推理程序及其构建依赖。
-- `scripts`：包含图片预处理、结果可视化、构建和运行脚本。
+- `scripts`：包含图片预处理、结果可视化、权重下载、构建和运行脚本。
 - `answers`：包含章节练习参考答案。
 
 > **注意：**
@@ -35,13 +35,13 @@
 
 ## Notebooks
 
-| Notebook | 内容 |
-|--|--|
-| [1. 章节介绍](./01_chapter_intro.ipynb) | 学习目标、流程和目录说明 |
-| [2. 环境准备与模型转换](./02_model_prepare.ipynb) | 准备 YOLOv13、导出 ONNX 并使用 ATC 生成 OM |
-| [3. ACL 离线推理](./03_acl_offline_inference.ipynb) | 编译并运行 ACL C++ 推理程序 |
-| [4. 结果处理与性能调优](./04_result_and_tuning.ipynb) | 后处理、可视化和多流参数调优 |
-| [5. 章节练习](./05_chapter_practice.ipynb) | 巩固模型转换、推理和调优知识 |
+| Notebook | 内容 | 在线体验 |
+|--|--|--|
+| [1. 章节介绍](./01_chapter_intro.ipynb) | 学习目标、流程和目录说明 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/01_chapter_intro.ipynb) |
+| [2. 环境准备与模型转换](./02_model_prepare.ipynb) | 准备 YOLOv13、导出 ONNX 并使用 ATC 生成 OM | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/02_model_prepare.ipynb) |
+| [3. ACL 离线推理](./03_acl_offline_inference.ipynb) | 编译并运行 ACL C++ 推理程序 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/03_acl_offline_inference.ipynb) |
+| [4. 结果处理与性能调优](./04_result_and_tuning.ipynb) | 后处理、可视化和多流参数调优 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/04_result_and_tuning.ipynb) |
+| [5. 章节练习](./05_chapter_practice.ipynb) | 巩固模型转换、推理和调优知识 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=reference_practice/yolov13_offline_inference&scanFilePath=reference_practice/yolov13_offline_inference/05_chapter_practice.ipynb) |
 
 ## 目录结构
 
@@ -58,7 +58,8 @@ reference_practice/yolov13_offline_inference/
 │   ├── build.sh
 │   ├── run.sh
 │   ├── preprocess.py
-│   └── draw_boxes.py
+│   ├── draw_boxes.py
+│   └── download_weight.py
 ├── src/
 │   ├── CMakeLists.txt
 │   ├── acl.json
@@ -95,24 +96,23 @@ Notebook 会通过 `npu-smi info -t board` 自动读取 `Chip Name` 和 `NPU Nam
 
 1. 下载 YOLOv13 权重。
 
-   从 [YOLOv13 Release 页面](https://github.com/iMoonLab/yolov13/releases/tag/yolov13) 下载 `yolov13n.pt`：
+   权重文件 `yolov13n.pt` 存放于 GitCode 模型库 [Yolov13](https://ai.gitcode.com/hf_mirrors/atalaydenknalbant/Yolov13)（Git LFS 存储），运行案例提供的脚本下载：
 
    ```
-   wget https://github.com/iMoonLab/yolov13/releases/download/yolov13/yolov13n.pt
+   python3 scripts/download_weight.py --output=yolov13n.pt
    ```
 
-   > **说明**：GitHub 下载请使用稳定代理。若下载不稳定，可通过浏览器手动下载。
+   > **说明**：脚本通过 Git LFS 接口下载，无需安装 git-lfs。若下载不稳定，也可以通过浏览器打开模型库页面手动下载。
 
 2. 安装 YOLOv13 依赖。
 
-   YOLOv13 使用自定义模块，标准 `ultralytics` 包无法直接加载，需要从 YOLOv13 源码仓库安装其 fork 版本：
+   YOLOv13 使用自定义模块，标准 `ultralytics` 包无法直接加载，需要从 YOLOv13 源码仓库（GitCode 镜像）安装其 fork 版本：
 
    ```
-   curl -L -o yolov13.zip "https://codeload.github.com/iMoonLab/yolov13/zip/refs/heads/main"
-   unzip yolov13.zip
+   git clone --depth 1 https://gitcode.com/gh_mirrors/yo/yolov13.git
 
    pip3 uninstall ultralytics -y 2>/dev/null
-   pip3 install --no-deps yolov13-main/
+   pip3 install --no-deps yolov13/
 
    pip3 install huggingface_hub seaborn py-cpuinfo
    ```
@@ -150,11 +150,11 @@ Notebook 会通过 `npu-smi info -t board` 自动读取 `Chip Name` 和 `NPU Nam
 
 ### 2. 准备测试图片与预处理
 
-1. 从 YOLOv13 官方仓库下载测试图片并放入 `data/` 目录：
+1. 从 YOLOv13 仓库（GitCode 镜像）下载测试图片并放入 `data/` 目录：
 
    ```
    cd data/
-   wget https://raw.githubusercontent.com/iMoonLab/yolov13/main/ultralytics/assets/bus.jpg
+   wget https://raw.gitcode.com/gh_mirrors/yo/yolov13/files/main/ultralytics/assets/bus.jpg
    ```
 
 2. 在图片所在目录执行预处理脚本，将 jpg 转换为 BIN：
