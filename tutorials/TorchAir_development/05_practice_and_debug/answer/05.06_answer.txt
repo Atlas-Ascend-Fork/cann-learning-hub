@@ -1,75 +1,86 @@
+﻿======================================================================
+5.6 算子入图实践 章节练习答案
 ======================================================================
-5.6 第五章章节练习 参考答案
-======================================================================
 
-一、单选题
-----------
-
-1. 图编译 Debug 信息保存功能中，AOT 前的 GraphModule 对应的产物文件是？
-   答案：D
-   解析：dynamo_out_graph.txt 是 AOT 前的 GraphModule；000_aot_
-         forward_graph.txt 是 AOT 后的 GraphModule，output_code.py 是
-         aclgraph 编译后的图结构文件，debug.log 是日志文件。
-
-2. Data-Dump 功能中，`data_dump_stage` 的默认取值是？
+1. （单选题）Kernel 直调工程中，算子 Kernel 入口函数所在的文件是？
    答案：B
-   解析：data_dump_stage 默认取 optimized，即 dump 经过 npugraph_ex
-         优化后的 FX 图；original 表示 dump 最原始未优化的 FX 图
-         （开启后通过 eager mode 执行，不进入 aclgraph 模式）。
+   解析：直调工程中，Kernel 入口函数位于 op_kernel/<op>_kernel.asc；
+         op_host/<op>.asc 承担 host 侧 Tiling 计算与 KernelCall，
+         op_extension/<op>_torch.cpp 是 PyTorch 接入封装，
+         scripts/golden.py 为 CPU 参考实现。
 
-3. 多流并发死锁检测功能在哪个阶段分析死锁风险？
-   答案：A
-   解析：死锁检测在编译期自动分析整图中各流上通信类算子的核心资源
-         占用，提前发现死锁隐患，无需真正运行到死锁发生。
+2. （单选题）AclGraph 中，标记捕获区间结束的接口是？
+   答案：D
+   解析：aclmdlRICaptureBegin 与 aclmdlRICaptureEnd 成对使用，划定捕获区间，
+         区间内指定 Stream 上的任务被捕获并暂存至模型运行实例；
+         ExecuteAsync 用于批量执行，Destroy 用于资源释放。
 
-4. Plog 日志的默认存放路径是？
+3. （单选题）AclGraph 中，一次性触发所有暂存任务执行的接口是？
    答案：C
-   解析：Plog 日志默认存放在 /root/ascend/log；./dump_output 是
-         Data-Dump 产物目录，./torch_compile_debug 是图编译 Debug
-         产物目录。
+   解析：aclmdlRIExecuteAsync 一次性触发暂存任务执行，重复执行时仅需多次调
+         用该接口，无需重复下发任务；SynchronizeStream 用于同步等待，
+         DebugJsonPrint 用于导出调试信息。
 
-5. Data-Dump 产物目录 `worldsize1_global_rank0` 的命名反映了什么信息？
-   答案：B
-   解析：整图算子 Dump 执行成功后，会在 data_dump_dir 指定目录下生成
-         如 worldsize1_global_rank0 的文件夹，命名包含世界规模（卡数）
-         与全局 rank 编号信息，多卡场景会生成多个文件夹。
+4. （单选题）直调工程中，用于逐元素比对本算子输出与 golden 结果的脚本是？
+   答案：C
+   解析：scripts/verify_result.py 负责将直调运行输出与 golden 结果逐元素比
+         对，并需显式传入 output 与 golden 两个文件路径；gen_data.py 生成
+         输入数据，golden.py 提供 CPU 参考实现，test_torch.py 用于 PyTorch
+         侧调用验证。
 
-6. 下列功能与其开启方式的对应关系，错误的是？
-   答案：D
-   解析：Plog 日志打屏应通过 ASCEND_SLOG_PRINT_TO_STDOUT=1 开启，而非
-         TORCH_COMPILE_DEBUG=0（该变量是图编译 Debug 信息保存开关）。
-         A、B、C 三组的对应关系均正确。
-
-二、多选题
-----------
-
-7. 关于图编译 Debug 信息保存功能，正确的说法有哪些？
-   答案：ABCD
-   解析：该功能复用 PyTorch 原生 TORCH_COMPILE_DEBUG 变量（A），须在
-         导入 torchair 和 logger 之前设置（B）；使用 compile_fx 开启时
-         不会收集 dynamo_out_graph.txt（C）；分布式场景下运行目录名
-         会在末尾追加 -rank_<rank_id>（D），四个选项均正确。
-
-8. 关于 SuperKernel 融合优化与 Data-Dump 的约束关系，正确的说法有哪些？
-   答案：ABC
-   解析：应选择 A（开启 SuperKernel 融合优化后 dump_tensor_data 不再
-         生效）、B（使用 torch_npu.save_npugraph_tensor 会使 SuperKernel
-         融合优化断开）、C（将 task_breaker_bypass 配置为 1 可避免融合
-         优化断开）。D 错误：SuperKernel 融合优化与 Data-Dump 存在
-         上述约束，关闭融合优化后 dump 功能仍可使用。
-
-9. 死锁检测的 CONFLICT 日志能够提供的信息包括哪些？
+5. （多选题）关于 AclGraph 的说法，正确的有哪些？
    答案：ABD
-   解析：CONFLICT 日志包含冲突算子所在的流编号与 TaskId（如
-         stream316 TaskId=4）、算子名称及占用的 Vector 核数量（如
-         32 AIVEC）、以及核数总和与设备总核数的比较结果（如
-         sum=56 > 48）。本功能只输出风险提示，不会自动生成修复
-         代码（C 错误）。
+   解析：AclGraph 采用「流任务捕获 + 模型化执行」的设计（A），核心目的是消
+         减算子逐一下发的 Host 调度开销（B）；重复执行时无需重复下发任务，
+         仅需多次调用执行接口（D）。C 错误：AclGraph 无需修改算子本身的实
+         现逻辑，仅改变任务下发方式。
 
-10. 本章介绍的调试功能与其适用问题类型的对应关系，正确的有哪些？
-    答案：ABCD
-    解析：图编译 Debug 信息保存用于分析图编译过程与 Pass 优化问题
-          （A）；算子 Data-Dump 用于定位 NaN、Inf 等精度异常问题（B）；
-          多流死锁检测用于发现多流并发通信算子核资源冲突（C）；Plog
-          日志用于底层运行时与设备侧日志排查（D），四个选项的对应
-          关系均正确。
+6. （多选题）关于 Kernel 直调工程的说法，正确的有哪些？
+   答案：ABC
+   解析：该工程包含 op_kernel、op_host、op_extension 与 scripts 等目录（A）；
+         模板中待修改位置均以 [MODIFY] 标记，需替换算子名、Tiling 结构体与
+         计算逻辑（B）；run.sh 将编译、造数、直调运行与精度比对串联，执行
+         bash run.sh 即可完成编译并直调运行 Kernel（C）。D 错误：工程同时
+         提供 op_extension 与 register.cpp，可通过 torch.ops.load_library
+         加载 lib<op>_ops.so 在 PyTorch 中调用，并非只能在本地直调。
+
+7. （多选题）关于算子精度自验证流程，说法正确的有哪些？
+   答案：ABC
+   解析：gen_data.py 负责生成输入数据与 golden 结果（A）；verify_result.py
+         将直调输出与 golden 逐元素比对（B）；通过 torch.ops.load_library
+         加载 lib<op>_ops.so 后即可在 PyTorch 中调用该算子（C）。D 错误：
+         直调验证通过后接入 AclGraph 无需修改算子 Kernel 实现。
+
+8. （编程题）参考实践一，实现 Softmax（或 Matmul）算子的 Kernel 直调工程，完成编译、直调与精度自验证；再参考实践二，将其接入 AclGraph，并完成数值正确性验证。
+   解析：直调工程的实现与精度自验证是整个接入链路的基础，可按以下步骤完成：
+         （1）编写直调工程：参考 Kernel 直调工程模板，按场景选择骨架——
+         Softmax 属 Vector 场景，以 references/add_custom/ 为基座；Matmul
+         属矩阵乘场景，以 references/matmul_blaze_template/ 为基座。工程目
+         录确定后，将 add_custom 统一替换为算子名（如 softmax_custom），按
+         [MODIFY] 标记改写 Kernel 计算逻辑、Tiling 结构体与输入输出数量，
+         并同步修改 CMakeLists.txt 的目标名、run.sh 的 OP_NAME 以及
+         scripts/test_torch.py 的 SO_NAME 与 OP_NAME。
+         （2）精度自验证：在工程根目录执行 bash run.sh，脚本依次完成编译、
+         生成输入与 golden、直调运行与精度比对；也可进入 build 目录分步执
+         行 cmake .. && make -j4、python3 ../scripts/gen_data.py、./<op>、
+         python3 ../scripts/verify_result.py output/output.bin
+         output/golden.bin。上述步骤通过后，该算子实现即可作为后续接入的基
+         础。
+         （3）AclGraph 接入：参照实践二，将算子下发动作放入
+         aclmdlRICaptureBegin 与 aclmdlRICaptureEnd 之间完成捕获，通过
+         aclmdlRIExecuteAsync 多次执行，最后调用 aclmdlRIDestroy 释放；算
+         子实现本身无需修改，只需保证捕获与重放期间 Device 内存地址不变、
+         资源在 RI 销毁前不被释放。
+
+9. （简答题）结合本章两个实践，说明算子直调工程与 AclGraph 两种方式在「是否需要改造算子」「适用场景」「性能收益来源」上的差异。
+   参考答案：
+   - 是否需要改造算子：算子直调工程需按 [MODIFY] 标记替换算子名、Tiling 与
+     计算逻辑，并补齐 op_extension 与 register.cpp 等接入文件，改造量集中
+     在算子实现本身；AclGraph 无需修改算子实现，仅改变任务下发方式。
+   - 适用场景：算子直调工程适合算子开发与精度自验证阶段，不依赖框架即可快
+     速验证 Kernel 正确性；AclGraph 适合重复执行的固定任务序列，用于消减
+     Host 侧调度开销。
+   - 性能收益来源：算子直调工程不带来运行期图优化收益，其价值在于得到可运
+     行、精度正确的算子实现，为后续接入提供基础；AclGraph 的收益来自「流任
+     务捕获 + 模型化执行」，即捕获一次后反复回放任务序列，省去重复的 Host
+     侧逐任务下发。
