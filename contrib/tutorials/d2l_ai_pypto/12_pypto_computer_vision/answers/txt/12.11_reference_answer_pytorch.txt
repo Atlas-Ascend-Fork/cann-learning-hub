@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -44,7 +44,7 @@ DATA_HUB['voc2012'] = (DATA_URL + 'VOCtrainval_11-May-2012.tar',
 
 相较于使用bilinear_kernel初始化，Xavier随机初始化的结果会差一些：双线性插值初始化给转置卷积一个“双线性上采样”的先验，训练起点好、收敛快，精度更高；而Xavier随机初始化需要从零学习上采样行为，训练更慢且最终精度较低。
 
-注：当前 CANN 版本对 kernel_size=64、stride=32 的转置卷积存在 tiling 缺陷（aclnnConvolution 报错），本节将单个 32 倍上采样转置卷积分解为 5 个 k=4, s=2, p=1 的转置卷积叠加（2^5 = 32 倍上采样，数学上等价），每个小核用 bilinear_kernel(num_classes, num_classes, 4) 初始化。
+注：当前 CANN 版本原生转置卷积（aclnn）在 kernel_size=64、stride=32 下的权重反传存在缺陷；PyPTO 版 PyPTOConvTranspose2d 通过 unfold+matmul 规避了该缺陷，故主 notebook 直接使用单层 k=64, s=32。本参考实现为便于对拍走原生 nn.ConvTranspose2d，将单个 32 倍上采样分解为 5 个 k=4, s=2, p=1 的转置卷积叠加（2^5 = 32，数学上等价），每个小核用 bilinear_kernel(num_classes, num_classes, 4) 初始化。
 
 » 以下使用 torch 编程进行验证（分别用两种初始化训练5个迭代周期）：
 
@@ -58,7 +58,7 @@ def add_transpose_upsample(net, num_classes):
     net.add_module('transpose_conv', blk)
     return blk
 
-pretrained_net = torchvision.models.resnet18(pretrained=True)
+pretrained_net = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1)
 net = nn.Sequential(*list(pretrained_net.children())[:-2])
 num_classes = 21
 net.add_module('final_conv', nn.Conv2d(512, num_classes, kernel_size=1))
@@ -81,7 +81,7 @@ def bilinear_kernel(in_channels, out_channels, kernel_size):
 def loss(inputs, targets):
     return F.cross_entropy(inputs, targets, reduction='none').mean(1).mean(1)
 
-# VOC2012 语义分割数据集读取（与主 notebook 12.9 节一致，D2LFunction 未内置 VOCSegDataset）
+# VOC2012 语义分割数据集读取（与主 notebook 12.9 节一致；此处为自包含实现）
 def voc_colormap2label():
     """构建从RGB到VOC类别索引的映射"""
     colormap2label = torch.zeros(256 ** 3, dtype=torch.long)
@@ -152,7 +152,7 @@ train_iter, test_iter = load_data_voc(batch_size, crop_size)
 print('训练集批数:', len(train_iter), '测试集批数:', len(test_iter))
 
 # Xavier 随机初始化转置卷积层并训练
-net2 = nn.Sequential(*list(torchvision.models.resnet18(pretrained=True).children())[:-2])
+net2 = nn.Sequential(*list(torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1).children())[:-2])
 net2.add_module('final_conv', nn.Conv2d(512, num_classes, kernel_size=1))
 add_transpose_upsample(net2, num_classes)
 for m in net2.transpose_conv:
@@ -163,7 +163,7 @@ trainer = torch.optim.SGD(net2.parameters(), lr=lr, weight_decay=wd)
 train_ch13(net2, train_iter, test_iter, loss, trainer, num_epochs, device)
 
 # 双线性插值初始化转置卷积层并训练（与正文一致）
-net3 = nn.Sequential(*list(torchvision.models.resnet18(pretrained=True).children())[:-2])
+net3 = nn.Sequential(*list(torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1).children())[:-2])
 net3.add_module('final_conv', nn.Conv2d(512, num_classes, kernel_size=1))
 add_transpose_upsample(net3, num_classes)
 for m in net3.transpose_conv:
@@ -192,11 +192,11 @@ train_ch13(net3, train_iter, test_iter, loss, trainer, num_epochs, device)
 
 【解答】
 
-可以调节学习率与权重衰减等超参数。例如去掉权重衰减（wd = 0）并使用更小的学习率，在数据量适中的VOC数据集上往往能进一步提升精度；但过大的学习率会导致震荡，需要结合验证集精度调整。
+可以调节学习率与权重衰减等超参数。例如去掉权重衰减（wd = 0）并使用更小的学习率，在数据量适中的 VOC 数据集上精度可能与基线相当或略有变化；但过大的学习率会导致震荡，需要结合验证集精度调整。本实验去掉权重衰减后 test acc 0.848，与使用权重衰减的基线 0.849 基本持平（短周期下差异在随机波动范围内）。
 
 » 以下使用 torch 编程进行验证（不采用权重衰减，训练5个迭代周期）：
 
-net4 = nn.Sequential(*list(torchvision.models.resnet18(pretrained=True).children())[:-2])
+net4 = nn.Sequential(*list(torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1).children())[:-2])
 net4.add_module('final_conv', nn.Conv2d(512, num_classes, kernel_size=1))
 add_transpose_upsample(net4, num_classes)
 for m in net4.transpose_conv:
@@ -293,7 +293,7 @@ input_data = torch.randn(1, 3, 256, 256)
 output = model(input_data)
 print('带跳跃连接的FCN输出形状:', output.shape)
 
-与 12.11节 (./12.11_fcn.ipynb) 正文只使用最后一层输出不同，跳跃连接把浅层细节（边缘、纹理）逐级融合进深层语义输出，能显著改善分割边界的精细度。
+与 12.11节 (../12.11_fcn.ipynb) 正文只使用最后一层输出不同，跳跃连接把浅层细节（边缘、纹理）逐级融合进深层语义输出，能显著改善分割边界的精细度。
 
 ──────────────────────────────────────────────
 【参考答案来源】 datawhalechina.github.io 的 d2l-ai-solutions-manual（参考答案与 PyTorch 代码实现来源）：https://datawhalechina.github.io/d2l-ai-solutions-manual/#/

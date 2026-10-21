@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -39,7 +39,7 @@ from src.PyPTOLinearFuseModule import PyPTOLinear
 ──────────────────────────────────────────────
 【题目】
 
-在不使用图像增广的情况下训练模型：train_with_data_aug(no_aug, no_aug)。比较使用和不使用图像增广的训练结果和测试精度。这个对比实验能支持图像增广可以减轻过拟合的论点吗？为什么？
+在不使用图像增广的情况下训练模型：先定义 no_aug = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])，再调用 train_with_data_aug(no_aug, no_aug, net)。比较使用和不使用图像增广的训练结果和测试精度。这个对比实验能支持图像增广可以减轻过拟合的论点吗？为什么？
 
 【解答】
 
@@ -70,7 +70,7 @@ if os.path.exists(os.path.join(_base, 'data_batch_1')) and \
     cifar_mod.CIFAR10.meta = {'filename': 'batches.meta', 'key': 'label_names',
                               'md5': _local_md5(f'{_base}/batches.meta')}
 
-all_images = torchvision.datasets.CIFAR10(train=True, root="../data",
+all_images = torchvision.datasets.CIFAR10(train=True, root="../../data",
                                           download=True)
 print(f'CIFAR-10 训练集大小: {len(all_images)}')
 
@@ -82,7 +82,7 @@ test_augs = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor()])
 
 def load_cifar10(is_train, augs, batch_size):
-    dataset = torchvision.datasets.CIFAR10(root="../data", train=is_train,
+    dataset = torchvision.datasets.CIFAR10(root="../../data", train=is_train,
                                            transform=augs, download=True)
     return torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                        shuffle=is_train, num_workers=0)
@@ -116,7 +116,7 @@ train_with_data_aug(train_augs, test_augs, net)
 
 
 
-PyPTO 版（batch=16，10 周期）实测：无增广 test acc 0.584、水平翻转 0.607，与 torch 版（0.566 / 0.605）方向一致——增广后的测试精度更高，支持"图像增广可以减轻过拟合"的论点；PyPTO 算子（PyPTOConv2d / PyPTOLinear）可端到端参与训练。
+PyPTO 版（batch=16，10 周期）实测：无增广 test acc 0.578、水平翻转 0.597，与 torch 版（0.584 / 0.594）方向一致——增广后的测试精度更高，支持"图像增广可以减轻过拟合"的论点；PyPTO 算子（PyPTOConv2d / PyPTOLinear）可端到端参与训练。
 
 
 
@@ -132,7 +132,7 @@ PyPTO 版（batch=16，10 周期）实测：无增广 test acc 0.584、水平翻
 
 【解答】
 
-理论上，组合多种增广（随机旋转、翻转、颜色抖动等）能让模型学到更鲁棒、更泛化的特征，从而提升测试精度。但增广本质是一种正则化：更强的增广需要更长的训练周期才能消化。本实验在 10 个迭代周期内，组合多种增广（RandomRotation + RandomHorizontalFlip + ColorJitter）的测试精度（torch 0.535 / PyPTO 0.554）反而低于仅水平翻转（torch 0.605 / PyPTO 0.607）与无增广（torch 0.566 / PyPTO 0.584）——强增广拖慢了收敛。读者可增大迭代周期或学习率观察其收益。
+理论上，组合多种增广（随机旋转、翻转、颜色抖动等）能让模型学到更鲁棒、更泛化的特征，从而提升测试精度。但增广本质是一种正则化：更强的增广需要更长的训练周期才能消化。本实验在 10 个迭代周期内，组合多种增广（RandomRotation + RandomHorizontalFlip + ColorJitter）的测试精度（torch 0.531 / PyPTO 0.557）反而低于仅水平翻转（torch 0.594 / PyPTO 0.597）与无增广（torch 0.584 / PyPTO 0.578）——强增广拖慢了收敛。读者可增大迭代周期或学习率观察其收益。
 
 » 以下使用 torch 编程进行验证（组合多种增广，训练10个迭代周期）：
 

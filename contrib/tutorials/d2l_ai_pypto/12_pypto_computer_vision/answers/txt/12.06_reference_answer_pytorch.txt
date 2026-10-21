@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -45,9 +45,9 @@ device = f"npu:{device_id}"
 
 import pandas as pd
 
-# 香蕉检测数据集读取（与主 notebook 12.6 节一致，D2LFunction 未内置）
+# 香蕉检测数据集读取（与主 notebook 12.6 节一致；此处为自包含实现）
 DATA_HUB['banana-detection'] = (DATA_URL + 'banana-detection.zip',
-                                '5de26c58fce8bcd781d198e0d4a8d2236d5d32ee')
+                                '5de26c8fce5ccdea9f91267273464dc968d20d72')
 
 def read_data_bananas(is_train=True):
     data_dir = download_extract('banana-detection')

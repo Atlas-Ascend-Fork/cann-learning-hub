@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -35,13 +35,13 @@ device = f"npu:{device_id}"
 ──────────────────────────────────────────────
 【题目】
 
-在 12.10.3节 (./12.10_transposed_conv.ipynb)中，卷积输入X和转置的卷积输出Z具有相同的形状。他们的数值也相同吗？为什么？
+在 12.10.3节 (../12.10_transposed_conv.ipynb)中，卷积输入X和转置的卷积输出Z具有相同的形状。他们的数值也相同吗？为什么？
 
 【解答】
 
 数值通常不同。
 
-1. 形状相同：例中3×3的卷积输出Y再经过转置卷积（步幅1、无填充）得到3×3的Z，恰好与原始输入X同形状。这是由转置卷积是普通卷积的“逆操作”这一性质决定的，输出形状公式为n_h'=(n_h-k_h+2p_h)/s_h+1，这里n_h = 2，k_h = 2，p_h = 0，s_h = 1，故n_h'=3。
+1. 形状相同：例中3×3的卷积输出Y再经过转置卷积（步幅1、无填充）得到3×3的Z，恰好与原始输入X同形状。这是由转置卷积是普通卷积的“逆操作”这一性质决定的，输出形状公式为n_h'=(n_h-1)s_h-2p_h+k_h，这里n_h = 2，k_h = 2，p_h = 0，s_h = 1，故n_h'=3。
 2. 数值不同：Z是Y经过转置卷积核的“广播”得到的，其每个位置都是Y中多个元素乘以卷积核权重再累加的结果，与原始输入X没有一一对应关系，因此数值一般不同。
 
 » 以下使用 torch 编程进行验证：
@@ -109,6 +109,37 @@ print('W^T @ vec(Y) 与转置卷积一致:', torch.allclose(Z_matmul, Z))
 3. 核尺寸增大时复杂度急剧上升：权重矩阵规模随核尺寸和输入尺寸乘积增长，大尺寸卷积核场景下不适用。
 
 实践中更高效的做法是 im2col + 稠密矩阵乘法（如本教程 PyPTOConv2DModule.py 的做法）：先用 torch.as_strided 零拷贝地取出每个卷积窗口，拼成 (M, K) 的 im2col 矩阵，再调用 pypto.matmul（Cube 单元，FP32）一次完成所有窗口的卷积。该路线把卷积变成了稠密GEMM，能充分发挥昇腾Cube算力；权重矩阵K（而非W）只有 C_in×k_h×k_w 个元素，稀疏性和权值共享问题自然消解。
+
+
+──────────────────────────────────────────────
+【练习 12.10.3】
+──────────────────────────────────────────────
+【题目】
+
+尝试修改trans_conv2d_kernel的调用参数，观察不同stride和padding下输出形状的变化，并验证其是否满足(n_h-1)s_h-2p_h+k_h形式的转置卷积输出形状公式。
+
+【解答】
+
+转置卷积的输出形状由输入尺寸n、卷积核k、步幅s和填充p共同决定：n'=(n-1)s-2p+k。下面遍历若干(s,p)组合，用与正文 trans_conv2d_kernel 等价的 F.conv_transpose2d 验证该公式（shape 验证在 CPU 上完成）：
+
+import torch.nn.functional as F
+
+def trans_conv_out(n, k, s, p):
+    return (n - 1) * s - 2 * p + k
+
+for n, k, s, p in [(5, 3, 1, 0), (5, 3, 2, 1), (5, 4, 2, 1), (6, 2, 3, 2)]:
+    X = torch.zeros(1, 1, n, n)
+    W = torch.ones(1, 1, k, k)
+    Y = F.conv_transpose2d(X, W, stride=s, padding=p)
+    out = trans_conv_out(n, k, s, p)
+    print(f'n={n}, k={k}, s={s}, p={p} -> {tuple(Y.shape[-2:])}, 公式={out}, 一致={Y.shape[-1] == out}')
+
+n=5, k=3, s=1, p=0 -> (7, 7), 公式=7, 一致=True
+n=5, k=3, s=2, p=1 -> (9, 9), 公式=9, 一致=True
+n=5, k=4, s=2, p=1 -> (10, 10), 公式=10, 一致=True
+n=6, k=2, s=3, p=2 -> (13, 13), 公式=13, 一致=True
+
+可以看到，所有组合下 F.conv_transpose2d 的输出尺寸均与公式 n'=(n-1)s-2p+k 一致：增大步幅s会放大输出尺寸，增大填充p会缩小输出尺寸。修改正文 trans_conv2d_kernel 的 stride/padding 参数时，输出形状同样遵循该公式。
 
 ──────────────────────────────────────────────
 【参考答案来源】 datawhalechina.github.io 的 d2l-ai-solutions-manual（参考答案与 PyTorch 代码实现来源）：https://datawhalechina.github.io/d2l-ai-solutions-manual/#/

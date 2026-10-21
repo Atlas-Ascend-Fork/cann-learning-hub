@@ -1,13 +1,10 @@
 import os
-import re
 import shutil
 import time
-import json
 import hashlib
 import urllib.request
 import tarfile
 import zipfile
-from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -94,10 +91,10 @@ DATA_HUB = {
 DATA_URL = 'http://d2l-data.s3-accelerate.amazonaws.com/'
 
 def use_svg_display():
-    """使用svg格式在Jupyter中显示绘图
+    """使用png格式在Jupyter中显示绘图
 
     Defined in :numref:`sec_calculus`"""
-    backend_inline.set_matplotlib_formats('svg')
+    backend_inline.set_matplotlib_formats('png')
 
 def set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend):
     """设置matplotlib的轴
@@ -365,10 +362,17 @@ def train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs,
     print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec on '
           f'{str(device)}')
 
-def download(url, folder='../data', sha1_hash=None):
+# 课程共享数据目录 (<d2l_ai_pypto>/data)，与运行目录无关，确保正文/答案复用同一份数据
+_DATA_DIR = os.path.normpath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data'))
+
+
+def download(url, folder=None, sha1_hash=None):
     """下载一个文件，如果文件已存在且校验通过则直接返回本地路径
 
     Defined in :numref:`sec_kaggle_house`"""
+    if folder is None:
+        folder = _DATA_DIR
     if url in DATA_HUB:
         url, hub_sha1 = DATA_HUB[url]
         if sha1_hash is None:
@@ -832,7 +836,9 @@ def _setup_dataloader_env():
     except OSError:
         return 0
     if shm_bytes < 256 * 1024 * 1024:
+        # /dev/shm 过小时多进程 worker 会 Bus error, 直接退回单进程加载
         torch.multiprocessing.set_sharing_strategy('file_system')
+        return 0
     return min(8, (os.cpu_count() or 4) // 4)
 
 _NUM_WORKERS = _setup_dataloader_env()
@@ -843,7 +849,7 @@ def get_dataloader_workers():
     Defined in :numref:`sec_fashion_mnist`
 
     /dev/shm 不足 256M 时（如部分容器默认 64M），自动切换
-    file_system 共享策略以避免多进程 worker 触发 bus error。"""
+    file_system 共享策略并返回 0（单进程加载），避免多进程 worker 触发 bus error。"""
     return _NUM_WORKERS
 
 def resnet18(num_classes, in_channels=1):

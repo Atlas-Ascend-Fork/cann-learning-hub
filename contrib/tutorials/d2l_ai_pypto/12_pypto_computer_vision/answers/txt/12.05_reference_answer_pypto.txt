@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -52,7 +52,7 @@ device = f"npu:{device_id}"
 ──────────────────────────────────────────────
 【题目】
 
-在 12.5.1节 (./12.05_multiscale_object_detection.ipynb)中的实验里的第一个尺度（fmap_w=4, fmap_h=4）下，生成可能重叠的均匀分布的锚框。
+在 12.5.1节 (../12.05_multiscale_object_detection.ipynb)中的实验里的第一个尺度（fmap_w=4, fmap_h=4）下，生成可能重叠的均匀分布的锚框。
 
 【解答】
 
@@ -62,13 +62,13 @@ device = f"npu:{device_id}"
 
 
 
-» 使用 PyPTO 编程进行验证（src/PyPTOAnchor.py 的 multibox_prior kernel）：
+» 使用 src/PyPTOAnchor.py 进行验证（multibox_prior 为 host 端 torch 等价实现，支持任意 sizes/ratios）：
 
 
 
 from src.PyPTOAnchor import multibox_prior as mb_prior_pypto
 
-# PyPTO kernel 的类型注解为 (1, 3, H, W)，锚框只依赖 H/W，前两维不影响输出
+# multibox_prior 只依赖 H/W，前两维不影响输出
 fmap = torch.zeros((1, 3, 4, 4), device=device)
 anchors_pt = mb_prior_pypto(fmap, sizes=[0.25], ratios=[1, 2, 0.5])
 bbox_scale = torch.tensor((w, h, w, h))

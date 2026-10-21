@@ -4,15 +4,19 @@
 从 06.02_conv_layer、06.03_padding_and_strides、06.04_channels 三个 notebook 中提取。
 
 本模块提供:
-  - _pad2d / _pad4d: 零填充原语 (从 PyPTOConv2DModule.py 提取)
-  - corr2d_kernel / corr2d_forward_kernel / corr2d_backward_k_kernel / corr2d_backward_x_kernel:
+  - _pad2d / _pad4d: 零填充辅助函数 (普通 Python 函数)
+  - corr2d_forward_kernel / corr2d_backward_k_kernel / corr2d_backward_x_kernel:
       06.02 中的基础互相关 kernel (2D, stride=1, padding=0)
   - PyPTOCorr2DFunction / corr2d / PyPTOConv2d (06.02 原始版):
-      基于 corr2d_kernel 的 autograd Function 和 nn.Module
-  - _corr2d_cross / _pad2d (06.03 版) / corr2d_kernel (06.03 版) / conv2d:
+      基于 PyPTO 互相关 kernel 的 autograd Function 和 nn.Module
+  - corr2d_kernel_strided / conv2d (06.03 版):
       06.03 中支持 stride/padding 的互相关
   - corr2d_multi_in / corr2d_multi_in_out / corr2d_multi_in_out_1x1:
       06.04 中的多通道卷积
+
+说明：PyPTO 新 IR 路径不再支持在 @pypto.frontend.jit 内核中调用
+@pypto.frontend.function 装饰的嵌套函数（NestedFunctionMarker）；本模块的
+kernel 均直接内联互相关循环，padding 画布由宿主侧分配后传入。
 """
 
 import pypto
@@ -23,7 +27,7 @@ from torch import nn
 # ── 从 PyPTOConv2DModule.py 提取的 2D/4D 零填充原语 ──
 
 
-@pypto.frontend.function
+# 普通 Python 辅助函数：新 IR 路径会直接展开，不再使用 NestedFunctionMarker。
 def _pad2d(
     X:   pypto.Tensor([], pypto.DT_FP32),
     out: pypto.Tensor([], pypto.DT_FP32),
@@ -58,7 +62,6 @@ def _pad2d(
     out.move(cur)
 
 
-@pypto.frontend.function
 def _pad4d(
     X:   pypto.Tensor([], pypto.DT_FP32),
     out: pypto.Tensor([], pypto.DT_FP32),
@@ -98,37 +101,25 @@ def _pad4d(
 # ── 从 06.02_conv_layer.ipynb 提取的基础互相关 kernel (2D, stride=1, padding=0) ──
 
 
-@pypto.frontend.function
-def corr2d_kernel(
-    input:  pypto.Tensor([], pypto.DT_FP32),
-    kernel: pypto.Tensor([], pypto.DT_FP32),
-    output: pypto.Tensor([], pypto.DT_FP32),
-):
-    """基础二维互相关 kernel (stride=1, padding=0)。
-
-    使用 pypto.loop + pypto.view + pypto.mul + pypto.sum + pypto.assemble 实现。
-    """
-    kH, kW = kernel.shape[0], kernel.shape[1]
-    H_out, W_out = input.shape[0] - kH + 1, input.shape[1] - kW + 1
-    pypto.set_vec_tile_shapes(8, 8)
-    for i_idx in pypto.loop(H_out, name="LOOP_L0_i", idx_name="i_idx"):
-        for j_idx in pypto.loop(W_out, name="LOOP_L1_j", idx_name="j_idx"):
-            pypto.set_vec_tile_shapes(8, 8)
-            window = input[i_idx:i_idx + kH, j_idx:j_idx + kW]
-            mul_result = pypto.mul(window, kernel)
-            sum_h = pypto.sum(mul_result, dim=0, keepdim=False)
-            scalar = pypto.sum(sum_h, dim=0, keepdim=False)
-            result_1x1 = pypto.reshape(scalar, [1, 1])
-            pypto.assemble(result_1x1, [i_idx, j_idx], output)
-
-
 @pypto.frontend.jit()
 def corr2d_forward_kernel(
     X: pypto.Tensor([], pypto.DT_FP32),
     K: pypto.Tensor([], pypto.DT_FP32),
     Y: pypto.Tensor([], pypto.DT_FP32),
 ):
-    corr2d_kernel(X, K, Y)
+    """基础二维互相关前向 kernel (stride=1, padding=0)。"""
+    kH, kW = K.shape[0], K.shape[1]
+    H_out, W_out = X.shape[0] - kH + 1, X.shape[1] - kW + 1
+    pypto.set_vec_tile_shapes(8, 8)
+    for i_idx in pypto.loop(H_out, name="LOOP_L0_i", idx_name="i_idx"):
+        for j_idx in pypto.loop(W_out, name="LOOP_L1_j", idx_name="j_idx"):
+            pypto.set_vec_tile_shapes(8, 8)
+            window = X[i_idx:i_idx + kH, j_idx:j_idx + kW]
+            mul_result = pypto.mul(window, K)
+            sum_h = pypto.sum(mul_result, dim=0, keepdim=False)
+            scalar = pypto.sum(sum_h, dim=0, keepdim=False)
+            result_1x1 = pypto.reshape(scalar, [1, 1])
+            pypto.assemble(result_1x1, [i_idx, j_idx], Y)
 
 
 @pypto.frontend.jit()
@@ -137,18 +128,29 @@ def corr2d_backward_k_kernel(
     X:      pypto.Tensor([], pypto.DT_FP32),
     grad_K: pypto.Tensor([], pypto.DT_FP32),
 ):
-    corr2d_kernel(X, grad_Y, grad_K)
+    """权重梯度：把 grad_Y 当作卷积核，对 X 做互相关。"""
+    kH, kW = grad_Y.shape[0], grad_Y.shape[1]
+    H_out, W_out = X.shape[0] - kH + 1, X.shape[1] - kW + 1
+    pypto.set_vec_tile_shapes(8, 8)
+    for i_idx in pypto.loop(H_out, name="LOOP_L0_i", idx_name="i_idx"):
+        for j_idx in pypto.loop(W_out, name="LOOP_L1_j", idx_name="j_idx"):
+            pypto.set_vec_tile_shapes(8, 8)
+            window = X[i_idx:i_idx + kH, j_idx:j_idx + kW]
+            mul_result = pypto.mul(window, grad_Y)
+            sum_h = pypto.sum(mul_result, dim=0, keepdim=False)
+            scalar = pypto.sum(sum_h, dim=0, keepdim=False)
+            result_1x1 = pypto.reshape(scalar, [1, 1])
+            pypto.assemble(result_1x1, [i_idx, j_idx], grad_K)
 
 
 @pypto.frontend.jit()
 def corr2d_backward_x_kernel(
-    grad_Y: pypto.Tensor([], pypto.DT_FP32),
-    K:      pypto.Tensor([], pypto.DT_FP32),
-    grad_X: pypto.Tensor([], pypto.DT_FP32),
+    grad_Y_pad: pypto.Tensor([], pypto.DT_FP32),
+    K:          pypto.Tensor([], pypto.DT_FP32),
+    grad_X:     pypto.Tensor([], pypto.DT_FP32),
 ):
-    """backward x: 对 grad_Y 做 padding 后与 K_rot180 做互相关。"""
+    """输入梯度：对宿主侧已 padding 的 grad_Y 与 K_rot180 做互相关。"""
     kH, kW = K.shape[0], K.shape[1]
-    H_in, W_in = grad_X.shape[0], grad_X.shape[1]
     pypto.set_vec_tile_shapes(8, 8)
 
     idx_h = pypto.arange(kH - 1, -1, -1)
@@ -157,27 +159,21 @@ def corr2d_backward_x_kernel(
     idx_w_2d = pypto.expand_clone(pypto.reshape(idx_w, [1, kW]), [kH, kW])
     K_rot = pypto.gather(pypto.gather(K, 0, idx_h_2d), 1, idx_w_2d)
 
-    if kW == 1 and kH == 1:
-        padded = grad_Y
-    else:
-        if kW > 1:
-            H_out = grad_Y.shape[0]
-            zero_w = pypto.zeros(H_out, kW - 1, dtype=pypto.DT_FP32)
-            padded_w = pypto.concat([zero_w, grad_Y, zero_w], dim=1)
-        else:
-            padded_w = grad_Y
-        if kH > 1:
-            W_mid = padded_w.shape[1]
-            zero_h = pypto.zeros(kH - 1, W_mid, dtype=pypto.DT_FP32)
-            padded = pypto.concat([zero_h, padded_w, zero_h], dim=0)
-        else:
-            padded = padded_w
-
-    corr2d_kernel(padded, K_rot, grad_X)
+    H_out = grad_Y_pad.shape[0] - kH + 1
+    W_out = grad_Y_pad.shape[1] - kW + 1
+    for i_idx in pypto.loop(H_out, name="LOOP_L0_i", idx_name="i_idx"):
+        for j_idx in pypto.loop(W_out, name="LOOP_L1_j", idx_name="j_idx"):
+            pypto.set_vec_tile_shapes(8, 8)
+            window = grad_Y_pad[i_idx:i_idx + kH, j_idx:j_idx + kW]
+            mul_result = pypto.mul(window, K_rot)
+            sum_h = pypto.sum(mul_result, dim=0, keepdim=False)
+            scalar = pypto.sum(sum_h, dim=0, keepdim=False)
+            result_1x1 = pypto.reshape(scalar, [1, 1])
+            pypto.assemble(result_1x1, [i_idx, j_idx], grad_X)
 
 
 class PyPTOCorr2DFunction(torch.autograd.Function):
-    """基于 corr2d_kernel 的 autograd Function (4D, 单通道)。"""
+    """基于 PyPTO 互相关 kernel 的 autograd Function (4D, 单通道)。"""
 
     @staticmethod
     def forward(ctx, X, K):
@@ -213,8 +209,12 @@ class PyPTOCorr2DFunction(torch.autograd.Function):
         grad_K_acc = torch.zeros_like(K_2d)
 
         for batch_idx in range(n):
-            corr2d_backward_x_kernel(
+            gY_pad = torch.nn.functional.pad(
                 grad_output_c[batch_idx, 0],
+                (kW - 1, kW - 1, kH - 1, kH - 1),
+            )
+            corr2d_backward_x_kernel(
+                gY_pad,
                 K_2d,
                 grad_X[batch_idx, 0],
             )
@@ -241,7 +241,7 @@ def corr2d(X, K):
 
 
 class PyPTOConv2d(nn.Module):
-    """原始二维卷积层 (基于 corr2d_kernel, 单通道, stride=1, padding=0)。"""
+    """原始二维卷积层 (基于 PyPTO 互相关 kernel, 单通道, stride=1, padding=0)。"""
 
     def __init__(
         self,
@@ -279,55 +279,36 @@ class PyPTOConv2d(nn.Module):
 # ── 从 06.03_padding_and_strides.ipynb 提取的支持 stride/padding 的互相关 ──
 
 
-@pypto.frontend.function
-def _corr2d_cross(
+@pypto.frontend.jit()
+def corr2d_kernel_strided(
     input:  pypto.Tensor([], pypto.DT_FP32),
     kernel: pypto.Tensor([], pypto.DT_FP32),
+    padded: pypto.Tensor([], pypto.DT_FP32),
     output: pypto.Tensor([], pypto.DT_FP32),
     stride_h: int, stride_w: int,
+    pad_top: int, pad_left: int,
 ):
-    """带 stride 的互相关 kernel。"""
-    kH, kW = kernel.shape[0], kernel.shape[1]
-    H_out = (input.shape[0] - kH) // stride_h + 1
-    W_out = (input.shape[1] - kW) // stride_w + 1
+    """支持 stride 和 padding 的互相关 kernel (06.03 版)。
 
+    padded 为宿主持有的零画布；kernel 只负责把 input 写入画布内部，
+    避免在 kernel 内创建局部临时张量。
+    """
     pypto.set_vec_tile_shapes(16, 16)
+    pypto.assemble(input, [pad_top, pad_left], padded)
+
+    kH, kW = kernel.shape[0], kernel.shape[1]
+    H_out = (padded.shape[0] - kH) // stride_h + 1
+    W_out = (padded.shape[1] - kW) // stride_w + 1
     for i_idx in pypto.loop(H_out, name="LOOP_L0_i", idx_name="i_idx"):
         for j_idx in pypto.loop(W_out, name="LOOP_L1_j", idx_name="j_idx"):
             pypto.set_vec_tile_shapes(16, 16)
             i_start = i_idx * stride_h
             j_start = j_idx * stride_w
-            window = pypto.view(input, [kH, kW], [i_start, j_start])
+            window = pypto.view(padded, [kH, kW], [i_start, j_start])
             mul_result = pypto.mul(window, kernel)
             sum_h = pypto.sum(mul_result, dim=0, keepdim=True)
             result_1x1 = pypto.sum(sum_h, dim=1, keepdim=True)
             pypto.assemble(result_1x1, [i_idx, j_idx], output)
-
-
-@pypto.frontend.jit()
-def corr2d_kernel_strided(
-    input:  pypto.Tensor([], pypto.DT_FP32),
-    kernel: pypto.Tensor([], pypto.DT_FP32),
-    output: pypto.Tensor([], pypto.DT_FP32),
-    stride_h: int, stride_w: int,
-    pad_top: int, pad_bottom: int, pad_left: int, pad_right: int,
-):
-    """支持 stride 和 padding 的互相关 kernel (06.03 版)。"""
-    H, W = input.shape[0], input.shape[1]
-    pypto.set_vec_tile_shapes(16, 16)
-    cur = input.clone()
-    cur_h, cur_w = H, W
-
-    if pad_top > 0 or pad_bottom > 0 or pad_left > 0 or pad_right > 0:
-        padded_h = cur_h + pad_top + pad_bottom
-        padded_w = cur_w + pad_left + pad_right
-        padded = pypto.zeros(padded_h, padded_w, dtype=pypto.DT_FP32)
-        _pad2d(cur, padded, pad_top, pad_bottom, pad_left, pad_right)
-        cur = padded
-        cur_h = padded_h
-        cur_w = padded_w
-
-    _corr2d_cross(cur, kernel, output, stride_h, stride_w)
 
 
 def conv2d(X, kernel_size=(3, 3), stride=(1, 1), padding=(0, 0), K=None):
@@ -352,7 +333,9 @@ def conv2d(X, kernel_size=(3, 3), stride=(1, 1), padding=(0, 0), K=None):
         return torch.zeros((0, 0), dtype=X_c.dtype, device=X_c.device)
 
     Y = torch.zeros((H_out, W_out), dtype=X_c.dtype, device=X_c.device)
-    corr2d_kernel_strided(X_c, K_c, Y, s_h, s_w, p_h, p_h, p_w, p_w)
+    # 零画布由宿主持有，避免 kernel 内的局部临时张量在重复调用时被复用
+    padded = torch.zeros((H_padded, W_padded), dtype=X_c.dtype, device=X_c.device)
+    corr2d_kernel_strided(X_c, K_c, padded, Y, s_h, s_w, p_h, p_w)
     return Y
 
 

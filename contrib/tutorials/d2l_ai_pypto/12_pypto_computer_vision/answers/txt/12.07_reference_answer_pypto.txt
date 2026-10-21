@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -49,15 +49,15 @@ device = f"npu:{device_id}"
 
 
 
-接下来用平滑L_1 + 焦点损失重新训练 12.7节 (./12.07_ssd.ipynb) 的 TinySSD（参数 σ=2，α=0.25，γ=2，20个迭代周期）：
+接下来用平滑L_1 + 焦点损失重新训练 12.7节 (../12.07_ssd.ipynb) 的 TinySSD（参数 σ=2，α=0.25，γ=2，20个迭代周期）：
 
 
 
-与正文使用普通L_1 + 交叉熵的基线相比，焦点损失 + 平滑L_1的类别误差与边界框MAE都有所下降，说明改进损失函数可以提升单发多框检测的性能。
+与正文使用普通L_1 + 交叉熵的基线（class err 3.26e-03、bbox mae 3.20e-03）相比，焦点损失 + 平滑L_1的边界框 MAE 下降至 3.10e-03，但类别误差略升至 3.84e-03。可见改进损失函数对边界框回归有所帮助，类别分支在本实验的短周期配置下未获提升；两者均受随机性影响，建议多次运行取平均后再下结论。
 
 
 
-» 使用 PyPTO 编程进行验证（锚框生成 / 标注 / 预测均走 src/PyPTOAnchor.py 的 PyPTO kernel）：
+» 使用 src/PyPTOAnchor.py 进行验证（box_iou 为 PyPTO kernel，multibox_prior/multibox_target/multibox_detection 为 host 端 torch 等价实现）：
 
 
 
@@ -74,8 +74,8 @@ net.eval()
 with torch.no_grad():
     anchors, cls_preds, bbox_preds = net(Xb)
 
-# 对第一个尺度的特征图生成锚框（PyPTO kernel，多尺度锚框中的第0块）
-# PyPTO kernel 类型注解为 (1, 3, H, W)，锚框只依赖 H/W，故用 (1, 3, H0, W0) 占位
+# 对第一个尺度的特征图生成锚框（多尺度锚框中的第0块）
+# multibox_prior 只依赖 H/W，故用 (1, 3, H0, W0) 占位
 blk0_out = net.blk_0(Xb)
 H0, W0 = blk0_out.shape[2], blk0_out.shape[3]
 fmap_dummy = torch.zeros(1, 3, H0, W0, device=device)
@@ -105,7 +105,7 @@ with torch.no_grad():
         bbox_preds[:1].cpu(), anchors[:1].cpu(), nms_threshold=0.5)
 print('与 torch 一致:', torch.allclose(output_pt.cpu(), output_torch, atol=1e-6))
 
-PyPTO 版锚框生成、标注与检测与 torch 版结果一致，说明 12.4节 (./12.04_anchor.ipynb) 的 PyPTO 锚框算子可以直接嵌入 SSD 流水线。
+PyPTO 版锚框生成、标注与检测与 torch 版结果一致，说明 12.4节 (../12.04_anchor.ipynb) 的 PyPTO 锚框算子可以直接嵌入 SSD 流水线。
 
 
 ──────────────────────────────────────────────

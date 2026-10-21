@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -43,7 +43,7 @@ device = f"npu:{device_id}"
 
 YOLO模型将目标检测问题直接视为一个回归问题：它将图像划分为网格，对每个网格预测边界框的坐标和大小（回归坐标与宽高），同时预测每个类别的置信度得分，表示该网格中是否包含该类别的目标。整个检测过程在一次前向传播中完成，无需单独的候选区域生成阶段。
 
-SSD同样属于回归式的单阶段检测器（见 12.7节 (./12.07_ssd.ipynb)），通过预定义的多尺度锚框直接回归偏移量与类别；而Anchor Free系列（如CenterNet）则直接回归目标的中心点、宽高或角点。与本节介绍的两阶段方法（R-CNN系列）相比，回归式方法通常速度更快，但精度上可能稍逊。
+SSD同样属于回归式的单阶段检测器（见 12.7节 (../12.07_ssd.ipynb)），通过预定义的多尺度锚框直接回归偏移量与类别；而Anchor Free系列（如CenterNet）则直接回归目标的中心点、宽高或角点。与本节介绍的两阶段方法（R-CNN系列）相比，回归式方法通常速度更快，但精度上可能稍逊。
 
 
 ──────────────────────────────────────────────
@@ -71,7 +71,7 @@ SSD同样属于回归式的单阶段检测器（见 12.7节 (./12.07_ssd.ipynb)�
 
 总的来说，SSD适用于需要快速处理速度的实时应用场景，而R-CNN系列更适合对准确性要求较高的任务。
 
-以下使用 torch 编程演示两阶段方法中的RoI池化（与 12.8.2节 (./12.08_rcnn.ipynb) 正文一致）：
+以下使用 torch 编程演示两阶段方法中的RoI池化（与 12.8.2节 (../12.08_rcnn.ipynb) 正文一致）：
 
 import torch
 from torch import nn
@@ -82,8 +82,6 @@ X = torch.arange(16.).reshape(1, 1, 4, 4)
 rois = torch.Tensor([[0, 0, 0, 20, 20], [0, 0, 10, 30, 30]])
 # 由于X的高和宽是输入图像高和宽的1/10，提议区域的坐标先按spatial_scale乘以0.1
 torchvision.ops.roi_pool(X, rois, output_size=(2, 2), spatial_scale=0.1)
-
-可见 R-CNN 与回归式检测中"特征提取 + 边界框回归"两个环节均可由 PyPTO 算子完成，与 12.7 节 SSD 的锚框分配/检测算子（PyPTOAnchor）组合后，可覆盖检测模型的主要计算路径。
 
 可见两阶段方法需要显式的候选区域（RoI）提取与池化，而SSD直接由锚框回归得到结果，无需该过程。
 

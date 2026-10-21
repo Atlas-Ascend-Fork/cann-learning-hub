@@ -71,7 +71,7 @@
 
     使用 PyPTO 编程进行验证:
 
-    以下使用 notebook 中实现的 PyPTOConv2d（基于 corr2d_kernel + torch.autograd.Function）进行二维卷积验证。该实现不依赖 pypto.conv 算子，通过 pypto.loop + pypto.view + pypto.assemble 完成互相关运算。
+    以下使用 notebook 中实现的 PyPTOConv2d（基于 PyPTO 互相关 kernel + torch.autograd.Function）进行二维卷积验证。该实现不依赖 pypto.conv 算子，通过 pypto.loop + pypto.view + pypto.assemble 完成互相关运算。
 
     from src.PyPTOConvPrimitive import corr2d, PyPTOConv2d
 

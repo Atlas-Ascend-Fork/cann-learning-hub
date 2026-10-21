@@ -21,9 +21,14 @@ PyPTOAnchor: 12.04_anchor.ipynb 中锚框相关函数的 PyPTO 版本 (通用 sh
   - 调用同一 kernel 传入不同尺寸时无需重编译
   - sizes / ratios 通过 kernel 标量参数传入, 支持任意 (>=1) 个尺寸和宽高比
   - 仅 iou_threshold / nms_threshold / pos_threshold 等 scalar 通过 kernel 参数传入
-"""
-import math
 
+实现说明:
+  - box_iou / box_corner_to_center / box_center_to_corner / offset_boxes /
+    offset_inverse 由 PyPTO kernel 实现;
+  - multibox_prior / multibox_target / nms / multibox_detection 因动态 shape 下
+    codegen 体积过大或 NMS/sort 支持有限, 采用 host 端 torch 等价实现
+    (详见各函数 docstring)。
+"""
 import torch
 import pypto
 
@@ -33,53 +38,6 @@ _run_mode = pypto.RunMode.NPU
 # ---------------------------------------------------------------------------
 # 12.4.1 生成多个锚框: multibox_prior
 # ---------------------------------------------------------------------------
-
-# 支持的最大 boxes_per_pixel (编译期静态形状, 避免 DYNAMIC manip 触发竞态)
-MP_MAX_BPP = 16
-
-
-@pypto.frontend.jit(runtime_options={"run_mode": _run_mode})
-def multibox_prior_kernel(
-    data: pypto.Tensor([pypto.DYNAMIC, pypto.DYNAMIC, pypto.DYNAMIC,
-                         pypto.DYNAMIC], pypto.DT_FP32),
-    output: pypto.Tensor([pypto.DYNAMIC, pypto.DYNAMIC], pypto.DT_FP32),
-    manip: pypto.Tensor([MP_MAX_BPP, 8], pypto.DT_FP32),
-    centers: pypto.Tensor([pypto.DYNAMIC, 8], pypto.DT_FP32),
-    bpp: int,
-    tile_pix: int,
-):
-    """生成以每个像素为中心具有不同形状的锚框 (PyPTO 版本, 通用 shape)
-
-    输出布局为 (H*W, bpp*8), host 端再 reshape 为 (1, H*W*bpp, 4).
-
-    Args:
-        data: 任意 4D 张量 (B, C, H, W), 仅用于获取 H/W (B / C 不影响结果)
-        output: 输出锚框 (H*W, bpp*8) -- 末 4 列填充 0 以满足 32 字节对齐
-        manip: 锚框偏移表 (MP_MAX_BPP, 8) = [dx, dy, dx, dy, 0, 0, 0, 0]
-               (仅前 bpp 行有效, 其余为 0; 静态形状避免 DYNAMIC 竞态)
-        centers: 每像素中心表 (H*W+pad, 8) = [cx, cy, cx, cy, 0, 0, 0, 0]
-        bpp: boxes_per_pixel (compile-time int)
-        tile_pix: 每 tile 像素数 (compile-time int)
-    """
-    n_pixels = data.shape[2] * data.shape[3]   # H*W
-    pix_loop = (n_pixels + tile_pix - 1) // tile_pix
-
-    for p_idx in pypto.loop(0, pix_loop, 1, name="MP_PIX_LOOP", idx_name="p_idx"):
-        p_offset = p_idx * tile_pix
-
-        # 当前 tile 像素的中心 (tile_pix, 8); centers/output 已在 host 端
-        # 多分配 tile_pix 行, 保证最后一个 tile 的读取/写入不越界
-        pypto.set_vec_tile_shapes(tile_pix, 8)
-        grid_tile = pypto.view(centers, [tile_pix, 8], [p_offset, 0])
-
-        # 对每个 bpp 行, 做 add 并 assemble 到 output 的第 j*8 列
-        for j in pypto.loop(bpp, name="MP_BPP_LOOP", idx_name="bj"):
-            pypto.set_vec_tile_shapes(tile_pix, 8)
-            row = pypto.view(manip, [1, 8], [j, 0])
-            out_j = pypto.add(grid_tile, row)  # (tile_pix, 8)
-            out_slice_off = j * 8
-            pypto.assemble(out_j, [p_offset, out_slice_off], output)
-
 
 def multibox_prior(data, sizes, ratios):
     """生成以每个像素为中心具有不同形状的锚框.
@@ -118,10 +76,6 @@ def multibox_prior(data, sizes, ratios):
                 dim=1).repeat_interleave(boxes_per_pixel, dim=0)
     output = out_grid + anchor_manipulations
     return output.unsqueeze(0)
-    # 取前 H*W 行, 重塑为 (H*W, bpp, 8), 取前 4 列得到 (H*W, bpp, 4),
-    # 再 reshape 为 (1, H*W*bpp, 4) 与 torch 接口兼容
-    return (output_padded[:H * W].reshape(H * W, bpp, 8)[:, :, :4]
-            .reshape(1, H * W * bpp, 4))
 
 
 # ---------------------------------------------------------------------------
@@ -440,48 +394,6 @@ def assign_anchor_to_bbox(ground_truth, anchors, iou_threshold=0.5):
 # 12.4.3 使用真实边界框标记锚框: multibox_target
 # ---------------------------------------------------------------------------
 
-@pypto.frontend.jit(runtime_options={"run_mode": _run_mode})
-def multibox_target_kernel(
-    anchors: pypto.Tensor([pypto.DYNAMIC, 8], pypto.DT_FP32),
-    labels: pypto.Tensor([1, pypto.DYNAMIC, 8], pypto.DT_FP32),
-    offset_out: pypto.Tensor([1, pypto.DYNAMIC], pypto.DT_FP32),
-    mask_out: pypto.Tensor([1, pypto.DYNAMIC], pypto.DT_FP32),
-    cls_out: pypto.Tensor([1, pypto.DYNAMIC], pypto.DT_INT32),
-):
-    """使用真实边界框标记锚框 (PyPTO 版本, 通用 shape, batch_size=1)
-
-    labels 的最后一维前 5 列是有效数据 (class_id + box), 后 3 列为对齐填充.
-    """
-    n_a = anchors.shape[0]
-    n_g = labels.shape[1]
-    tile_n_a = 4
-    pypto.set_vec_tile_shapes(tile_n_a, 8)
-
-    for i in pypto.loop(0, n_a, tile_n_a, name="MT_LOOP", idx_name="ai"):
-        a = pypto.view(anchors, [tile_n_a, 8], [i, 0])  # (tile_n_a, 8)
-
-        # IoU with each gt -- 计算本行 jaccard
-        pypto.set_vec_tile_shapes(tile_n_a, 8)
-        # 计算本 tile 的 offset
-        offset_xy_acc = pypto.zeros((tile_n_a, 2), dtype=pypto.DT_FP32)
-        offset_wh_acc = pypto.zeros((tile_n_a, 2), dtype=pypto.DT_FP32)
-        mask_acc = pypto.zeros((tile_n_a, 1), dtype=pypto.DT_FP32)
-        cls_acc = pypto.zeros((tile_n_a, 1), dtype=pypto.DT_INT32)
-
-        # 简化: 直接对每个 anchor 计算 offset (假设 anchor 全部被分配)
-        # 实际需要根据 assign_anchor_to_bbox 的结果选择
-        # 这里走简化路径, 与 torch 实现保持一致 (用 jaccard 阈值筛选)
-        # 由于动态形状复杂度, 我们对每个 anchor 行, 只取 jaccard 最大的 gt
-        # 然后用其构建 offset
-        # (此 kernel 仅处理一个 batch, batch_size=1)
-
-        _ = (n_g,)  # suppress lint, n_g 仅用于 host 端传递
-        # 写出 (tile_n_a, 4) 占位 -- 实际逻辑由 host 完成
-        out_i = pypto.zeros((tile_n_a, 4), dtype=pypto.DT_FP32)
-        pypto.assemble(out_i, [0, i, 0], offset_out)
-        pypto.assemble(out_i, [0, i, 0], mask_out)
-
-
 def multibox_target(anchors, labels):
     """使用真实边界框标记锚框 (host 入口, 支持任意 batch size)
 
@@ -533,50 +445,16 @@ def multibox_target(anchors, labels):
 # 12.4.4 非极大值抑制: nms
 # ---------------------------------------------------------------------------
 
-@pypto.frontend.jit(runtime_options={"run_mode": _run_mode})
-def nms_kernel(
-    boxes: pypto.Tensor([pypto.DYNAMIC, 8], pypto.DT_FP32),
-    scores: pypto.Tensor([pypto.DYNAMIC], pypto.DT_FP32),
-    keep_out: pypto.Tensor([pypto.DYNAMIC], pypto.DT_INT32),
-    arange_fp32: pypto.Tensor([pypto.DYNAMIC], pypto.DT_FP32),
-    arange_mul: float,
-    arange_add: float,
-    iou_threshold: float,
-):
-    """对预测边界框的置信度进行排序(非极大值抑制) (PyPTO 版本, 通用 shape)
-
-    由于动态 shape scores 不能直接参与运算, 在循环内使用 view 获取静态切片.
-    boxes/keep_out/arange_fp32 仍为动态 shape.
-    """
-    n = boxes.shape[0]
-    pypto.set_vec_tile_shapes(8)
-    score_bt = pypto.add(pypto.mul(scores, arange_mul), arange_add)
-    B = pypto.argsort(score_bt, 0, True)  # (n,)
-
-    for k in pypto.loop(n, name="NMS_LOOP", idx_name="k"):
-        # 用 view 取 B[k:k+1] (静态 shape (1,))
-        idx_1 = pypto.view(B, [1], [k])  # (1,) int32
-        # 取出对应的 box (静态 shape (1, 8))
-        cand_box = pypto.view(boxes, [1, 8], [0, 0])  # placeholder, 需要按 idx 取
-        # 由于 idx_1 是动态 SymbolicScalar, 不能用 view (offset 需 concrete)
-        # 改用按行展开逻辑: 当前循环 k 表示排序后的第 k 个 box
-        # boxes_sorted[k] = boxes[B[k]] -- 这需要按 sorted index 取
-        # 退路: 不用 kernel 实现 nms, 在 host 端调用 torch_nms
-        _ = (idx_1, cand_box)
-        raise NotImplementedError(
-            "nms kernel with dynamic n requires host-side implementation")
-
-
 def nms(boxes, scores, iou_threshold):
     """对预测边界框的置信度进行排序 (host 入口, 返回保留的索引)
 
     注: n 通常较小 (anchor 数), 用 host 端 torch 实现以保证 dynamic n 支持;
-    kernel 仍通过 box_iou 提供 IoU 计算 (此处未直接调用).
+    IoU 由 box_iou 提供 (此处未直接调用).
     """
     boxes, scores = boxes.contiguous(), scores.contiguous()
     assert boxes.dim() == 2 and boxes.shape[-1] == 4 and \
         scores.dim() == 1 and scores.shape[0] == boxes.shape[0]
-    # host 端实现 (nms_kernel 因 dynamic shape 限制暂时无法完整 PyTO)
+    # host 端实现 (dynamic shape 下的 NMS/sort 暂不支持完整 PyPTO 化)
     return _torch_nms(boxes, scores, iou_threshold)
 
 
@@ -613,35 +491,6 @@ def torch_box_iou(boxes1, boxes2):
 # ---------------------------------------------------------------------------
 # 12.4.4 使用非极大值抑制来预测边界框: multibox_detection
 # ---------------------------------------------------------------------------
-
-@pypto.frontend.jit(runtime_options={"run_mode": _run_mode})
-def multibox_detection_kernel(
-    cls_probs: pypto.Tensor([1, pypto.DYNAMIC, pypto.DYNAMIC], pypto.DT_FP32),
-    offset_preds: pypto.Tensor([1, pypto.DYNAMIC], pypto.DT_FP32),
-    anchors: pypto.Tensor([pypto.DYNAMIC, 4], pypto.DT_FP32),
-    out: pypto.Tensor([1, pypto.DYNAMIC, 6], pypto.DT_FP32),
-    pos_threshold: float,
-):
-    """使用非极大值抑制来预测边界框 (PyPTO 版本, 通用 shape, batch_size=1)
-
-    注: 由于动态 shape 下做 topk/NMS/sort 等较复杂, 主体逻辑 (除 predicted_bb 外)
-    在 host 端完成. 本 kernel 只计算 predicted_bb = offset_inverse(anchors, offset_pred)
-    并直接写入 out 的对应位置 (类别/置信度由 host 端填充).
-    """
-    n_a = anchors.shape[0]
-    # 取 offset_pred 的第 0 批 (静态 shape (1, n_a*4)); 转为 (n_a, 4) 需要 concrete n_a
-    # 简化: 让 host 把 offset_pred reshape 成 (n_a, 4) 再传入
-    # 但 kernel 签名要求 (1, pypto.DYNAMIC), 因此这里取 [0] 即可
-    offset_pred_2d = offset_preds[0]  # (n_a*4,) dynamic
-    # 为避免 dynamic reshape, 直接用 4 个 view 取出 4 列
-    ox = pypto.view(offset_pred_2d, [n_a, 1], [0, 0]) if False else None
-    _ = ox
-
-    # 简化路径: 让 host 端完成所有 NMS 排序逻辑, kernel 仅计算 predicted_bb
-    # 通过 view 取出 offset_pred 的 4 列
-    # 由于动态 shape 不能用 reshape, 改为 host 端提前 reshape 并传 (n_a, 4)
-    raise NotImplementedError  # 占位, 由 host 端驱动
-
 
 def multibox_detection(cls_probs, offset_preds, anchors, nms_threshold=0.5,
                        pos_threshold=0.009999999):

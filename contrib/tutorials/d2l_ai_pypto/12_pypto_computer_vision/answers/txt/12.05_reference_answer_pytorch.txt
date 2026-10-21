@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -52,7 +52,7 @@ device = f"npu:{device_id}"
 ──────────────────────────────────────────────
 【题目】
 
-在 12.5.1节 (./12.05_multiscale_object_detection.ipynb)中的实验里的第一个尺度（fmap_w=4, fmap_h=4）下，生成可能重叠的均匀分布的锚框。
+在 12.5.1节 (../12.05_multiscale_object_detection.ipynb)中的实验里的第一个尺度（fmap_w=4, fmap_h=4）下，生成可能重叠的均匀分布的锚框。
 
 【解答】
 

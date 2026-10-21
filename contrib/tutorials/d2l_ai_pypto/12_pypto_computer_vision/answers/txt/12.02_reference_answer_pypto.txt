@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -57,11 +57,11 @@ device = f"npu:{device_id}"
 
 进一步调整finetune_net与scratch_net的超参数，重点探究param_group的影响（输出层FC使用10倍学习率）。在其他超参数相同的情况下：
 
-• 预训练模型 + 微调全部层（param_group=False）：test acc 0.926；
-• 预训练模型 + 输出层10倍学习率（param_group=True）：输出层收敛更快，test acc 0.945，略高于前者；
+• 预训练模型 + 微调全部层（param_group=False）：test acc 0.930；
+• 预训练模型 + 输出层10倍学习率（param_group=True）：输出层收敛更快，test acc 0.929，与前者基本持平；
 • 无预训练（scratch_net）从零训练：精度明显低于微调模型，且对学习率更敏感。
 
-总体而言，使用预训练模型并微调的效果最好，输出层可以使用更大的学习率。
+总体而言，使用预训练模型并微调的效果最好，输出层可以使用更大的学习率而精度基本不变。
 
 
 ──────────────────────────────────────────────

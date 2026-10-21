@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -78,7 +78,7 @@ plt.legend();
 
 
 
-接下来用平滑L_1 + 焦点损失重新训练 12.7节 (./12.07_ssd.ipynb) 的 TinySSD（参数 σ=2，α=0.25，γ=2，20个迭代周期）：
+接下来用平滑L_1 + 焦点损失重新训练 12.7节 (../12.07_ssd.ipynb) 的 TinySSD（参数 σ=2，α=0.25，γ=2，20个迭代周期）：
 
 
 
@@ -159,9 +159,9 @@ class TinySSD(nn.Module):
 
 import pandas as pd
 
-# 香蕉检测数据集读取（与主 notebook 12.6 节一致，D2LFunction 未内置）
+# 香蕉检测数据集读取（与主 notebook 12.6 节一致；此处为自包含实现）
 DATA_HUB['banana-detection'] = (DATA_URL + 'banana-detection.zip',
-                                '5de26c58fce8bcd781d198e0d4a8d2236d5d32ee')
+                                '5de26c8fce5ccdea9f91267273464dc968d20d72')
 
 def read_data_bananas(is_train=True):
     data_dir = download_extract('banana-detection')
@@ -246,7 +246,7 @@ def cls_eval(cls_preds, cls_labels):
 def bbox_eval(bbox_preds, bbox_labels, bbox_masks):
     return float((torch.abs((bbox_labels - bbox_preds) * bbox_masks)).sum())
 
-# 自包含 torch 实现（d2l 原版，D2LFunction 未包含 assign_anchor_to_bbox/offset_boxes 等依赖）
+# 自包含 torch 实现（d2l 原版；与 src/D2LFunction.py 中的同名实现等价）
 def box_iou_torch(boxes1, boxes2):
     box_area = lambda b: (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1])
     areas1, areas2 = box_area(boxes1), box_area(boxes2)
@@ -375,13 +375,13 @@ for epoch in range(num_epochs):
 print(f'class err {cls_err:.2e}, bbox mae {bbox_mae:.2e}')
 print(f'{len(train_iter.dataset) / timer.stop():.1f} examples/sec on {str(device)}')
 
-与正文使用普通L_1 + 交叉熵的基线相比，焦点损失 + 平滑L_1的类别误差与边界框MAE都有所下降，说明改进损失函数可以提升单发多框检测的性能。
+与正文使用普通L_1 + 交叉熵的基线（class err 3.26e-03、bbox mae 3.20e-03）相比，焦点损失 + 平滑L_1的边界框 MAE 下降至 3.10e-03，但类别误差略升至 3.84e-03。可见改进损失函数对边界框回归有所帮助，类别分支在本实验的短周期配置下未获提升；两者均受随机性影响，建议多次运行取平均后再下结论。
 
 
 
 
 
-PyPTO 版锚框生成、标注与检测与 torch 版结果一致，说明 12.4节 (./12.04_anchor.ipynb) 的 PyPTO 锚框算子可以直接嵌入 SSD 流水线。
+PyPTO 版锚框生成、标注与检测与 torch 版结果一致，说明 12.4节 (../12.04_anchor.ipynb) 的 PyPTO 锚框算子可以直接嵌入 SSD 流水线。
 
 
 ──────────────────────────────────────────────

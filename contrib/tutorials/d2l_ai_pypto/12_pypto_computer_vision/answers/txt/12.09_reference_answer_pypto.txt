@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -55,7 +55,7 @@ device = f"npu:{device_id}"
 ──────────────────────────────────────────────
 【题目】
 
-回想一下 12.1节 (./12.01_image_augmentation.ipynb)中对数据增强的描述。图像分类中使用的哪种图像增强方法是难以用于语义分割的？
+回想一下 12.1节 (../12.01_image_augmentation.ipynb)中对数据增强的描述。图像分类中使用的哪种图像增强方法是难以用于语义分割的？
 
 【解答】
 
@@ -63,7 +63,7 @@ device = f"npu:{device_id}"
 
 随机裁剪通过在图像中随机选择一个区域进行裁剪，以提高数据多样性和模型泛化能力；但在语义分割中，不仅需要对图像裁剪，还需要对标签（分割掩码）同步裁剪，确保像素级对应关系。随机裁剪可能使图像与标签不对齐，破坏语义分割的准确性。
 
-因此语义分割更倾向于使用能保持像素级对应关系的增强方法，例如随机缩放、随机翻转、弹性变换等；若使用随机裁剪，必须对图像与标签施加完全相同的变换（如 12.9节 (./12.09_semantic_segmentation_and_dataset.ipynb)正文 VOCSegDataset 中 random_crop 对特征图和标签使用同一个随机偏移量那样）。
+因此语义分割更倾向于使用能保持像素级对应关系的增强方法，例如随机缩放、随机翻转、弹性变换等；若使用随机裁剪，必须对图像与标签施加完全相同的变换（如 12.9节 (../12.09_semantic_segmentation_and_dataset.ipynb)正文 VOCSegDataset 中 random_crop 对特征图和标签使用同一个随机偏移量那样）。
 
 » 使用 PyPTO 编程进行验证（语义分割模型的骨干以卷积为主，与 12.11 节 FCN 的 resnet18 骨干同款；用 PyPTOConv2d 对一张 VOC 图像做特征提取，与 torch 卷积逐值对比，说明分割模型的底层算子同样可以下沉 PyPTO）：
 

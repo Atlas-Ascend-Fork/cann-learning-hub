@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -41,10 +41,10 @@ torch.set_printoptions(2)  # 精简输出精度
 
 【解答】
 
-假设输入图像的高度为h，宽度为w。以每个像素为中心生成锚框，缩放比为s ∈ (0, 1]，宽高比为r > 0，则锚框的宽度和高度分别是ws√r和hs/√r。
+假设输入图像的高度为h，宽度为w。以每个像素为中心生成锚框，缩放比为s ∈ (0, 1]，宽高比为r > 0，则锚框的宽度和高度分别是hs√r和hs/√r。
 
 • sizes控制锚框的尺寸：较大的size生成更大的锚框，较小的size生成更小的锚框；
-• ratios控制锚框的宽高比：较高的ratio生成更窄（高瘦）的锚框，较低的ratio生成更宽（扁平）的锚框。
+• ratios控制锚框的宽高比：较高的ratio生成更宽（扁平）的锚框，较低的ratio生成更窄（高瘦）的锚框。
 
 以同一像素为中心共生成n+m-1个锚框（n为size个数，m为ratio个数），改变两者会影响锚框在不同尺度和宽高比上的分布，以适应不同大小和形状的目标。
 
@@ -72,7 +72,7 @@ fig = plt.imshow(img)
 show_bboxes(fig.axes, boxes[250, 250, :, :] * bbox_scale,
             ['s=0.75, r=4', 's=0.5, r=4', 's=0.25, r=4', 's=0.75, r=2', 's=0.75, r=0.5']);
 
-可以看到，较大的size生成更大的锚框；r=4的锚框高瘦，r=0.5的锚框扁平。
+可以看到，较大的size生成更大的锚框；r=4的锚框更宽（扁平），r=0.5的锚框更窄（高瘦）。
 
 
 
@@ -88,8 +88,8 @@ show_bboxes(fig.axes, boxes[250, 250, :, :] * bbox_scale,
 
 【解答】
 
-取两个相同尺寸（4×4）的边界框，令其水平方向重叠部分的宽度为4/3：
-框1为[0,0,4,4]，框2为[4/3,0,16/3,4]。交叠面积为4×4/3 = 16/3，并集面积为16+16-16/3 = 80/3，故IoU=16/3/80/3 = 0.5。
+取两个相同尺寸（4×4）的边界框，令其水平方向重叠部分的宽度为8/3：
+框1为[0,0,4,4]，框2为[4/3,0,16/3,4]。交叠面积为4×8/3 = 32/3，并集面积为16+16-32/3 = 64/3，故IoU=32/3/64/3 = 0.5。
 
 » 以下使用 torch 编程进行验证：
 
@@ -122,7 +122,7 @@ plot_boxes(boxes1, boxes2)
 iou = box_iou_torch(boxes1, boxes2)
 print(f'IoU = {iou.item():.4f}')
 
-两个边界框水平方向重叠约1/3宽度，红色（框1）与蓝色（框2）的交叠区域占各自面积的一半，正是IoU=0.5的直观体现。
+两个边界框水平方向重叠约2/3宽度，红色（框1）与蓝色（框2）的交叠区域占各自面积的2/3，正是IoU=0.5的直观体现。
 
 
 
@@ -134,13 +134,13 @@ print(f'IoU = {iou.item():.4f}')
 ──────────────────────────────────────────────
 【题目】
 
-在 12.4.3节 (./12.04_anchor.ipynb)和 12.4.4节 (./12.04_anchor.ipynb)中修改变量anchors，结果如何变化？
+在 12.4.3节 (../12.04_anchor.ipynb)和 12.4.4节 (../12.04_anchor.ipynb)中修改变量anchors，结果如何变化？
 
 【解答】
 
 针对 12.4.3 节的标注算法与 12.4.4 节的预测算法，修改anchors的值（例如将5个锚框换成4个更贴合真实框的锚框），可以看到：
 
-• 与真实边界框（狗、猫）IoU最大的锚框被标记为对应类别，其余锚框按阈值（0.5）判定为背景；
+• 与真实边界框（狗、猫）IoU最大的锚框被标记为对应类别，其余锚框按阈值（0.5）判定：IoU 超过阈值则标记为对应类别，否则标记为背景；
 • multibox_detection输出中，正类锚框给出类别与置信度，负类（背景）锚框类别为-1。
 
 » 以下使用 torch 编程进行验证：
@@ -163,7 +163,7 @@ fig = plt.imshow(img)
 show_bboxes(fig.axes, ground_truth[:, 1:] * bbox_scale, ['dog', 'cat'], 'k')
 show_bboxes(fig.axes, anchors * bbox_scale, ['0', '1', '2', '3']);
 
-# 自包含的 torch 实现（d2l 原版，D2LFunction 未包含以下辅助函数）
+# 自包含的 torch 实现（d2l 原版；与 src/D2LFunction.py 中同名实现等价，为便于逐题演示而内联）
 def assign_anchor_to_bbox_torch(ground_truth, anchors, iou_threshold=0.5):
     num_anchors, num_gt_boxes = anchors.shape[0], ground_truth.shape[0]
     jaccard = box_iou_torch(anchors, ground_truth)
@@ -283,7 +283,7 @@ for i in output[0].detach().numpy():
     label = ('dog=', 'cat=')[int(i[0])] + str(i[1])
     show_bboxes(fig.axes, [torch.tensor(i[2:]) * bbox_scale], label);
 
-从结果可以看出，修改anchors后：第0框与狗的真实边界框IoU最大，被标记为狗；第3框被标记为猫；第2框与狗的真实边界框IoU超过阈值0.5，也被标记为狗；第1框与各真实框的IoU均低于阈值，被标记为背景。预测阶段经非极大值抑制后，保留置信度最高的框并抑制与其高度重叠的框。
+从结果可以看出，修改anchors后：第0、1、2框与狗的真实边界框IoU均超过阈值0.5，被标记为狗；第3框与猫的真实边界框IoU最大，被标记为猫；本组锚框没有背景框。预测阶段经非极大值抑制后，保留置信度最高的框并抑制与其高度重叠的框。
 
 
 

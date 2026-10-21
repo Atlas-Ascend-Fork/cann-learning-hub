@@ -1,511 +1,422 @@
-"""PyPTO AIV Conv2d (LeNet) — 纯向量实现, 不使用 AIC (Cube)
+"""PyPTO Conv2d — 6.6 LeNet 训练用的卷积层 (fwd pypto 引擎 + bwd 原生)
 
-支持 forward / dK / dX / dbias 全部用 PyPTO 向量算子实现。
+fwd 按 shape 分三条路线:
 
-设计 (window-stack, 详见 README.md):
-1. 窗口 view 覆盖 Cin 轴: view(padded, [1, Cin, ROWS, WW], [n, 0, h, kw])
-   → 4D view 的 dim1 映射到 parent 的 dim1 (通道轴) ✓
-2. concat (kH*kW 个) → (kH*kW, Cin, ROWS, WW) → reshape (T, 1, ROWS, WW),
-   T = Cin*kH*kW (tap-major, 顺序 (kh,kw,ic), 与 k_host 一致)
-3. 单轴广播 mul (ws 扩 dim1, k 扩 dim2) + sum(dim=0) 归约 tap 轴
-4. kernel 权重 host 预展开: K → (T, Cout, 1, WW)
-5. 32B 对齐窗口 (WW=32), 统一对齐 tile
-6. 输出 2D 写回 (N*Cout*H_out, W_out), 每 (n,oc,chunk) 一次 2D assemble
-7. 大 Cout/T 场景: oc 分组循环 (mul 输出 (T,G,ROWS,WW) 需满足 UB 限制)
+* **conv 引擎** (``pypto.conv``, 隐式 GEMM), 常规 spatial 的 k>1 走此路线:
+  - batch 维用 ``pypto.DYNAMIC`` 编译 + 核内按 ``_BATCH_TILE`` 循环,
+    缓存 key 不含 batch, 每个 shape 只编译一次;
+  - Cin/Cout 按 C0=8 补零对齐;
+  - 输出宽度 Wo 非 16 倍数时, 输入右侧补零使运行期输出宽度对齐 16,
+    输出再裁回 —— 否则引擎 tileHout 被迫为 1, H 方向在编译期全展开,
+    单个 shape 可生成多个十万行级的 _aic.cpp, 编译时间不可接受;
+  - tile 推导采用联合优化: 遍历 tileCin 候选, 取 H_tiles × Cin_tiles
+    最小的组合 (宁可多切 K 轴, 不让 H 方向逐行展开)。
+* **1x1 (p=0, d=1, 任意 stride)**: ``X.view`` 零拷贝 + b_trans matmul
+  (1x1 的 im2col 就是张量自身布局, 无需任何搬运), bias 核外加; stride>1
+  时先做 stride 切片 (零拷贝视图) 再 matmul, 避免走引擎的补宽/裁回 host
+  拷贝与 tileHout 编译开销 (ResNet 1x1 捷径为 stride=2)。
+* **极小 spatial 的 k>1**: 原生 ``F.unfold`` 物化 im2col + 同一个 b_trans
+  matmul kernel —— 引擎隐含 GEMM 在 M=N*Ho*Wo 很小时 cube 利用率差且
+  随 Cout 增长 (512->512 @6 实测 4.9ms vs unfold 0.6ms); 阈值内改用
+  显式 matmul。@24 及以上仍走引擎 (host im2col 拷贝随 spatial 增长)。
 
-已知框架限制 (实测, 详见 README):
-- 隐式广播/expand_clone 只允许单轴扩展
-- 4D 多通道/多行 assemble 只写第一个 slice → 必须 2D 写回 + 逐 oc
-- concat/2D assemble 的 tile 尾轴需 32B 对齐
-- 不能把"重新赋值的变量"传给嵌套 frontend 函数 (base 为空报 Empty tensor)
-- move 到 strided view 写全零
+bwd: ``aten.convolution_backward`` 一次原生调用同时输出 dX/dW/db,
+零 JIT 编译。stride/padding/dilation 任意原生透传; transposed 不支持。
 
-限制: stride=1; W_out <= WW; H_out/H 需能被 ROWS 整除。
+注意: conv 引擎 kernel 按 shape 首次调用触发 JIT 编译, 耗时可达分钟级
+(进程内缓存, 无磁盘缓存), 全形状预热较久, 首个 epoch 会明显偏慢。
+
+限制: transposed=False, FP32。
+
+说明：本模块不使用 @pypto.frontend.function 嵌套函数，所有计算由 @pypto.frontend.jit
+kernel 或原生 aten 完成，兼容 PyPTO 新 IR（PIL）编译路径。
 """
 
-import os
-import sys
-
 import torch
+import torch.nn.functional as F
 from torch import nn
 
-_REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, _REPO)
-
 import pypto
+from pypto import pypto_impl
 
-# ── 可调参数 (环境变量) ──
-WW = int(os.environ.get("PTO_WW", "32"))                # 对齐窗口宽度
-ROWS_FWD = int(os.environ.get("PTO_ROWS_FWD", "28"))    # forward 每 chunk 行数
-ROWS_DK = int(os.environ.get("PTO_ROWS_DK", "28"))      # dK 每 chunk 行数
-ROWS_DX = int(os.environ.get("PTO_ROWS_DX", "28"))      # dX 每 chunk 行数 (多 chunk 结果错误, 恒取 H)
-CT2 = int(os.environ.get("PTO_CT2", "2"))               # 计算 tile 的 ROWS 切分上限
-OC_GROUPS = int(os.environ.get("PTO_OC_GROUPS", "0"))   # 0=自动
-
-_UB_BYTES = 192 * 1024
-
-
-def _debug_options():
-    return {"runtime_debug_mode": 1} if os.environ.get("PTO_DEBUG", "") == "1" else {}
+_C0 = 8                    # FP32 通道对齐 (conv 引擎要求 Cin/Cout % 8 == 0)
+_L1_SIZE = 480 * 1024      # L1 tile 预算
+_BATCH_TILE = 8            # 引擎核内 batch 循环步长 (transdata UB 随 batch 线性增长)
+_KERNEL_CACHE = {}         # jit kernel 编译缓存, key = 全部定形参数 (不含 batch)
+# fwd 路由阈值 (极小 spatial 改走 unfold+matmul, 见 _conv_forward):
+#   输出 Ho*Wo <= _IM2COL_MAX_HW 且 (空间极小 或 Cout 大) 时用 unfold。
+_IM2COL_MAX_HW = 144       # 输出空间上限 (12x12)
+_IM2COL_TINY_HW = 36       # 无论 Cout 都走 unfold 的极小空间 (6x6)
+_IM2COL_MIN_COUT = 64      # 大 Cout 阈值 (引擎墙钟随 Cout 增长)
 
 
-def _pick_rows(h_out, rows_env):
-    rows = rows_env if h_out % rows_env == 0 else h_out
-    return rows
+def _cached_kernel(factory):
+    """kernel 闭包工厂的编译缓存装饰器。"""
+    def get(*key):
+        kernel = _KERNEL_CACHE.get(key)
+        if kernel is None:
+            kernel = factory(*key)
+            _KERNEL_CACHE[key] = kernel
+        return kernel
+    return get
 
 
-# ── 快速 pad: concat 方案 + 大 tile ──
+def _to_pair(v):
+    """标量/二元组 → (int, int)。"""
+    if isinstance(v, (tuple, list)):
+        return int(v[0]), int(v[1])
+    return int(v), int(v)
 
 
-@pypto.frontend.function
-def _pad4d_fast(
-    X:   pypto.Tensor([], pypto.DT_FP32),
-    out: pypto.Tensor([], pypto.DT_FP32),
-    pad_top: int,
-    pad_bottom: int,
-    pad_left: int,
-    pad_right: int,
-):
-    Np = X.shape[0]
-    Cp = X.shape[1]
-    Hp = X.shape[2]
-    Wp = X.shape[3]
-    pypto.set_vec_tile_shapes(8, 1, 8, 32)
-    cur = X.clone()
-    cur_h = Hp
-    cur_w = Wp
-    if pad_top > 0:
-        zero_t = pypto.zeros(Np, Cp, pad_top, cur_w, dtype=pypto.DT_FP32)
-        cur = pypto.concat([zero_t, cur], dim=2)
-        cur_h = cur_h + pad_top
-    if pad_bottom > 0:
-        zero_b = pypto.zeros(Np, Cp, pad_bottom, cur_w, dtype=pypto.DT_FP32)
-        cur = pypto.concat([cur, zero_b], dim=2)
-        cur_h = cur_h + pad_bottom
-    if pad_left > 0:
-        zero_l = pypto.zeros(Np, Cp, cur_h, pad_left, dtype=pypto.DT_FP32)
-        cur = pypto.concat([zero_l, cur], dim=3)
-        cur_w = cur_w + pad_left
-    if pad_right > 0:
-        zero_r = pypto.zeros(Np, Cp, cur_h, pad_right, dtype=pypto.DT_FP32)
-        cur = pypto.concat([cur, zero_r], dim=3)
-        cur_w = cur_w + pad_right
-    out.move(cur)
+def _out_size(size, k, s, p, d):
+    """卷积输出尺寸: (size + 2p - d*(k-1) - 1) // s + 1。"""
+    return (size + 2 * p - d * (k - 1) - 1) // s + 1
 
 
-def _build_windows(input, Cin, ROWS, WW_, kH, kW, n_idx, ohc):
-    """窗口堆叠: kH*kW 个 (1,Cin,ROWS,WW) view → concat → reshape (T,1,ROWS,WW)"""
-    # concat 阶段 tile: dim0=kH*kW, dim1=Cin, dim2 自适应避免 UB 溢出
-    per_row = kH * kW * Cin * WW_ * 4
-    ct2c = max(1, min(ROWS, (_UB_BYTES - 32 * 1024) // per_row))
-    pypto.set_vec_tile_shapes(kH * kW, Cin, ct2c, 32)
-    wins = []
-    for kh in range(kH):
-        for kw in range(kW):
-            wins.append(pypto.view(
-                input, [1, Cin, ROWS, WW_],
-                [n_idx, 0, ohc * ROWS + kh, kw],
-            ))
-    ws4 = pypto.concat(wins, 0)  # (kH*kW, Cin, ROWS, WW)
-    T = Cin * kH * kW
-    ws = pypto.reshape(ws4, [T, 1, ROWS, WW_])  # (T, 1, ROWS, WW), 顺序 (kh,kw,ic)
-    return ws
+def _align_w(W, kW, s_w, p_w, d_w):
+    """输入宽度补零量, 使输出 Wo 对齐 16 (已对齐返回 0)。
+
+    Wo 非 16 倍数时引擎 tileHout 被迫为 1 → H 方向编译期全展开 (见模块
+    docstring); 右侧补零列对有效输出零贡献, 输出裁回即精确。
+    """
+    Wo = _out_size(W, kW, s_w, p_w, d_w)
+    wo_pad = -Wo % 16
+    if wo_pad == 0:
+        return 0
+    return max(0, (Wo + wo_pad - 1) * s_w + d_w * (kW - 1) + 1 - 2 * p_w - W)
 
 
-# ── forward ──
+def _pad_c0(X, C):
+    """通道维补零到 C0 对齐 (FP32: 8), 供 conv 引擎使用。"""
+    pad = ((C + _C0 - 1) // _C0) * _C0 - C
+    if pad == 0:
+        return X
+    return F.pad(X, (0, 0, 0, 0, 0, pad, 0, 0))
 
 
-@pypto.frontend.function
-def _conv2d_fwd(
-    input:  pypto.Tensor([], pypto.DT_FP32),    # padded (N, Cin, Hp, Wp)
-    k_host: pypto.Tensor([], pypto.DT_FP32),    # (T, Cout, 1, WW)
-    output: pypto.Tensor([], pypto.DT_FP32),    # (N*Cout*H_out, W_out) 2D
-    kH: int,
-    kW: int,
-    W_out: int,
-    oc_groups: int,
-    ct2: int,
-):
-    N = input.shape[0]
-    Cin = input.shape[1]
-    Cout = k_host.shape[1]
-    T = k_host.shape[0]
-    WW_ = k_host.shape[3]
-    H_out = (input.shape[2] - kH) // 1 + 1
-    G = Cout // oc_groups
-    ROWS = _pick_rows(H_out, ROWS_FWD)
-
-    for n_idx in range(N):
-        for ohc in pypto.loop(H_out // ROWS, name="LOOP_chunk", idx_name="ohc"):
-            pypto.set_vec_tile_shapes(kH * kW, Cin, ROWS, 32)
-            ws = _build_windows(input, Cin, ROWS, WW_, kH, kW, n_idx, ohc)
-            pypto.set_vec_tile_shapes(T, G, ct2, 32)
-            for g in range(oc_groups):
-                k_g = pypto.view(k_host, [T, G, 1, WW_], [0, g * G, 0, 0])
-                m = pypto.mul(ws, k_g)  # ws 扩 dim1 (1->G), k_g 扩 dim2 (1->ROWS)
-                s = pypto.sum(m, 0, keepdim=False)  # (G, ROWS, WW)
-                s2 = pypto.reshape(s, [G * ROWS, WW_])
-                pypto.set_vec_tile_shapes(ROWS, 32)
-                for oc in range(G):
-                    acc_oc = pypto.view(s2, [ROWS, W_out], [oc * ROWS, 0])
-                    pypto.assemble(
-                        acc_oc,
-                        [n_idx * Cout * H_out + (g * G + oc) * H_out + ohc * ROWS, 0],
-                        output,
-                    )
-                pypto.set_vec_tile_shapes(T, G, ct2, 32)
+# ════════════════════════════════════════════════════════════════════
+# fwd 路线 1: pypto.conv 引擎 (k>1)
+# ════════════════════════════════════════════════════════════════════
 
 
-@pypto.frontend.jit(
-    debug_options=_debug_options(),
-    runtime_options={},
-)
-def conv2d_fwd_kernel(
-    input:  pypto.Tensor([], pypto.DT_FP32),
-    k_host: pypto.Tensor([], pypto.DT_FP32),
-    output: pypto.Tensor([], pypto.DT_FP32),
-    kH: int,
-    kW: int,
-    pad: int,
-    oc_groups: int,
-    ct2: int,
-):
-    N = input.shape[0]
-    Cin = input.shape[1]
-    H = input.shape[2]
-    W = input.shape[3]
-    pypto.set_vec_tile_shapes(8, 1, 8, 32)
-    W_out = W + 2 * pad - kW + 1
+def _derive_conv_tiles(Cin, Cout, H, W, kH, kW, s_h, s_w, p_h, p_w, d_h, d_w):
+    """L1/L0/vec tile 预算式推导 (按 DAV 硬件约束):
 
-    src = input
-    if pad > 0:
-        p_wr = max(pad, kW + WW - 1 - W - pad)
-        padded = pypto.zeros(N, Cin, H + 2 * pad,
-                             W + pad + p_wr, dtype=pypto.DT_FP32)
-        _pad4d_fast(src, padded, pad, pad, pad, p_wr)
-        _conv2d_fwd(padded, k_host, output, kH, kW, W_out, oc_groups, ct2)
+    - L1: 输入 tile (hin*win*tileCin*4B) + 权重 tile (tileN*tileCin*kH*kW*4B)
+      <= L1 预算; tileCin 从 Cin 向下减半做 K 轴切分
+    - L0: L0A tileH*tileW*tileK*4 <= 64KB, L0C tileH*tileW*tileN*4 <= 128KB,
+      tileN <= 16, tileW 需 16 元素对齐
+    - tileK 必须整除 tileCin*kH*kW (kAL1/kBL1)
+    - Wo 已由调用方以 _align_w 保证 16 对齐, tileHout 可大于 1
+    - vec: batch 16 * ceil8(Cout)(<=64) * 1 * C0 (C 维须为 C0 整数倍, 否则
+      pypto 报 "tileShape C should be an integer multiple of C0"; 故按
+      cout_pad 取, 小 Cout (如 LeNet 的 6) 也满足), 双缓冲受 UB 预算约束
+
+    联合优化: 贪心取最大 tileCin 会把权重 tile 撑满 L1, 导致输入 tile
+    空间不足、tileHout 被压到 1 (H 方向逐行静态展开, 编译爆炸); 故遍历
+    tileCin 候选, 选 H_tiles × Cin_tiles 最小者 —— K 轴多切一次的运行
+    时代价远小于 H 展开的编译代价。
+    """
+    Ho = _out_size(H, kH, s_h, p_h, d_h)
+    Wo = _out_size(W, kW, s_w, p_w, d_w)
+    cin_pad = ((Cin + _C0 - 1) // _C0) * _C0
+    cout_pad = ((Cout + _C0 - 1) // _C0) * _C0
+    kH_eff = d_h * (kH - 1) + 1
+    kW_eff = d_w * (kW - 1) + 1
+    tile_wout = 16
+    tileN = 16
+    win = (tile_wout - 1) * s_w + kW_eff
+    tile_hout = 1 if Wo % 16 != 0 else None
+
+    def fit(tc):
+        return tc * kH * kW * tileN * 4 + win * kH * tc * 4 <= _L1_SIZE - 2048
+
+    def _hout_for(tc):
+        w_bytes = tc * kH * kW * tileN * 4
+        hin_max = (_L1_SIZE - w_bytes - 2048) // (win * tc * 4)
+        if s_h == 1:
+            return max(1, min(hin_max - kH_eff + 1, Ho))
+        return max(1, min((hin_max - kH_eff) // s_h + 1, Ho))
+
+    if tile_hout is None:
+        best_tiles, tile_cin, tile_hout = None, cin_pad, 1
+        tc = cin_pad
+        while tc >= _C0:
+            if fit(tc):
+                hout = _hout_for(tc)
+                tiles = -(-Ho // hout) * -(-cin_pad // tc)
+                if best_tiles is None or tiles < best_tiles:
+                    best_tiles, tile_cin, tile_hout = tiles, tc, hout
+            tc //= 2
     else:
-        p_wr = max(0, kW + WW - 1 - W)
-        padded = pypto.zeros(N, Cin, H, W + p_wr, dtype=pypto.DT_FP32)
-        _pad4d_fast(src, padded, 0, 0, 0, p_wr)
-        _conv2d_fwd(padded, k_host, output, kH, kW, W_out, oc_groups, ct2)
+        tile_cin = cin_pad
+        while not fit(tile_cin) and tile_cin > _C0:
+            tile_cin //= 2
+    hi_al1 = min((tile_hout - 1) * s_h + kH_eff, H)
+    wi_al1 = min((tile_wout - 1) * s_w + kW_eff, W)
+    k_fact = tile_cin * kH * kW
+    tile_k = 64
+    while k_fact % tile_k != 0 and tile_k > _C0:
+        tile_k //= 2
+    l1 = pypto_impl.TileL1Info(tileHin=hi_al1, tileHout=tile_hout, tileWin=wi_al1,
+                               tileWout=tile_wout, tileCinFmap=tile_cin,
+                               tileCinWeight=tile_cin, tileN=tileN, tileBatch=1)
+    l0 = pypto_impl.TileL0Info(tileH=min(tile_hout, 8), tileW=tile_wout,
+                               tileK=tile_k, tileN=16)
+    vec = (16, min(cout_pad, 64), 1, _C0)
+    return l1, l0, vec
 
 
-# ── dK ──
+@_cached_kernel
+def _conv_kernel(Cin, Cout, H, W, kH, kW, s_h, s_w, p_h, p_w, d_h, d_w):
+    """按 shape 生成 conv fwd kernel (闭包工厂, 编译后缓存)。
+
+    batch 维 pypto.DYNAMIC, 核内按 _BATCH_TILE 循环 (view + assemble),
+    一次调用处理整个 batch; 缓存 key 不含 batch。
+    """
+    Ho = _out_size(H, kH, s_h, p_h, d_h)
+    Wo = _out_size(W, kW, s_w, p_w, d_w)
+    cin_pad = ((Cin + _C0 - 1) // _C0) * _C0
+    cout_pad = ((Cout + _C0 - 1) // _C0) * _C0
+    l1, l0, vec = _derive_conv_tiles(Cin, Cout, H, W, kH, kW, s_h, s_w, p_h, p_w, d_h, d_w)
+    # pypto 0.2.1 动态维需用 status-shape 列表 [pypto.DYNAMIC, ...] (tuple 报
+    # "Invalid value type", 见 Tensor.__init__ 的 _validate_status_shape)
+    fmap_shape = [pypto.DYNAMIC, cin_pad, H, W]
+    out_shape = [pypto.DYNAMIC, cout_pad, Ho, Wo]
+
+    @pypto.frontend.jit()
+    def conv_fwd_kernel(fmap: pypto.Tensor(fmap_shape, pypto.DT_FP32),
+                        weight: pypto.Tensor((cout_pad, cin_pad, kH, kW), pypto.DT_FP32),
+                        bias: pypto.Tensor([cout_pad], pypto.DT_FP32),
+                        out: pypto.Tensor(out_shape, pypto.DT_FP32)):
+        pypto.set_conv_tile_shapes(l1, l0)
+        pypto.set_vec_tile_shapes(*vec)
+        batch = fmap.shape[0]
+        tile_batch = pypto.symbolic_scalar(_BATCH_TILE)
+        batch_loop = (batch + tile_batch - 1) // tile_batch
+        for batch_idx in pypto.loop(0, batch_loop, 1, name="LOOP_batch"):
+            batch_offset = batch_idx * tile_batch
+            input_view = pypto.view(fmap, [tile_batch, cin_pad, H, W],
+                                    [batch_offset, 0, 0, 0])
+            output = pypto.conv(input_view, weight, pypto.DT_FP32, [s_h, s_w],
+                                [p_h, p_w, p_h, p_w], [d_h, d_w],
+                                extend_params={"bias_tensor": bias}, groups=1)
+            pypto.assemble(output, [batch_offset, 0, 0, 0], out)
+    return conv_fwd_kernel
 
 
-@pypto.frontend.function
-def _conv2d_dk(
-    input:  pypto.Tensor([], pypto.DT_FP32),    # padded X
-    dy:     pypto.Tensor([], pypto.DT_FP32),    # padded dY (N, Cout, H_out, Wp)
-    dk2:    pypto.Tensor([], pypto.DT_FP32),    # (Cout, T) 输出
-    kH: int,
-    kW: int,
-    oc_groups: int,
-):
-    N = input.shape[0]
-    Cin = input.shape[1]
-    Cout = dy.shape[1]
-    T = Cin * kH * kW
-    WW_ = dy.shape[3]
-    H_out = (input.shape[2] - kH) // 1 + 1
-    G = Cout // oc_groups
-    # 注意: pypto.loop 不支持跨迭代携带累加 tensor, chunk 循环用 Python range 展开。
-    # tile (T,G,1,32): ROWS 被切分, sum(dim2) 为跨 tile 归约 (正确但偏慢, 已知限制:
-    # tile (T,1,ROWS,32) 会触发 TExpand codegen bug, 无法使用)。
-    ROWS = _pick_rows(H_out, ROWS_DK)
-
-    pypto.set_vec_tile_shapes(T, G, 1, 32)
-    dk_accs = []
-    for g in range(oc_groups):
-        dk_accs.append(pypto.zeros(T, G, 1, 1, dtype=pypto.DT_FP32))
-    for n_idx in range(N):
-        for ohc in range(H_out // ROWS):
-            pypto.set_vec_tile_shapes(kH * kW, Cin, ROWS, 32)
-            ws = _build_windows(input, Cin, ROWS, WW_, kH, kW, n_idx, ohc)
-            pypto.set_vec_tile_shapes(T, G, 1, 32)
-            for g in range(oc_groups):
-                dy_v = pypto.view(dy, [1, G, ROWS, WW_], [n_idx, g * G, ohc * ROWS, 0])
-                m = pypto.mul(ws, dy_v)  # ws 扩 dim1, dy_v 扩 dim0, 各单轴 ✓
-                s1 = pypto.sum(m, 2, keepdim=True)  # (T, G, 1, WW)
-                s2 = pypto.sum(s1, 3, keepdim=True)  # (T, G, 1, 1)
-                dk_accs[g] = pypto.add(dk_accs[g], s2)
-    pypto.set_vec_tile_shapes(T, Cout, 1, 32)
-    if oc_groups == 1:
-        dk_acc = dk_accs[0]  # 单组时 concat 单元素精度不保证
+def _fwd_conv(X, K, bias, s_h, s_w, p_h, p_w, d_h, d_w):
+    """conv 引擎 fwd: 通道/宽度补零对齐 + 一次 kernel 调用处理整个 batch。"""
+    N, Cin, H, W = X.shape
+    Cout, _, kH, kW = K.shape
+    Ho = _out_size(H, kH, s_h, p_h, d_h)
+    Wo = _out_size(W, kW, s_w, p_w, d_w)
+    cout_pad = ((Cout + _C0 - 1) // _C0) * _C0
+    w_pad = _align_w(W, kW, s_w, p_w, d_w)
+    Wo_run = _out_size(W + w_pad, kW, s_w, p_w, d_w)
+    kernel = _conv_kernel(Cin, Cout, H, W + w_pad, kH, kW, s_h, s_w, p_h, p_w, d_h, d_w)
+    Xp = _pad_c0(X, Cin)
+    if w_pad:
+        Xp = F.pad(Xp, (0, w_pad))
+    Kp = _pad_c0(K, Cin)
+    cout_tail = cout_pad - Cout
+    if cout_tail:
+        Kp = F.pad(Kp, (0, 0, 0, 0, 0, 0, 0, cout_tail))
+    if bias is None:
+        b = torch.zeros(cout_pad, device=X.device, dtype=X.dtype)
+    elif cout_tail:
+        b = F.pad(bias, (0, cout_tail))
     else:
-        dk_acc = pypto.concat(dk_accs, 1)  # (T, Cout, 1, 1)
-    pypto.set_vec_tile_shapes(8, 8)
-    dk_acc2 = pypto.reshape(dk_acc, [T, Cout])
-    dk_t = pypto.transpose(dk_acc2, 0, 1)  # (Cout, T)
-    pypto.set_vec_tile_shapes(ROWS, 32)
-    dk2.move(dk_t)
+        b = bias
+    tail = (-N) % _BATCH_TILE
+    if tail:
+        Xp = F.pad(Xp, (0, 0, 0, 0, 0, 0, 0, tail))
+    out = torch.empty(Xp.shape[0], cout_pad, Ho, Wo_run, device=X.device, dtype=X.dtype)
+    kernel(Xp, Kp, b, out)
+    out = out[:N]
+    if w_pad:
+        out = out[:, :, :, :Wo].contiguous()
+    if cout_tail:
+        out = out[:, :Cout]
+    return out
 
 
-@pypto.frontend.jit(
-    debug_options=_debug_options(),
-    runtime_options={},
-)
-def conv2d_dk_kernel(
-    input:  pypto.Tensor([], pypto.DT_FP32),
-    dy:     pypto.Tensor([], pypto.DT_FP32),
-    dk2:    pypto.Tensor([], pypto.DT_FP32),
-    kH: int,
-    kW: int,
-    pad: int,
-    oc_groups: int,
-):
-    N = input.shape[0]
-    Cin = input.shape[1]
-    H = input.shape[2]
-    W = input.shape[3]
-    Cout = dy.shape[1]
-    Hg = dy.shape[2]
-    Wg = dy.shape[3]
-    pypto.set_vec_tile_shapes(8, 1, 8, 32)
-
-    p_wr = max(0, kW + WW - 1 - W - pad)  # 窗口对齐所需右 pad (W < kW+WW-1 时)
-    padded = pypto.zeros(N, Cin, H + 2 * pad,
-                         W + pad + p_wr, dtype=pypto.DT_FP32)
-    _pad4d_fast(input, padded, pad, pad, pad, p_wr)
-
-    dy_pad_w = max(WW + kW - 1, Wg)
-    dy_pad = pypto.zeros(N, Cout, Hg, dy_pad_w, dtype=pypto.DT_FP32)
-    _pad4d_fast(dy, dy_pad, 0, 0, 0, dy_pad_w - Wg)
-
-    _conv2d_dk(padded, dy_pad, dk2, kH, kW, oc_groups)
+# ════════════════════════════════════════════════════════════════════
+# fwd 路线 2: view + b_trans matmul (1x1)
+# ════════════════════════════════════════════════════════════════════
 
 
-# ── dX ──
+def _tiles_for(M, K, N):
+    """按 M/K/N 分档选 cube tile: 小 shape 用小 tile, 其余 128-256
+    (FP32 下 L1 预算需 mL1*kL1+nL1*kL1 <= 48K 元素)。
+
+    返回 hashable 的嵌套 tuple —— matmul kernel 缓存以 tile 组合为键
+    (M 只影响分档, 不进键), 故所有落到同一档的 1x1 形状共享一次编译。
+    """
+    if M <= 144 or N <= 64:
+        return ((64, 64), (64, 128), (128, 128))
+    return ((128, 128), (64, 256), (128, 128))
 
 
-@pypto.frontend.function
-def _conv2d_dx(
-    dy_pad: pypto.Tensor([], pypto.DT_FP32),    # padded dY (N, Cout, Hp, Wp)
-    k_dx:   pypto.Tensor([], pypto.DT_FP32),    # (T2, Cin, 1, WW), T2=kH*kW*Cout
-    dx2:    pypto.Tensor([], pypto.DT_FP32),    # (N*Cin*H, W) 输出
-    kH: int,
-    kW: int,
-    Hin: int,
-    Win: int,
-    t2: int,                                    # dim0 tile 切分 (UB 预算, 需整除 T2)
-):
-    N = dy_pad.shape[0]
-    Cout = dy_pad.shape[1]
-    Cin = k_dx.shape[1]
-    T2 = k_dx.shape[0]
-    WW_ = k_dx.shape[3]
-    ROWS = _pick_rows(Hin, ROWS_DX)
-    ROWS = Hin  # 多 chunk 的 sum 部分和合并结果错误 (框架限制), 恒单 chunk
+@_cached_kernel
+def _matmul_kernel(mt, kt, nt):
+    """C = A @ B^T (免 B 转置拷贝) 的 b_trans matmul kernel, 按 tile 组合缓存。
 
-    for n_idx in range(N):
-        for ohc in range(H // ROWS):
-            pypto.set_vec_tile_shapes(kH * kW, Cout, ROWS, 32)
-            ws = _build_windows(dy_pad, Cout, ROWS, WW_, kH, kW, n_idx, ohc)
-            pypto.set_vec_tile_shapes(t2, 1, 1, 32)
-            for ic in range(Cin):
-                k_ic = pypto.view(k_dx, [T2, 1, 1, WW_], [0, ic, 0, 0])
-                m = pypto.mul(ws, k_ic)  # k_ic 扩展 dim2 (1->ROWS) ✓
-                s = pypto.sum(m, 0, keepdim=False)  # (1, ROWS, WW)
-                s2 = pypto.reshape(s, [ROWS, WW_])
-                pypto.set_vec_tile_shapes(ROWS, 32)
-                acc_ic = pypto.view(s2, [ROWS, Win], [0, 0])
-                pypto.assemble(
-                    acc_ic,
-                    [(n_idx * Cin + ic) * Hin + ohc * ROWS, 0],
-                    dx2,
-                )
-                pypto.set_vec_tile_shapes(t2, 1, 1, 32)
+    kernel 张量形状全动态 (``pypto.Tensor([], ...)``), M/K/N 不参与编译,
+    故同一 tile 档下任意 shape 复用同一 kernel —— 1x1 卷积形状随
+    spatial/batch 变化时不再逐 shape 重编 (流程同 Linear 的 M 分桶)。
+    """
+    @pypto.frontend.jit()
+    def matmul_kernel(A: pypto.Tensor([], pypto.DT_FP32),
+                      B: pypto.Tensor([], pypto.DT_FP32),
+                      out: pypto.Tensor([], pypto.DT_FP32)):
+        pypto.set_cube_tile_shapes(list(mt), list(kt), list(nt))
+        out[:] = pypto.matmul(A, B, pypto.DT_FP32, b_trans=True)
+    return matmul_kernel
 
 
-@pypto.frontend.jit(
-    debug_options=_debug_options(),
-    runtime_options={},
-)
-def conv2d_dx_kernel(
-    dy:     pypto.Tensor([], pypto.DT_FP32),
-    k_dx:   pypto.Tensor([], pypto.DT_FP32),
-    dx2:    pypto.Tensor([], pypto.DT_FP32),
-    kH: int,
-    kW: int,
-    pad: int,
-    t2: int,
-):
-    N = dy.shape[0]
-    Cout = dy.shape[1]
-    Hg = dy.shape[2]
-    Wg = dy.shape[3]
-    Cin = k_dx.shape[1]
-    # dX 尺寸由 dY 推导: H = Hg + 2*p_h - kH + 1 (前端对 dx2.shape 表达式求值有误)
-    p_h = kH - 1 - pad
-    p_w = kW - 1 - pad
-    H = Hg + 2 * p_h - kH + 1
-    W = Wg + 2 * p_w - kW + 1
-    pypto.set_vec_tile_shapes(8, 1, 8, 32)
+def _fwd_1x1(X, K, bias, s_h, s_w):
+    """1x1 fwd (任意 stride, padding=0): C = X_sub_nhwc_2d @ K^T。
 
-    dy_pad_h = Hg + 2 * p_h
-    dy_pad_w = max(Wg + 2 * p_w, WW + kW - 1)
-    dy_pad = pypto.zeros(N, Cout, dy_pad_h, dy_pad_w, dtype=pypto.DT_FP32)
-    _pad4d_fast(dy, dy_pad, p_h, p_h, p_w, dy_pad_w - Wg - p_w)
+    X 是 NCHW 布局, 须先 permute 到 (N,H,W,Cin) 再展平 (直接 reshape
+    NCHW 到 (M, Cin) 是非法重排 —— 通道维不在尾维); 一次 permute 拷贝
+    即 1x1 的全部 "im2col" 开销。
 
-    _conv2d_dx(dy_pad, k_dx, dx2, kH, kW, H, W, t2)
+    stride>1 时先做 ``X[:, :, ::s_h, ::s_w]`` 空间切片 (stride 切片是
+    视图, 零拷贝), 等价于 1x1 卷积的稀疏采样 —— 避免走 conv 引擎:
+    引擎对该形状需 ``_align_w`` 补宽 + 输出裁回 (多次 host 拷贝), 且
+    tileHout 编译代价高; 切片 + matmul 的 M 更小, 实测 ~5x。
+    输出 permute 视图不 ``.contiguous()`` (调用方模块入口均自行
+    ``.contiguous()``), 省一次整张量拷贝。
+    """
+    N, Cin, H, W = X.shape
+    Cout = K.shape[0]
+    if s_h != 1 or s_w != 1:
+        X = X[:, :, ::s_h, ::s_w]
+    Ho, Wo = X.shape[2], X.shape[3]
+    M = N * Ho * Wo
+    mt, kt, nt = _tiles_for(M, Cin, Cout)
+    kernel = _matmul_kernel(mt, kt, nt)
+    cols = X.permute(0, 2, 3, 1).reshape(M, Cin).contiguous()
+    out = torch.empty(M, Cout, device=X.device, dtype=X.dtype)
+    kernel(cols, K.reshape(Cout, Cin), out)
+    if bias is not None:
+        out = out + bias
+    return out.reshape(N, Ho, Wo, Cout).permute(0, 3, 1, 2)
 
 
-# ── dbias ──
+def _fwd_conv_im2col(X, K, bias, s_h, s_w, p_h, p_w, d_h, d_w):
+    """极小 spatial 的 conv fwd: 原生 ``F.unfold`` 物化 im2col + pypto matmul。
+
+    引擎对极小输出效率低: 为满足 tileWout=16 对齐, ``_align_w`` 把输入
+    宽度补到 16 的倍数, 无效输出列被大量计算 (如 6x6 输出按 6x16 计),
+    且隐含 GEMM 的 M=N*Ho*Wo 很小时 cube 利用率差、墙钟随 Cin/Cout 增长
+    —— 实测 512->512 @6 引擎 4.9ms, 本路线 0.6ms (逻辑 GEMM 相同, 显式
+    matmul 效率高得多)。此处用原生 unfold 物化 cols (小 spatial 下拷贝
+    量小、带宽友好), 再交给同一个 pypto b_trans matmul kernel, 保留
+    PyPTO 计算路径。@24 及以上回归引擎 (host im2col 拷贝量随 spatial
+    增长, 引擎更优; 见 ``_conv_forward`` 的路由条件)。
+    """
+    N, Cin, H, W = X.shape
+    Cout, _, kH, kW = K.shape
+    cols = F.unfold(X, (kH, kW), dilation=(d_h, d_w), padding=(p_h, p_w),
+                    stride=(s_h, s_w))                      # (N, Cin*kH*kW, L)
+    L = cols.shape[2]
+    M = N * L
+    Kd = Cin * kH * kW
+    A = cols.transpose(1, 2).reshape(M, Kd).contiguous()
+    mt, kt, nt = _tiles_for(M, Kd, Cout)
+    out = torch.empty(M, Cout, device=X.device, dtype=X.dtype)
+    _matmul_kernel(mt, kt, nt)(A, K.reshape(Cout, Kd), out)
+    if bias is not None:
+        out = out + bias
+    Ho = _out_size(H, kH, s_h, p_h, d_h)
+    Wo = _out_size(W, kW, s_w, p_w, d_w)
+    return out.reshape(N, Ho, Wo, Cout).permute(0, 3, 1, 2)
 
 
-@pypto.frontend.jit(
-    debug_options=_debug_options(),
-    runtime_options={},
-)
-def conv2d_dbias_kernel(
-    dy:  pypto.Tensor([], pypto.DT_FP32),
-    db:  pypto.Tensor([], pypto.DT_FP32),
-):
-    pypto.set_vec_tile_shapes(8, 1, 8, 32)
-    Cout = dy.shape[1]
-    s0 = pypto.sum(dy, 0, keepdim=True)    # (1, Cout, Hg, Wg)
-    s1 = pypto.sum(s0, 2, keepdim=True)    # (1, Cout, 1, Wg)
-    s2 = pypto.sum(s1, 3, keepdim=True)    # (1, Cout, 1, 1)
-    s3 = pypto.reshape(s2, [Cout])
-    db.move(s3)
+def _conv_forward(X, K, bias, s_h, s_w, p_h, p_w, d_h, d_w):
+    """fwd 分派: 1x1 → 切片+matmul; 极小 spatial → unfold+matmul; 其余 → 引擎。
+
+    极小 spatial 阈值 (_IM2COL_MAX_HW/_IM2COL_MIN_COUT) 由实测得到: 引擎
+    墙钟近似随 Cout 增长而几乎不随极小 spatial 缩小, 而 unfold 拷贝量随
+    spatial 缩小; 故 @12 及以下仅在大 Cout 时改走 unfold (DenseNet 的
+    Cout=32 小 spatial 引擎已足够快), @6 及以下无论 Cout 均走 unfold。
+    """
+    if K.shape[2] == 1 and K.shape[3] == 1 and (p_h, p_w) == (0, 0) \
+            and (d_h, d_w) == (1, 1):
+        return _fwd_1x1(X, K, bias, s_h, s_w)
+    Ho = _out_size(X.shape[2], K.shape[2], s_h, p_h, d_h)
+    Wo = _out_size(X.shape[3], K.shape[3], s_w, p_w, d_w)
+    hw = Ho * Wo
+    if hw <= _IM2COL_MAX_HW and (hw <= _IM2COL_TINY_HW or K.shape[0] > _IM2COL_MIN_COUT):
+        return _fwd_conv_im2col(X, K, bias, s_h, s_w, p_h, p_w, d_h, d_w)
+    return _fwd_conv(X, K, bias, s_h, s_w, p_h, p_w, d_h, d_w)
 
 
-# ── host 侧预处理 ──
+# ── autograd Function + nn.Module ──
 
 
-def make_k_host(K, kH, kW, wwin=WW):
-    """K (Cout, Cin, kH, kW) → (T, Cout, 1, WW), T=Cin*kH*kW, 顺序 (kh,kw,ic)"""
-    Cout, Cin, _, _ = K.shape
-    K_t = K.permute(2, 3, 1, 0).contiguous()   # (kH, kW, Cin, Cout)
-    T = Cin * kH * kW
-    K_flat = K_t.reshape(T, Cout).contiguous()
-    return K_flat[:, :, None, None].expand(T, Cout, 1, wwin).contiguous()
-
-
-def make_k_dx(K, kH, kW, wwin=WW):
-    """K (Cout, Cin, kH, kW) → (T2, Cin, 1, WW), T2=kH*kW*Cout, 顺序 (kh,kw,oc)
-    dX 使用旋转核: dX = full_conv(dY, K_rot)"""
-    Cout, Cin, _, _ = K.shape
-    K_rot = torch.flip(K, [2, 3]).contiguous()   # rot180
-    K_t = K_rot.permute(2, 3, 0, 1).contiguous()  # (kH, kW, Cout, Cin)
-    T2 = kH * kW * Cout
-    K_flat = K_t.reshape(T2, Cin).contiguous()
-    return K_flat[:, :, None, None].expand(T2, Cin, 1, wwin).contiguous()
-
-
-def pick_oc_groups(T, Cout, wwin=WW):
-    """选择 oc 分组使 mul 的 tile (T, G, 1, WW) 满足 UB (保守: 预留 ws/k/acc 空间)"""
-    if OC_GROUPS > 0:
-        return OC_GROUPS
-    per_tile = T * wwin * 4
-    max_g = max(1, (_UB_BYTES - 128 * 1024) // per_tile)
-    for g in (1, 2, 4, 8, 16, 32, 64):
-        if Cout % g == 0 and Cout // g <= max_g:
-            return g
-    return max(1, Cout // max_g)
-
-
-def pick_ct2(T, G, wwin=WW):
-    """选择计算 tile 的 ROWS 切分使 (T, G, ct2, WW) 满足 UB (保守)"""
-    per_row = T * G * wwin * 4
-    max_ct2 = max(1, (_UB_BYTES - 96 * 1024) // per_row)
-    return max(1, min(CT2, max_ct2))
-
-
-def pick_t2(T2, wwin=WW):
-    """选择 dX mul 的 dim0 tile 切分: 大卷积核时 T2=kH*kW*Cout 过大,
-    mul 的 in+out (2*t2*wwin*4) 超 UB, 取 T2 的不超过预算的最大因子
-    (sum(dim0) 跨 tile 归约, 同 dK 的 ROWS 切分, 正确但稍慢)。"""
-    max_t2 = max(1, (_UB_BYTES - 64 * 1024) // (2 * wwin * 4))
-    t2 = T2
-    while t2 > max_t2:
-        spf = next(d for d in range(2, t2 + 1) if t2 % d == 0)
-        t2 //= spf
-    return t2
-
-
-# ── nn.Module (autograd Function, forward/backward 全 PyPTO) ──
-
-
-def _pad_wr(W, k, p, wwin=WW):
-    """窗口 32B 对齐所需的右 pad"""
-    return max(p, k + wwin - 1 - W - p)
-
-
-class PyPTOConv2dAIVFunction(torch.autograd.Function):
+class PyPTOConv2dFunction(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, X, K, bias, kH, kW, pad):
-        N, Cin, H, W = X.shape
-        Cout = K.shape[0]
-        H_out = H + 2 * pad - kH + 1
-        W_out = W + 2 * pad - kW + 1
-        T = Cin * kH * kW
-        og = pick_oc_groups(T, Cout)
-        ct2 = pick_ct2(T, Cout // og)
-
-        K_host = make_k_host(K, kH, kW)
-        Y = torch.zeros(N, Cout, H_out, W_out, device=X.device, dtype=X.dtype)
-        Y2 = Y.view(N * Cout * H_out, W_out)
-        conv2d_fwd_kernel(X, K_host, Y2, kH, kW, pad, og, ct2)
-        if bias is not None:
-            Y = Y + bias.view(1, -1, 1, 1)
-
-        ctx.save_for_backward(X, K, bias)
-        ctx.params = (kH, kW, pad)
+    def forward(ctx, X, K, stride, padding, dilation, bias):
+        s_h, s_w = _to_pair(stride)
+        p_h, p_w = _to_pair(padding)
+        d_h, d_w = _to_pair(dilation)
+        X_c, K_c = X.contiguous(), K.contiguous()
+        Y = _conv_forward(X_c, K_c, bias, s_h, s_w, p_h, p_w, d_h, d_w)
+        ctx.save_for_backward(X_c, K_c)
+        ctx.conv_args = (s_h, s_w, p_h, p_w, d_h, d_w)
+        ctx.has_bias = bias is not None
         return Y
 
     @staticmethod
-    def backward(ctx, grad_Y):
-        X, K, bias = ctx.saved_tensors
-        kH, kW, pad = ctx.params
-        N, Cin, H, W = X.shape
-        Cout = K.shape[0]
-        T = Cin * kH * kW
-        og = pick_oc_groups(T, Cout)
-
-        dY = grad_Y.contiguous()
-        dX = torch.zeros_like(X)
-        dX2 = dX.view(N * Cin * H, W)
-        K_dx = make_k_dx(K, kH, kW)
-        conv2d_dx_kernel(dY, K_dx, dX2, kH, kW, pad,
-                         pick_t2(kH * kW * Cout))
-
-        dK = torch.zeros_like(K)
-        dK2 = torch.zeros(Cout, T, device=X.device, dtype=X.dtype)
-        conv2d_dk_kernel(X, dY, dK2, kH, kW, pad, og)
-        dK.copy_(dK2.reshape(Cout, kH, kW, Cin).permute(0, 3, 1, 2))
-
-        db = None
-        if bias is not None:
-            db = torch.zeros_like(bias)
-            conv2d_dbias_kernel(dY, db)
-        return dX, dK, db, None, None, None
+    def backward(ctx, grad_output):
+        X, K = ctx.saved_tensors
+        s_h, s_w, p_h, p_w, d_h, d_w = ctx.conv_args
+        mask = (ctx.needs_input_grad[0], ctx.needs_input_grad[1], ctx.needs_input_grad[5])
+        dX, dW, db = torch.ops.aten.convolution_backward(
+            grad_output.contiguous(), X, K,
+            [K.shape[0]] if ctx.has_bias else None,
+            [s_h, s_w], [p_h, p_w], [d_h, d_w], False, [0, 0], 1, mask)
+        return dX, dW, None, None, None, db
 
 
 class PyPTOConv2d(nn.Module):
-    """PyPTO AIV Conv2d (stride=1, 对称 padding), forward/backward 全 PyPTO 向量算子"""
+    """PyPTO Conv2d: fwd = pypto.conv 引擎 (k>1) / view+matmul (1x1),
+    bwd = aten.convolution_backward (原生, 零编译)。
 
-    def __init__(self, in_channels, out_channels, kernel_size, padding=0,
+    - stride/padding/dilation 任意原生透传; transposed 不支持 (传入即抛错)
+    - 路由与编译注意事项: 见模块 docstring
+    """
+
+    def __init__(self, in_channels=1, out_channels=1, kernel_size=(3, 3),
+                 stride=1, padding=0, dilation=1, transposed=False,
                  bias=True, device="npu:0", dtype=torch.float32):
         super().__init__()
+        if transposed:
+            raise NotImplementedError("transposed 未实现, 请用 torch.nn.ConvTranspose2d")
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.kernel_size = kernel_size if isinstance(kernel_size, (tuple, list)) else (kernel_size, kernel_size)
+        self.kernel_size = _to_pair(kernel_size)
+        self.stride = stride
         self.padding = padding
-        kH, kW = self.kernel_size
-        self.weight = nn.Parameter(torch.empty(out_channels, in_channels, kH, kW,
+        self.dilation = dilation
+        self.weight = nn.Parameter(torch.empty(out_channels, in_channels, *self.kernel_size,
                                                device=device, dtype=dtype))
-        if bias:
-            self.bias = nn.Parameter(torch.empty(out_channels, device=device, dtype=dtype))
-        else:
-            self.register_parameter("bias", None)
         nn.init.kaiming_uniform_(self.weight, a=5 ** 0.5)
+        fan_in = in_channels * self.kernel_size[0] * self.kernel_size[1]
+        self.bias = (nn.Parameter(torch.empty(out_channels, device=device, dtype=dtype))
+                     if bias else None)
         if self.bias is not None:
-            fan_in = in_channels * kH * kW
-            bound = 1 / fan_in ** 0.5
-            nn.init.uniform_(self.bias, -bound, bound)
+            nn.init.uniform_(self.bias, -fan_in ** -0.5, fan_in ** -0.5)
+
+    def extra_repr(self):
+        return (f"in_channels={self.in_channels}, out_channels={self.out_channels}, "
+                f"kernel_size={self.kernel_size}, stride={self.stride}, "
+                f"padding={self.padding}, dilation={self.dilation}, "
+                f"bias={self.bias is not None}")
 
     def forward(self, x):
-        kH, kW = self.kernel_size
-        return PyPTOConv2dAIVFunction.apply(x, self.weight, self.bias, kH, kW, self.padding)
+        return PyPTOConv2dFunction.apply(
+            x, self.weight, self.stride, self.padding, self.dilation, self.bias)

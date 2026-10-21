@@ -1,6 +1,7 @@
 """PyPTO ConvTranspose2d 模块 (相位分解 + matmul 路线, 与 PyPTOConv2DModule 同风格)
 
-fwd / dK / dX 全部走 PyPTO ``matmul`` (AIC/Cube, FP32)。
+fwd 走 PyPTO ``matmul`` (AIC/Cube, FP32, 相位分解); dX/dW 走原生 aten
+(F.conv2d), 与第7章 conv 后向原生化一致。
 
 转置卷积 (transposed conv / deconv):
     Y[oc, h, w] = Σ_ic Σ_kh Σ_kw X[ic, h_src, w_src] * K[oc, ic, kh, kw]
@@ -16,9 +17,8 @@ fwd / dK / dX 全部走 PyPTO ``matmul`` (AIC/Cube, FP32)。
          out_tmp = cols @ W_full^T                     (M, Cout*s²)  [单次大 matmul]
          Y = pixel_shuffle(out_tmp) 后裁剪有效区
          (W_full 展平为 2D: (Cout*s², Cin*r²), 满足 matmul 同维约束)
-- dX:    dX = conv(dY, K^swap, stride=s, padding=p)   (转置卷积 backward 恒等式)
-         复用 PyPTOConv2DModule._conv_forward_via_matmul 单次完成
-- dK:    dK^swap = conv_wgrad(dY_pad, X)               复用 _conv_dK_via_matmul 单次完成
+- dX:    dX = conv2d(dY, W, stride=s, padding=p)      原生 (转置卷积 backward 恒等式)
+- dW:    dW = unfold(dY) @ X                          原生 (im2col+matmul)
 
 限制: groups=1, dilation=1, output_padding=0。
 """
@@ -27,19 +27,12 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-import pypto
-
 try:
     from .PyPTOConv2DModule import (
-        _matmul_bt_kernel, _matmul_at_kernel, _matmul_bt_capped,
-        _matmul_at_capped, _im2col_strided, _to_pair, _pad4d, _conv_geom)
+        _matmul_bt_capped, _im2col_strided, _to_pair, _pad4d)
 except ImportError:
     from PyPTOConv2DModule import (
-        _matmul_bt_kernel, _matmul_at_kernel, _matmul_bt_capped,
-        _matmul_at_capped, _im2col_strided, _to_pair, _pad4d, _conv_geom)
-
-# pypto.matmul ND 排布内轴上限 65535, 留余量; 大核 (如 FCN 21ch*64*64=86016) 需分块
-_INNER_AXIS_MAX = 65000
+        _matmul_bt_capped, _im2col_strided, _to_pair, _pad4d)
 
 
 def _build_W_full(K_conv, r_h, r_w, s_h, s_w):
@@ -85,77 +78,26 @@ def _conv_transpose_forward(X, K_conv, bias, stride, padding):
     return Y
 
 
-def _conv2d_fwd_matmul_chunked(X, K, stride, padding):
-    """标准卷积前向 (im2col + 分块 matmul): Y[m, co] = Σ_g cols[:, Kg] @ K[:, Kg]^T.
+def _conv_transpose_dW(X, grad_Y, Kh, Kw, stride, padding):
+    """dW 原生实现: 对 dY 做 unfold (im2col) 后与 X 做 matmul。
 
-    与 _conv_forward_via_matmul 相同, 但按输入通道分块使内轴 ≤_INNER_AXIS_MAX,
-    各通道块贡献不相交求和。返回 (N*H_out*W_out, Cout)。
+    dW[cin,cout,kh,kw] = Σ_{n,h,w} X[n,cin,h,w] * gY[n,cout,h*s+kh-p,w*s+kw-p]。
+
+    不走 torch 的 ConvTranspose 权重反传 (``aclnnConvolutionBackward``) —— 实测
+    该算子在 64×64 大核 + stride=32 (FCN) 形状下触发 NPU TransData vector-core
+    out-of-bounds 异常, 且小 shape 结果亦有偏差。unfold+matmul 在 NPU 上稳定,
+    且单次 matmul 无分块累加, fp32 精度好。
     """
-    N, Cin, H, W = X.shape
-    Cout = K.shape[0]
-    kH, kW = K.shape[2], K.shape[3]
+    s_h, s_w = _to_pair(stride)
     p_h, p_w = _to_pair(padding)
-    H_out, W_out = _conv_geom(X.shape, kH, kW, stride, padding)
-
-    X_pad = _pad4d(X.contiguous(), p_h, p_w)
-    cols = _im2col_strided(X_pad, kH, kW, stride)          # (M, Cin*kH*kW)
-    K_2d = K.reshape(Cout, Cin * kH * kW)
-    out = torch.zeros(cols.shape[0], Cout, device=X.device, dtype=X.dtype)
-    K2 = kH * kW
-    step = max(1, _INNER_AXIS_MAX // K2)
-    for c0 in range(0, Cin, step):
-        c1 = min(c0 + step, Cin)
-        part = torch.empty(cols.shape[0], Cout,
-                           device=X.device, dtype=X.dtype)
-        _matmul_bt_capped(cols[:, c0 * K2:c1 * K2].contiguous(),
-                          K_2d[:, c0 * K2:c1 * K2].contiguous(), part)
-        out += part
-    return out
-
-
-def _conv_transpose_dX(grad_Y, K_conv, X_shape, stride, padding):
-    """dX = conv(dY, swap(K), stride=s, padding=p) 恒等式 (核通道互换, 不翻转).
-
-    该卷积的输出网格恰为 X 的空间尺寸。
-    """
-    K_swap = K_conv.permute(1, 0, 2, 3).contiguous()
-    N, Cin, H_in, W_in = X_shape
-    dX_cols = _conv2d_fwd_matmul_chunked(grad_Y.contiguous(), K_swap,
-                                         stride, padding)
-    return dX_cols.reshape(N, H_in, W_in, Cin).permute(0, 3, 1, 2).contiguous()
-
-
-def _conv_transpose_dK(X, grad_Y, K_conv, stride, padding):
-    """dW: 以 dY 为卷积输入、X 为输出梯度求权重梯度 (swap 视角).
-
-    恒等式: dW[cin, cout, kh, kw] = Σ gY_pad[cout, i*s+kh, j*s+kw] * X[cin, i, j].
-    按输出通道分块防内轴超限。
-    """
-    N = grad_Y.shape[0]
-    Cout_t, Cin_t = grad_Y.shape[1], X.shape[1]
-    H_in, W_in = X.shape[2], X.shape[3]
-    Kh, Kw = K_conv.shape[2], K_conv.shape[3]
-    p_h, p_w = _to_pair(padding)
-
-    # 恒等式: gY_pad 上以 (Kh,Kw) 步长 s 滑窗的窗口数恰为 X 的空间网格数
-    gY_pad = _pad4d(grad_Y.contiguous(), p_h, p_w)
-    cols = _im2col_strided(gY_pad, Kh, Kw, stride)         # (M, Cout*K²)
-    X_2d = X.permute(0, 2, 3, 1).reshape(
-        N * H_in * W_in, Cin_t).contiguous()
-    K2 = Kh * Kw
-    step = max(1, _INNER_AXIS_MAX // K2)
-    flat = torch.empty(Cout_t * K2, Cin_t,
-                       device=grad_Y.device, dtype=grad_Y.dtype)
-    for c0 in range(0, Cout_t, step):
-        c1 = min(c0 + step, Cout_t)
-        # flat 行序 (cout, kh, kw): cols 列与 flat 行同序, 直接切片
-        part = torch.empty((c1 - c0) * K2, Cin_t,
-                           device=grad_Y.device, dtype=grad_Y.dtype)
-        _matmul_at_capped(cols[:, c0 * K2:c1 * K2].contiguous(),
-                          X_2d, part)
-        flat[c0 * K2:c1 * K2] = part
-    # (Cout, kH, kW, Cin) → (Cin, Cout, kH, kW) = weight 布局
-    return flat.reshape(Cout_t, Kh, Kw, Cin_t).permute(3, 0, 1, 2).contiguous()
+    gY_pad = F.pad(grad_Y, (p_w, p_w, p_h, p_h))
+    cols = F.unfold(gY_pad, (Kh, Kw), stride=(s_h, s_w))   # (N, Cout*Kh*Kw, L)
+    N, Ck, L = cols.shape
+    Cin = X.shape[1]
+    X2 = X.permute(0, 2, 3, 1).reshape(N, L, Cin)           # (N, L, Cin)
+    dW_flat = (cols @ X2).sum(0)                            # (Cout*Kh*Kw, Cin)
+    return dW_flat.reshape(Ck // (Kh * Kw), Kh, Kw, Cin
+                           ).permute(3, 0, 1, 2).contiguous()
 
 
 class PyPTOConvTranspose2dFunction(torch.autograd.Function):
@@ -179,18 +121,23 @@ class PyPTOConvTranspose2dFunction(torch.autograd.Function):
         X, K_conv = ctx.saved_tensors
         s_h, s_w, padding = ctx.params
         grad_Y = grad_output.contiguous()
+        # ConvT weight (Cin, Cout, kH, kW) = conv 视角核的通道互换
+        W = K_conv.permute(1, 0, 2, 3)
 
-        dW = (_conv_transpose_dK(X, grad_Y, K_conv, (s_h, s_w), padding)
-              if ctx.needs_input_grad[1] else None)
-        dX = (_conv_transpose_dX(grad_Y, K_conv, X.shape, (s_h, s_w), padding)
+        # dX = conv(dY, W, s, p): 转置卷积 backward 恒等式, 原生 aten
+        dX = (F.conv2d(grad_Y, W, stride=(s_h, s_w), padding=padding)
               if ctx.needs_input_grad[0] else None)
+        # dW: dY unfold 后与 X matmul (避开 NPU ConvTranspose 权重反传的 TransData bug)
+        dW = (_conv_transpose_dW(X, grad_Y, W.shape[2], W.shape[3],
+                                 (s_h, s_w), padding)
+              if ctx.needs_input_grad[1] else None)
         db = (grad_Y.sum(dim=(0, 2, 3)).contiguous()
               if ctx.needs_input_grad[6] else None)
         return dX, dW, None, None, None, None, db
 
 
 class PyPTOConvTranspose2d(nn.Module):
-    """PyPTO 二维转置卷积 (相位分解 + AIC matmul, FP32): fwd/dK/dX 全 PyPTO."""
+    """PyPTO 二维转置卷积 (相位分解 + AIC matmul, FP32): fwd PyPTO, bwd 原生 aten."""
 
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, output_padding=0, groups=1, bias=True,

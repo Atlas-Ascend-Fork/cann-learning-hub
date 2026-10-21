@@ -1,19 +1,15 @@
 """PyPTO BatchNorm (fwd + bwd) — 7.5 节批量规范化层
 
-基于 conv v3 / pool v2 风格的 kernel 实现, 把批量规范化转成"按行归约"
-问题, 归约方向统一为最后一维:
+把批量规范化转成"按行归约"问题, 归约方向统一为最后一维:
 
-- **卷积形态 (num_dims=4)**: X (N,C,H,W) → (N*C, H*W) 纯 reshape 零拷贝 view
-  (同 conv v3 的 ``K.reshape(Cout, K)`` 零拷贝 view)。行 = (n,c) 组。
-  注意: 行内统计只是"样本内"统计, 而 BN 需要整个 batch 的通道统计,
-  因此 kernel 内做两阶段归约: 每行先求局部和 (R,1), 再按 n 组求和得到
-  全局通道统计 ((1,C)), 展开回 (R,1) 后做归一化。
+- **卷积形态 (num_dims=4)**: X (N,C,H,W) → (N*C, H*W) 纯 reshape 零拷贝 view。
+  行 = (n,c) 组。注意: 行内统计只是"样本内"统计, 而 BN 需要整个 batch 的
+  通道统计, 因此 kernel 内做两阶段归约: 每行先求局部和 (R,1), 再按 n 组
+  求和得到全局通道统计 ((1,C)), 展开回 (R,1) 后做归一化。
 - **全连接形态 (num_dims=2)**: X (N,F) → host 转置 (F,N), 行 = 特征、列 = batch
-  (F 很小, 一次小拷贝; 同 im2col 的一次 contiguous 拷贝风格)。
-  n_groups=1 时两阶段归约自然退化为行内归约。
+  (F 很小, 一次小拷贝)。n_groups=1 时两阶段归约自然退化为行内归约。
 - **gamma/beta/moving 统计**: host 侧 reshape/expand 成 (R,1) 零拷贝 view,
-  kernel 内用 ``pypto.expand_clone`` 展开到 (R,M) (同 PyPTOConvPrimitive 的
-  ``expand_clone(reshape(idx_h,[kH,1]), [kH,kW])`` 用法)。
+  kernel 内用 ``pypto.expand_clone`` 展开到 (R,M)。
 
 kernel 划分 (每层每步 fwd+bwd 各 1 个 kernel):
 - ``_bn_fwd_train_kernel``: 两阶段 mean/var → ``rsqrt`` → x_hat → γ/β 仿射
@@ -21,27 +17,20 @@ kernel 划分 (每层每步 fwd+bwd 各 1 个 kernel):
   momentum 更新。
 - ``_bn_fwd_eval_kernel``: 用 moving 统计 (训练过程中 evaluate 走 net.eval())。
 - ``_bn_bwd_train_kernel``: 标准 BN 反向三式 (通道均值用同样的两阶段归约),
-  mean/var/inv/x_hat 由 X 重算 (同第 10 章 layer_norm_bwd 的重算风格,
-  前向只需保存 X)。
+  mean/var/inv/x_hat 由 X 重算 (前向只需保存 X)。
 - ``_bn_bwd_eval_kernel``: eval 态反向 (固定统计, 无去中心化项)。
 
-大 R 路径 (R = 行数 > ``_BN_MAX_R=4096``, 如 batch=64 的 b3-b5 BN):
-- 触发原因: 归约 kernel 的累加器 tile (R×8×4B) 超 MEM_UB, R=8192 时 bwd
-  编译直接硬杀进程 (不可捕获)。
+大 R 路径 (R = 行数 > ``_BN_MAX_R``, 如 batch=64 的深层 BN):
+- 触发原因: 归约 kernel 的累加器 tile (R×8×4B) 超 MEM_UB, R 超上限时
+  bwd kernel 编译直接失败并中断进程。
 - 实现: host torch 两遍法统计 (``_host_stats``) + torch 逐元素归一化/三式,
-  公式与 kernel 完全一致 (先均值再算平方差)。注意大 R 下**不能**复用
-  ``_bn_fwd_eval_kernel``: 实测 R=32768/M=36 时行 tile 迭代 17.4ms, 须
-  torch 逐元素 (~0.2ms)。
+  公式与 kernel 完全一致 (先均值再算平方差)。大 R 下也不复用
+  ``_bn_fwd_eval_kernel`` (行 tile 迭代在大 R 下开销过高)。
 
-限制: FP32; 输入需连续 (函数内 ``.contiguous()`` 防御); eps 硬编码 1e-5
-(同 layer_norm); 动量 0.9 (与 7.5 节手写实现一致, 注意与 nn.BatchNorm 的 0.1
-不同)。vec tile 用 (8, aligned) 同 layer_norm (逐行归约, UB 预算随 cols 增长,
-实测 cols≤1024 时 8×cols×4B×2 约 64KB < 192KB)。
-
-性能注记: 卷积路径 fwd/bwd 全程零拷贝 view (各 1 次 kernel 启动);
-全连接路径仅一次 (F,N) 小转置。fwd 输出 out 为 view, 无 host 拷贝。
-batch=64 实测 (ResNet18): b1/b2 (R=4096) kernel 路径, b3-b5 (R=8192+)
-torch 路径; BN 合计 ~36 kernel 启动/步 (kernel 路径) + ~10 小 torch op (大 R)。
+限制: FP32; 输入需连续 (函数内 ``.contiguous()`` 防御); eps 硬编码 1e-5;
+动量 0.9 (与 7.5 节手写实现一致, 注意与 nn.BatchNorm 的 0.1 不同)。
+vec tile 用 (8, aligned): 逐行归约的 UB 预算随 cols 增长 (cols≤1024 时
+双缓冲约 64KB < 192KB)。
 """
 
 import torch
@@ -49,11 +38,8 @@ from torch import nn
 
 import pypto
 
-# 单 kernel 行数上限: 实测 fwd 归约 kernel R=8192 可编译但 bwd 归约 kernel
-# R=8192 编译失败 (_Map_base::at 内部错误, 且编译失败会中断进程), R=4096 两者
-# 均通过。batch=64 时 b3/b4/b5 的 R=8192/16384/32768 需走大 R 路径。
-# 大 R 路径: host torch 两遍法统计 + 复用 eval 类 kernel (无大归约) 与
-# host 三式 bwd (同 conv dW 用 torch 的先例), 公式与 kernel 完全一致。
+# 单 kernel 行数上限: R 超过 4096 后 bwd 归约 kernel 编译失败 (会中断进程),
+# 更大的 R 由 host torch 路径承接 (公式与 kernel 一致, 见 forward/backward)。
 _BN_MAX_R = 4096
 
 
@@ -232,21 +218,17 @@ class PyPTOBatchNormFunction(torch.autograd.Function):
     """BN autograd 包装: 训练态返回 (Y, new_mm, new_mv) 供动量更新。"""
 
     @staticmethod
-    def _host_stats(X2, R, M, n_groups, rows_per_group):
-        """host 两遍法通道统计 (大 R 路径, 公式与 kernel 一致):
-        返回 (mean_ch, var_ch, mean_row, var_row): 前两者 (1,C) 通道统计,
-        后两者 (R,1) 零拷贝 view。
+    def _host_stats(Xv):
+        """host 通道统计 (大 R 路径, 公式与 kernel 一致, 两遍法)。
+
+        ``Xv`` 为 (n_groups, rows_per_group, M) view; 直接在最后两维归约
+        得到 (1, rows_per_group, 1) 的通道 mean/var —— 用 torch 的
+        ``var_mean`` 单趟融合归约 (同时出 mean/var) 代替逐行 sum + 分组
+        sum + expand 的多 kernel 组合, 大 R 下显著减少 host 发射。
         """
-        s1 = X2.sum(1, keepdim=True)                       # (R,1) 行和
-        mean_ch = s1.reshape(n_groups, rows_per_group).sum(
-            0, keepdim=True) / (n_groups * M)              # (1,C) 通道均值
-        mean_row = mean_ch.expand(n_groups, rows_per_group).reshape(R, 1)
-        xc = X2 - mean_row                                 # (R,M)
-        s2 = (xc * xc).sum(1, keepdim=True)                # (R,1) 行平方差和
-        var_ch = s2.reshape(n_groups, rows_per_group).sum(
-            0, keepdim=True) / (n_groups * M)              # (1,C) 通道方差
-        var_row = var_ch.expand(n_groups, rows_per_group).reshape(R, 1)
-        return mean_ch, var_ch, mean_row, var_row
+        var, mean = torch.var_mean(Xv, dim=(0, 2), unbiased=False,
+                                   keepdim=True)               # (1,C,1)
+        return mean, var
 
     @staticmethod
     def forward(ctx, X, gamma, beta, moving_mean, moving_var, num_dims,
@@ -285,17 +267,27 @@ class PyPTOBatchNormFunction(torch.autograd.Function):
         ctx.W = W if num_dims == 4 else None
         ctx.R, ctx.M, ctx.n_groups = R, M, n_groups
         ctx.rows_per_group = rows_per_group
+        ctx.host_stats = None          # 仅大 R (host) 路径填充, 供反向复用
 
         if training:
             if R > _BN_MAX_R:
-                # 大 R: 全 torch 路径 (host 两遍法统计 + torch 归一化)。
-                # 注意: 大 R 下不能用 _bn_fwd_eval_kernel (实测 R=32768/M=36 时
-                # 行 tile 迭代开销 17.4ms), torch 逐元素归一化 ~0.2ms。
-                mean_ch, var_ch, mean_row, var_row = \
-                    PyPTOBatchNormFunction._host_stats(
-                        X2, R, M, n_groups, rows_per_group)
-                out_view.copy_((X2 - mean_row) * torch.rsqrt(var_row + 1e-5)
-                               * g2 + b2)
+                # 大 R: 全 torch 路径 (广播式通道统计 + torch 归一化)。
+                # 注意: 大 R 下不能用 _bn_fwd_eval_kernel (行 tile 迭代
+                # 开销过高), 用 torch 逐元素归一化。
+                Xv = X2.reshape(n_groups, rows_per_group, M)
+                mean, var = PyPTOBatchNormFunction._host_stats(Xv)
+                g3 = g2.reshape(n_groups, rows_per_group, 1)
+                b3 = b2.reshape(n_groups, rows_per_group, 1)
+                # 归一化+仿射合并为 per-channel scale/shift (张量运算减半):
+                # y = (x-mean)*inv*g + b = x*(inv*g) + (b - mean*inv*g)
+                scale = torch.rsqrt(var + 1e-5) * g3               # (1,C,1)
+                shift = b3 - mean * scale
+                # 写回预分配 base buffer (自定义 Function 返回多输出时,
+                # 若某输出是 view 会被 autograd 的 inplace 检查拒绝)
+                out_view.copy_((Xv * scale + shift).reshape(R, M))
+                mean_ch = mean.reshape(1, rows_per_group)
+                var_ch = var.reshape(1, rows_per_group)
+                ctx.host_stats = (mean.detach(), var.detach())  # 反向复用 (常数)
             else:
                 mean_ch = torch.empty(1, rows_per_group,
                                       device=X.device, dtype=X.dtype)
@@ -313,8 +305,15 @@ class PyPTOBatchNormFunction(torch.autograd.Function):
                 new_mm, new_mv
         else:
             if R > _BN_MAX_R:
-                # 大 R eval: 同样绕开慢的 eval kernel (实测 R*M=4.7MB 时 17.4ms)
-                out_view.copy_((X2 - mm2) * torch.rsqrt(mv2 + 1e-5) * g2 + b2)
+                # 大 R eval: 同样绕开行 tile 迭代较慢的 eval kernel
+                Xv = X2.reshape(n_groups, rows_per_group, M)
+                mm3 = mm2.reshape(n_groups, rows_per_group, 1)
+                mv3 = mv2.reshape(n_groups, rows_per_group, 1)
+                g3 = g2.reshape(n_groups, rows_per_group, 1)
+                b3 = b2.reshape(n_groups, rows_per_group, 1)
+                scale = torch.rsqrt(mv3 + 1e-5) * g3               # (1,C,1)
+                shift = b3 - mm3 * scale
+                out_view.copy_((Xv * scale + shift).reshape(R, M))
             else:
                 _bn_fwd_eval_kernel(X2, mm2, mv2, g2, b2, out_view, R, M)
             ctx.mode = "eval"
@@ -348,27 +347,33 @@ class PyPTOBatchNormFunction(torch.autograd.Function):
         if ctx.mode == "train":
             X2, g2 = ctx.saved_tensors
             if R > _BN_MAX_R:
-                # 大 R: host 两遍法统计 + 三式 (同 kernel 公式, 无大归约 kernel)
-                _, _, mean_row, var_row = \
-                    PyPTOBatchNormFunction._host_stats(
-                        X2, R, M, n_groups, ctx.rows_per_group)
-                inv_row = torch.rsqrt(var_row + 1e-5)        # (R,1)
-                x_hat = (X2 - mean_row) * inv_row            # (R,M) 由 X 重算
-                gy_g = grad_Y * g2                            # γ·gY
-                gm_row = (gy_g.sum(1, keepdim=True).reshape(
-                    n_groups, ctx.rows_per_group).sum(
-                    0, keepdim=True) / (n_groups * M))        # (1,C) → 行展开
-                gm_row = gm_row.expand(
-                    n_groups, ctx.rows_per_group).reshape(R, 1)
-                gh_row = ((gy_g * x_hat).sum(1, keepdim=True).reshape(
-                    n_groups, ctx.rows_per_group).sum(
-                    0, keepdim=True) / (n_groups * M)).expand(
-                    n_groups, ctx.rows_per_group).reshape(R, 1)
-                grad_X_view.copy_(inv_row * (gy_g - gm_row - x_hat * gh_row))
-                g_ch = (grad_Y * x_hat).sum(1, keepdim=True).reshape(
-                    n_groups, ctx.rows_per_group).sum(0, keepdim=True)
-                b_ch = grad_Y.sum(1, keepdim=True).reshape(
-                    n_groups, ctx.rows_per_group).sum(0, keepdim=True)
+                # 大 R: 广播式通道统计 + 三式 (同 kernel 公式, 无大归约 kernel)
+                rpg = ctx.rows_per_group
+                Xv = X2.reshape(n_groups, rpg, M)
+                gyv = grad_Y.reshape(n_groups, rpg, M)
+                if ctx.host_stats is not None:
+                    mean, var = ctx.host_stats          # 复用前向统计
+                else:
+                    mean, var = PyPTOBatchNormFunction._host_stats(Xv)
+                inv = torch.rsqrt(var + 1e-5)                 # (1,C,1)
+                xhat = (Xv - mean) * inv                      # (N,C,M)
+                g3 = g2.reshape(n_groups, rpg, 1)
+                gy_g = gyv * g3                               # γ·gY
+                # 三式的通道均值 = 对 (n, M) 维求均值 (单融合归约)
+                gm = gy_g.mean(dim=(0, 2), keepdim=True)      # (1,C,1)
+                gh = (gy_g * xhat).mean(dim=(0, 2), keepdim=True)
+                # grad = inv*(gy*g - gm - xhat*gh) 展开成 2 个张量乘 + 常数:
+                #   = gyv*(inv*g) + (Xv-mean)*(-inv^2*gh) - inv*gm
+                ca = inv * g3                                  # (1,C,1)
+                cb = -(inv * inv * gh)
+                cc = -inv * gm
+                xcent = Xv - mean
+                grad3 = gyv * ca + xcent * cb + cc             # (N,C,M)
+                grad_X_view.copy_(grad3.reshape(R, M))
+                g_ch = (grad_Y.reshape(n_groups, rpg, M) * xhat).sum(
+                    dim=(0, 2)).reshape(1, rpg)
+                b_ch = grad_Y.reshape(n_groups, rpg, M).sum(
+                    dim=(0, 2)).reshape(1, rpg)
             else:
                 _bn_bwd_train_kernel(X2, g2, grad_Y, grad_X_view, g_ch, b_ch,
                                      R, M, n_groups)

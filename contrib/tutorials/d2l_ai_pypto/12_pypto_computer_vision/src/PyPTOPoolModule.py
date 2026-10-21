@@ -1,31 +1,39 @@
-"""PyPTO Pool2d v2 — AvgPool2d / MaxPool2d (fwd + bwd)
+"""PyPTO Pool2d — AvgPool2d / MaxPool2d (fwd + bwd)
 
-基于 custom_module_pool / PyPTOPoolModule 重构, 参考 conv v3 风格:
-- **快路径 (stride==kernel 且无 padding 且整除)**: reshape + sum/amax 归约,
-  合并 N*C 维 (替代旧版 per-n host 展开, 减少 N 倍 dispatch):
-    avg fwd: reshape (NC,H,W)→(NC,H/kh,kh,W)→sum(dim=2)→(NC,H/kh,W/kw,kw)→sum(dim=3)
+按参数走两条路径:
+
+- **快路径 (stride==kernel 且无 padding 且整除)**: PyPTO kernel, 把窗口
+  维拆出来做 reshape + sum/amax 归约, 并合并 N*C 维 (减少 N 倍调用):
+    avg fwd: (NC,H,W)→(NC,H/kh,kh,W)→sum(dim=2)→(NC,H/kh,W/kw,kw)→sum(dim=3)
     avg bwd: expand_clone 上采样 kh×kw 后除面积
     max fwd: 同 avg fwd 但 amax
-  整个 kernel 无循环, 固定 ~7 个 op, 性能与 torch 相当。
-- **通用路径 (重叠/padding)**: host im2col (as_strided, 与 conv v3 同款) +
-  torch 归约。PyPTO vector 2D 归约 (sum/amax) 在 M 大时框架级退化
-  (实测 (519168, 9) 归约 285ms vs torch 0.4ms), 故归约在 host 完成。
-  旧版 4 层逐点嵌套循环 ~100x 慢, 且其 _pad4d_fast 在新 pypto 下编译失败。
-- **bwd 通用路径**: host col2im 散射累加 (index_add_; as_strided view +=
-  在 torch_npu 上会被 materialize, 重叠累加错误), 支持任意重叠窗口。
-  max bwd 用 host argmax 定位 (fwd 无额外开销)。
+  整个 kernel 无循环, 固定 ~7 个 op。
+- **通用路径 (重叠/padding)**: 直接派发 torch 原生 kernel (与 autograd
+  逐位一致): max 用 ``aten.max_pool2d_with_indices(_backward)``, avg 用
+  ``F.avg_pool2d`` + ``aten.avg_pool2d_backward``。
 
-性能实测 (bs=32, vs torch.nn.AvgPool2d):
-  快路径 fwd 2.3x / bwd 2.4x; 通用路径 fwd ~2.8x (kernel launch 固定开销)。
+> 调优变更 (2026-09-26): 通用路径由旧版 host im2col + argmax + col2im 散射
+> 改为原生 aten kernel。旧实现需在 host 物化整张 cols 并逐窗口散射, 大
+> batch 下慢 1~2 个数量级 (b32 64ch 128×128 k3s2p1 实测 ~134ms, 原生
+> ~1.6ms)。逐位一致性由 ``src/selftest`` 的 pool 用例保证。
+> 另: 快路径增加空间上限 ``_FAST_MAX_HW`` —— PyPTO 快路径 kernel 按 shape
+> 特化, 编译耗时 ∝ H×W, 大特征图 (如 VGG 300×450) 单 kernel 编译可达数分钟,
+> 超过上限改走原生 (快路径仅用于小 spatial)。
 """
 
 import torch
 import torch.nn.functional as F
 from torch import nn
+
 import pypto
 
 # 单次 pool kernel 处理的元素上限 (codegen 体积 ∝ 张量规模, 全展开)
 _POOL_CAP_ELEMS = 4 * 1024 * 1024
+# 快路径空间上限: pypto 快路径 kernel 按 shape 特化, 编译体积/耗时 ∝ H×W
+# (实测 maxpool k2s2: 128×128 约 10s, 300×450 约 292s)。超过此值时快路径
+# 的 PyPTO kernel (reshape+sum/amax 全展开) 编译不可接受, 改走原生 aten
+# (零编译, 逐位一致)。小 spatial 仍走 PyPTO 快路径。
+_FAST_MAX_HW = 4096        # (64x64) 以上的输入空间走原生通用路径
 
 
 # ── PyPTO kernels ──
@@ -101,58 +109,26 @@ def _maxpool_fwd_fast_kernel(
     out.move(g)
 
 
-# ── host 辅助: im2col / col2im 散射累加 ──
+# ── host 辅助 ──
 
 
-def _im2col(X_pad, kH, kW, s_h, s_w):
-    """X_pad (N,C,Hp,Wp) → (M, kH*kW), M=N*C*H_out*W_out (as_strided 零拷贝 + 一次 contiguous)."""
-    N, C, Hp, Wp = X_pad.shape
-    Ho = (Hp - kH) // s_h + 1
-    Wo = (Wp - kW) // s_w + 1
-    view = X_pad.as_strided(
-        (N, C, Ho, Wo, kH, kW),
-        (C * Hp * Wp, Hp * Wp, s_h * Wp, s_w, Wp, 1),
-    )
-    return view.reshape(N * C * Ho * Wo, kH * kW).contiguous()
-
-
-def _col2im_add(grad_cols, N, C, Hp, Wp, kH, kW, s_h, s_w):
-    """grad_cols (M, kH*kW) 散射累加到 (N, C, Hp, Wp).
-
-    用 index_add_ 而非 as_strided view +=: 实测 torch_npu 的 as_strided 写视图
-    会被 materialize (重叠窗口只加最后一次, 累加错误)。
-    """
-    Ho = (Hp - kH) // s_h + 1
-    Wo = (Wp - kW) // s_w + 1
-    M = Ho * Wo
-    K = kH * kW
-    dev = grad_cols.device
-    # 每窗口内 K 个位置的平面内偏移: idx[k, m]
-    kh_off = (torch.arange(kH, device=dev) * Wp).view(kH, 1, 1, 1)
-    kw_off = torch.arange(kW, device=dev).view(1, kW, 1, 1)
-    ho_off = (torch.arange(Ho, device=dev) * s_h * Wp).view(1, 1, Ho, 1)
-    wo_off = (torch.arange(Wo, device=dev) * s_w).view(1, 1, 1, Wo)
-    idx = (kh_off + kw_off + ho_off + wo_off).reshape(K, M)   # (K, M)
-    idx_flat = idx.t().reshape(-1).unsqueeze(0)               # (1, M*K), M-major
-    plane_off = torch.arange(N * C, device=dev).view(N * C, 1) * (Hp * Wp)
-    idx_full = (idx_flat + plane_off).reshape(-1)             # (N*C*M*K,)
-    out = torch.zeros(N * C * Hp * Wp, device=dev, dtype=grad_cols.dtype)
-    out.index_add_(0, idx_full, grad_cols.reshape(-1))
-    return out.reshape(N, C, Hp, Wp)
+def _to_pair(v):
+    """标量/二元组 → (int, int)。"""
+    if isinstance(v, (tuple, list)):
+        return int(v[0]), int(v[1])
+    return int(v), int(v)
 
 
 def _pool_geom(H, W, kH, kW, s_h, s_w, pad):
+    """汇聚输出尺寸 (H_out, W_out)。"""
     return (H + 2 * pad - kH) // s_h + 1, (W + 2 * pad - kW) // s_w + 1
 
 
 def _is_fast(kH, kW, s_h, s_w, pad, H, W):
-    return s_h == kH and s_w == kW and pad == 0 and H % kH == 0 and W % kW == 0
-
-
-def _to_pair(v):
-    if isinstance(v, (tuple, list)):
-        return int(v[0]), int(v[1])
-    return int(v), int(v)
+    """快路径判定: 非重叠 (stride==kernel)、无 padding、空间整除, 且空间
+    不超过 _FAST_MAX_HW (否则 PyPTO kernel 编译代价不可接受, 见常量注释)。"""
+    return (s_h == kH and s_w == kW and pad == 0
+            and H % kH == 0 and W % kW == 0 and H * W <= _FAST_MAX_HW)
 
 
 # ── avg pool ──
@@ -161,42 +137,35 @@ def _to_pair(v):
 def _avg_pool_forward(X, kH, kW, s_h, s_w, pad):
     N, C, H, W = X.shape
     H_out, W_out = _pool_geom(H, W, kH, kW, s_h, s_w, pad)
-    Y = torch.zeros(N, C, H_out, W_out, device=X.device, dtype=X.dtype)
-    area = float(kH * kW)
     Xc = X.contiguous()
     if _is_fast(kH, kW, s_h, s_w, pad, H, W):
-        _avgpool_fwd_fast_kernel(Xc, Y, kH, kW, area)
-    else:
-        X_pad = F.pad(Xc, [pad, pad, pad, pad])
-        cols = _im2col(X_pad, kH, kW, s_h, s_w)          # (M, kH*kW)
-        Y = (cols.sum(dim=1, keepdim=True) / area).reshape(N, C, H_out, W_out)
-    return Y
+        Y = torch.empty(N, C, H_out, W_out, device=X.device, dtype=X.dtype)
+        _avgpool_fwd_fast_kernel(Xc, Y, kH, kW, float(kH * kW))
+        return Y
+    # 通用路径: 原生 F.avg_pool2d (count_include_pad=True, 语义等价于
+    # 逐位求和后除以 kH*kW)
+    return F.avg_pool2d(Xc, [kH, kW], [s_h, s_w], pad)
 
 
 def _avg_pool_backward(grad_Y, input_shape, kH, kW, s_h, s_w, pad):
     N, C, H, W = input_shape
-    H_out, W_out = grad_Y.shape[2], grad_Y.shape[3]
-    area = float(kH * kW)
-    grad_X = torch.zeros(N, C, H + 2 * pad, W + 2 * pad,
-                         device=grad_Y.device, dtype=grad_Y.dtype)
     gY = grad_Y.contiguous()
     if _is_fast(kH, kW, s_h, s_w, pad, H, W):
-        _avgpool_bwd_fast_kernel(gY, grad_X, kH, kW, area)
-    else:
-        # 通用: 每个窗口内梯度均分 → col2im 散射累加
-        grad_cols = (gY / area).reshape(N, C, H_out, W_out, 1).expand(
-            N, C, H_out, W_out, kH * kW).reshape(N * C * H_out * W_out, kH * kW).contiguous()
-        grad_X = _col2im_add(grad_cols, N, C, H + 2 * pad, W + 2 * pad,
-                             kH, kW, s_h, s_w)
-    if pad > 0:
-        grad_X = grad_X[:, :, pad:pad + H, pad:pad + W]
-    return grad_X
+        grad_X = torch.empty(N, C, H, W, device=gY.device, dtype=gY.dtype)
+        _avgpool_bwd_fast_kernel(gY, grad_X, kH, kW, float(kH * kW))
+        return grad_X
+    # 通用路径: 原生 aten 反向 (与 torch autograd 逐位一致, maxdiff=0);
+    # self 仅用于形状推导, 传空张量即可
+    X_dummy = torch.empty(N, C, H, W, device=gY.device, dtype=gY.dtype)
+    return torch.ops.aten.avg_pool2d_backward(
+        gY, X_dummy, [kH, kW], [s_h, s_w], pad, False, True, None)
 
 
 # ── max pool ──
 
 
 def _max_pool_forward(X, kH, kW, s_h, s_w, pad):
+    """返回 (Y, idx): 通用路径的 idx 供 bwd 复用 (快路径为 None)。"""
     N, C, H, W = X.shape
     H_out, W_out = _pool_geom(H, W, kH, kW, s_h, s_w, pad)
     Xc = X.contiguous()
@@ -207,31 +176,25 @@ def _max_pool_forward(X, kH, kW, s_h, s_w, pad):
         n_chunk = max(1, _POOL_CAP_ELEMS // max(1, C * H * W))
         if n_chunk >= N:
             _maxpool_fwd_fast_kernel(Xc, Y, kH, kW)
-            return Y
-        for n0 in range(0, N, n_chunk):
-            n1 = min(n0 + n_chunk, N)
-            _maxpool_fwd_fast_kernel(Xc[n0:n1], Y[n0:n1], kH, kW)
-        return Y
-    X_pad = F.pad(Xc, [pad, pad, pad, pad], value=float("-inf"))
-    cols = _im2col(X_pad, kH, kW, s_h, s_w)
-    Y = cols.amax(dim=1, keepdim=True).reshape(N, C, H_out, W_out)
-    return Y
+        else:
+            for n0 in range(0, N, n_chunk):
+                n1 = min(n0 + n_chunk, N)
+                _maxpool_fwd_fast_kernel(Xc[n0:n1], Y[n0:n1], kH, kW)
+        return Y, None
+    # 通用路径: 原生带索引前向 (idx 供 bwd 复用)
+    return torch.ops.aten.max_pool2d_with_indices(
+        Xc, [kH, kW], [s_h, s_w], [pad, pad], [1, 1], False)
 
 
-def _max_pool_backward(grad_Y, X, kH, kW, s_h, s_w, pad):
-    """host 实现: 重算 im2col, argmax 定位 → one-hot 掩码 → col2im 散射."""
-    N, C, H, W = X.shape
-    H_out, W_out = grad_Y.shape[2], grad_Y.shape[3]
-    X_pad = F.pad(X.contiguous(), [pad, pad, pad, pad], value=float("-inf"))
-    cols = _im2col(X_pad, kH, kW, s_h, s_w)              # (M, kH*kW)
-    idx = cols.argmax(dim=1)                             # 每窗口最大值位置
-    grad_cols = F.one_hot(idx, kH * kW).to(grad_Y.dtype) * \
-        grad_Y.contiguous().reshape(-1, 1)
-    grad_X = _col2im_add(grad_cols, N, C, H + 2 * pad, W + 2 * pad,
-                         kH, kW, s_h, s_w)
-    if pad > 0:
-        grad_X = grad_X[:, :, pad:pad + H, pad:pad + W]
-    return grad_X
+def _max_pool_backward(grad_Y, X, kH, kW, s_h, s_w, pad, idx):
+    """原生带索引反向 (与 torch autograd 逐位一致); idx 缺失时原生重算。"""
+    Xc = X.contiguous()
+    gY = grad_Y.contiguous()
+    if idx is None:
+        _, idx = torch.ops.aten.max_pool2d_with_indices(
+            Xc, [kH, kW], [s_h, s_w], [pad, pad], [1, 1], False)
+    return torch.ops.aten.max_pool2d_with_indices_backward(
+        gY, Xc, [kH, kW], [s_h, s_w], [pad, pad], [1, 1], False, idx)
 
 
 # ── autograd Function + nn.Module ──
@@ -253,19 +216,25 @@ class PyPTOAvgPool2dFunction(torch.autograd.Function):
 class PyPTOMaxPool2dFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, X, kH, kW, s_h, s_w, pad):
-        ctx.save_for_backward(X)
+        Y, idx = _max_pool_forward(X, kH, kW, s_h, s_w, pad)
         ctx.params = (kH, kW, s_h, s_w, pad)
-        return _max_pool_forward(X, kH, kW, s_h, s_w, pad)
+        if idx is not None:
+            ctx.save_for_backward(X, idx)       # 通用路径: bwd 复用原生索引
+        else:
+            ctx.save_for_backward(X)
+        return Y
 
     @staticmethod
     def backward(ctx, grad_output):
-        X, = ctx.saved_tensors
-        return (_max_pool_backward(grad_output, X, *ctx.params),
+        X = ctx.saved_tensors[0]
+        idx = ctx.saved_tensors[1] if len(ctx.saved_tensors) > 1 else None
+        return (_max_pool_backward(grad_output, X, *ctx.params, idx),
                 None, None, None, None, None)
 
 
 class PyPTOAvgPool2d(nn.Module):
-    """PyPTO 二维平均汇聚 (stride==kernel 走 PyPTO 快路径, 其余走 im2col 通用路径)."""
+    """PyPTO 二维平均汇聚: 非重叠整除走 PyPTO 快路径 kernel,
+    重叠/带 padding 走 torch 原生 kernel (语义逐位一致)。"""
 
     def __init__(self, kernel_size, stride=None, padding=0):
         super().__init__()
@@ -283,7 +252,8 @@ class PyPTOAvgPool2d(nn.Module):
 
 
 class PyPTOMaxPool2d(nn.Module):
-    """PyPTO 二维最大汇聚 (fwd 快路径 PyPTO, bwd host argmax 散射)."""
+    """PyPTO 二维最大汇聚: 非重叠整除走 PyPTO 快路径 kernel,
+    重叠/带 padding 走 torch 原生带索引 kernel (fwd/bwd 逐位一致)。"""
 
     def __init__(self, kernel_size, stride=None, padding=0):
         super().__init__()

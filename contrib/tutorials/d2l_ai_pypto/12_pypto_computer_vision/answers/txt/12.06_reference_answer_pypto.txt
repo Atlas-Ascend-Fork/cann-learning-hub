@@ -7,7 +7,7 @@
 ══════════════════════════════════════════════
 import os, sys
 sys.path.insert(0, "..")
-os.environ["TILE_FWK_DEVICE_ID"] = "1"
+os.environ["TILE_FWK_DEVICE_ID"] = "0"
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -43,28 +43,27 @@ device = f"npu:{device_id}"
 
 可以看到，不同图像中香蕉的大小、朝向、位置与光照差异明显，对应的边界框也随之改变：横放的香蕉边界框宽大于高，竖放的香蕉边界框高大于宽。
 
-» 使用 PyPTO 编程进行验证（12.4 节已把锚框生成 multibox_prior 与交并比 box_iou 下沉为 PyPTO kernel，这里在香蕉检测数据上串起这两个算子：为一张香蕉图生成锚框，再计算每个锚框与真实边界框的 IoU——这是 assign_anchor_to_bbox（按 IoU 贪心分配锚框）的第一步，也是练习 12.6.2 提到的"目标检测中边界框必须随图像一起变换"的数值基础）：
+» 使用 src/PyPTOAnchor.py 进行验证（12.4 节提供了锚框生成 multibox_prior（host 端 torch 等价实现）与交并比 box_iou（PyPTO kernel），这里在香蕉检测数据上串起二者：为一张香蕉图生成锚框，再计算每个锚框与真实边界框的 IoU——这是 assign_anchor_to_bbox（按 IoU 贪心分配锚框）的第一步，也是练习 12.6.2 提到的"目标检测中边界框必须随图像一起变换"的数值基础）：
 
 # PyPTO 验证：香蕉图上生成锚框 + 计算与真实框的 IoU（src/PyPTOAnchor.py kernel 下沉）
 from src.PyPTOAnchor import multibox_prior as mb_prior_pypto
 from src.PyPTOAnchor import box_iou as box_iou_pypto
-from src.PyPTOAnchor import box_center_to_corner as bctc_pypto
 
 # 用验证集第 1 张图（顺序固定，结果可复现；训练集 DataLoader 打乱顺序会改变演示数值）
 val_images, val_labels = read_data_bananas(is_train=False)
 X_banana = val_images[0].float().unsqueeze(0).contiguous().to(device)
                           # (1,3,256,256): read_image 返回非连续 uint8，需 contiguous()
 anchors_pt = mb_prior_pypto(X_banana, sizes=[0.05, 0.1], ratios=[1, 2, 0.5])
-print('PyPTO 锚框数量:', anchors_pt.shape[1])  # 256*256 像素 x bpp=4
+print('锚框数量:', anchors_pt.shape[1])  # 256*256 像素 x bpp=4
 
-gt_banana = val_labels[0, 0, 1:].float().to(device)  # 真实框 (cx, cy, w, h)
-gt_corner = bctc_pypto(gt_banana.unsqueeze(0))     # PyPTO kernel 转角点格式
+# read_data_bananas 的标签为 (类别, xmin, ymin, xmax, ymax)，已是角点格式（归一化坐标）
+gt_corner = val_labels[0, 0, 1:].float().unsqueeze(0).to(device)
 iou_pt = box_iou_pypto(anchors_pt[0], gt_corner)   # PyPTO kernel IoU
 print('PyPTO IoU 矩阵形状:', tuple(iou_pt.shape))
 print('与真实框 IoU>0.1 的锚框数:', int((iou_pt[:, 0] > 0.1).sum()),
       '，最大 IoU:', f'{iou_pt[:, 0].max().item():.4f}')
 
-密集锚框中绝大多数与真实边界框的 IoU 很小（< 0.1），这与 12.4 节"先按 IoU 把真实框分配给最近的锚框"的贪心策略一致：IoU 匹配是目标检测回归训练的基础。练习 12.6.2 提到的随机裁剪增广会同时改变图像与边界框坐标，若裁剪只切到目标的一小部分，其与锚框的 IoU 将骤降，导致该目标无法匹配任何锚框——这正是目标检测与图像分类增广的关键差异。
+在本例验证集的第 1 张图上，262144 个锚框中有 2614 个与真实框的 IoU 超过 0.1（最大 IoU 约 0.231）；密集锚框中绝大多数与真实边界框的 IoU 很小（< 0.1），这与 12.4 节"先按 IoU 把真实框分配给最近的锚框"的贪心策略一致：IoU 匹配是目标检测回归训练的基础。练习 12.6.2 提到的随机裁剪增广会同时改变图像与边界框坐标，若裁剪只切到目标的一小部分，其与锚框的 IoU 将骤降，导致该目标无法匹配任何锚框——这正是目标检测与图像分类增广的关键差异。
 
 
 ──────────────────────────────────────────────

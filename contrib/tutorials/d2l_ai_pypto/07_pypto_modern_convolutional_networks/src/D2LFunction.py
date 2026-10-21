@@ -96,10 +96,10 @@ DATA_HUB = dict()
 DATA_URL = 'http://d2l-data.s3-accelerate.amazonaws.com/'
 
 def use_svg_display():
-    """使用svg格式在Jupyter中显示绘图
+    """使用png格式在Jupyter中显示绘图
 
     Defined in :numref:`sec_calculus`"""
-    backend_inline.set_matplotlib_formats('svg')
+    backend_inline.set_matplotlib_formats('png')
 
 def set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend):
     """设置matplotlib的轴
