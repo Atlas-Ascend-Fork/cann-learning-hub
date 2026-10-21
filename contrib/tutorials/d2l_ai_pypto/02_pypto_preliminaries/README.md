@@ -8,7 +8,7 @@
 ## 在线阅读
 | 文档 | Link | 状态 |
 |--|--|--|
-| 02.00 章节介绍 | [在线阅读](./02.00_chapter_info.ipynb) | ✅ 已发布 |
+| 02.00 章节介绍 | [在线阅读](./02.00_chapter_intro.ipynb) | ✅ 已发布 |
 | 02.01 数据操作 | [在线阅读](./02.01_data_manipulation.ipynb) | ✅ 已发布 |
 | 02.02 数据预处理 | [在线阅读](./02.02_data_preprocessing.ipynb) | ✅ 已发布 |
 | 02.03 线性代数 | [在线阅读](./02.03_linear_algebra.ipynb) | ✅ 已发布 |
