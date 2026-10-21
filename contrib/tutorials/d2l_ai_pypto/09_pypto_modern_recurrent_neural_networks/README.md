@@ -17,3 +17,9 @@
 | 09.06 编码器-解码器架构 | [在线阅读](./09.06_encoder_decoder.ipynb) | ✅ 已发布 |
 | 09.07 序列到序列学习（seq2seq） | [在线阅读](./09.07_seq2seq.ipynb) | ✅ 已发布 |
 | 09.08 束搜索 | [在线阅读](./09.08_beam_search.ipynb) | ✅ 已发布 |
+
+---
+
+## 参考答案说明
+- PyTorch nn.GRU 在当前 NPU/CANN 上首次调用会失败（DynamicGRUV2, 500002），目前答案中演示已注释
+

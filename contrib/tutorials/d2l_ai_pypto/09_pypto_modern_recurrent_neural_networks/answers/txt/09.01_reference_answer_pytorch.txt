@@ -1,4 +1,4 @@
-说明：以下代码片段依赖主 notebook 环境（已导入 torch / nn / F / pypto / device 等，answers 子目录需先执行 sys.path.insert(0, "..") 以导入 src.utils / src.pypto_ops）。
+说明：以下 PyTorch 代码片段依赖主 notebook 环境（已导入 torch / nn / F / device 等；answers 子目录需先执行 sys.path.insert(0, "..") 以导入 src.utils）。
 9.1 门控循环单元（GRU） 练习参考答案
 
 练习9.1.1

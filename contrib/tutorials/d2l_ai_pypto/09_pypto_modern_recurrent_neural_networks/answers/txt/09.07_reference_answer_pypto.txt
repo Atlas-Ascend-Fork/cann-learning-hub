@@ -6,7 +6,7 @@
 试着通过调整超参数来改善翻译效果。
 
 解答：
-（同PyTorch版分析，详见pytorch版txt。注：PyPTO 版采用章内默认超参（embed/hidden=32、batch=64、lr=0.005、500 epochs）作对照演示，与 torch 版的调参配置（256/256/256/0.001/300）对应同一道题；如需复现调参效果，可将下方超参替换为 torch 版配置后重跑。）
+（同PyTorch版分析，详见pytorch版txt。PyPTO 版采用与 torch 版相同的调参配置（embed/hidden=256、batch=256、lr=0.001、300 epochs），在 NPU 上完成训练。）
 
 PyPTO 代码（使用 src.utils 中的 Encoder/Decoder/EncoderDecoder 基类和 PyPTOLinear）：
 
@@ -42,10 +42,12 @@ class Seq2SeqDecoderPyPTO(Decoder):
 
 class MaskedSoftmaxCELoss(nn.CrossEntropyLoss):
     """带遮蔽的 softmax 交叉熵损失函数"""
+    def __init__(self):
+        super().__init__()
+        self.reduction = 'none'
     def forward(self, pred, label, valid_len):
         weights = torch.ones_like(label)
         weights = sequence_mask(weights, valid_len)
-        self.reduction = 'none'
         unweighted_loss = super().forward(pred.permute(0, 2, 1), label)
         weighted_loss = (unweighted_loss * weights).mean(dim=1)
         return weighted_loss
@@ -86,16 +88,13 @@ def train_seq2seq(net, data_iter, lr, num_epochs, tgt_vocab, device):
     print(f'loss {metric[0]/metric[1]:.3f}, {metric[1]/timer.stop():.1f} '
         f'tokens/sec on {str(device)}')
 
-batch_size, num_steps = 64, 10
+batch_size, num_steps = 256, 10
 train_iter, src_vocab, tgt_vocab = load_data_nmt(batch_size, num_steps)
-encoder = Seq2SeqEncoderPyPTO(len(src_vocab), 32, 32, 2, 0.1)
-decoder = Seq2SeqDecoderPyPTO(len(tgt_vocab), 32, 32, 2, 0.1)
+encoder = Seq2SeqEncoderPyPTO(len(src_vocab), 256, 256, 2, 0.1)
+decoder = Seq2SeqDecoderPyPTO(len(tgt_vocab), 256, 256, 2, 0.1)
 net = EncoderDecoder(encoder, decoder).to(device)
 
 # JIT 编译预热
-print('正在编译 PyPTO kernel...')
-import time as t
-t0 = t.time()
 X_batch, X_len, Y_batch, Y_len = next(iter(train_iter))
 X_batch = X_batch.to(device); Y_batch = Y_batch.to(device)
 X_len = X_len.to(device); Y_len = Y_len.to(device)
@@ -105,10 +104,9 @@ loss = MaskedSoftmaxCELoss()
 Y_hat, _ = net(X_batch, dec_input, X_len)
 l = loss(Y_hat, Y_batch, Y_len)
 l.sum().backward(); net.zero_grad()
-print(f'编译完成，耗时 {t.time() - t0:.0f} 秒')
 
-print('开始训练...')
-train_seq2seq(net, train_iter, 0.005, 500, tgt_vocab, device)
+# 训练
+train_seq2seq(net, train_iter, 0.001, 300, tgt_vocab, device)
 
 NPU 注意事项：
 - 编码器-解码器架构中使用 PyPTOGRU（支持多层 num_layers / dropout，层间 dropout 仅训练时生效），输出层使用 PyPTOLinear
@@ -267,7 +265,7 @@ NPU 注意事项：
 用LSTM替换GRU重新运行实验。
 
 解答：
-（同PyTorch版分析，详见pytorch版txt）
+（同PyTorch版分析，详见pytorch版txt。PyPTO 版采用与 torch 版一致的 2 层 LSTM 结构；为控制 NPU 训练时长，仅训练 10 epochs（torch 版为 500），仅作正确性演示。）
 
 PyPTO 代码（PyPTOLSTM 替换 PyPTOGRU，state 为 (h, c) 二元组）：
 
@@ -278,22 +276,24 @@ from src.pypto_ops import PyPTOLinear, PyPTOLSTM
 
 class MaskedSoftmaxCELoss(nn.CrossEntropyLoss):
     """带遮蔽的 softmax 交叉熵损失（PyPTO 版，self-contained）。"""
+    def __init__(self):
+        super().__init__()
+        self.reduction = 'none'
     def forward(self, pred, label, valid_len):
         weights = torch.ones_like(label)
         weights = sequence_mask(weights, valid_len)
-        self.reduction = 'none'
         unweighted_loss = super().forward(pred.permute(0, 2, 1), label)
         weighted_loss = (unweighted_loss * weights).mean(dim=1)
         return weighted_loss
 
 
 class Seq2SeqEncoderPyPTOLSTM(Encoder):
-    """LSTM 编码器（PyPTO 版）：PyPTOLSTM 单向、此处用单层（默认）。"""
+    """LSTM 编码器（PyPTO 版）：PyPTOLSTM 单向，支持多层。"""
 
-    def __init__(self, vocab_size, embed_size, num_hiddens, dropout=0):
+    def __init__(self, vocab_size, embed_size, num_hiddens, num_layers=1, dropout=0):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
-        self.rnn = PyPTOLSTM(embed_size, num_hiddens)
+        self.rnn = PyPTOLSTM(embed_size, num_hiddens, num_layers, dropout)
 
     def forward(self, X, *args):
         X = self.embedding(X).permute(1, 0, 2).contiguous()
@@ -304,10 +304,10 @@ class Seq2SeqEncoderPyPTOLSTM(Encoder):
 class Seq2SeqDecoderPyPTOLSTM(Decoder):
     """LSTM 解码器（PyPTO 版）：state 为 (h, c) 二元组。"""
 
-    def __init__(self, vocab_size, embed_size, num_hiddens, dropout=0):
+    def __init__(self, vocab_size, embed_size, num_hiddens, num_layers=1, dropout=0):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
-        self.rnn = PyPTOLSTM(embed_size + num_hiddens, num_hiddens)
+        self.rnn = PyPTOLSTM(embed_size + num_hiddens, num_hiddens, num_layers, dropout)
         self.dense = PyPTOLinear(num_hiddens, vocab_size)
 
     def init_state(self, enc_outputs, *args):
@@ -363,14 +363,11 @@ def train_seq2seq_lstm(net, data_iter, lr, num_epochs, tgt_vocab, device):
 
 batch_size, num_steps = 64, 10
 train_iter, src_vocab, tgt_vocab = load_data_nmt(batch_size, num_steps)
-encoder = Seq2SeqEncoderPyPTOLSTM(len(src_vocab), 32, 32)
-decoder = Seq2SeqDecoderPyPTOLSTM(len(tgt_vocab), 32, 32)
+encoder = Seq2SeqEncoderPyPTOLSTM(len(src_vocab), 32, 32, 2, 0.1)
+decoder = Seq2SeqDecoderPyPTOLSTM(len(tgt_vocab), 32, 32, 2, 0.1)
 net = EncoderDecoder(encoder, decoder).to(device)
 
 # JIT 编译预热
-print('正在编译 PyPTO kernel...')
-import time as t
-t0 = t.time()
 X_batch, X_len, Y_batch, Y_len = next(iter(train_iter))
 X_batch = X_batch.to(device); Y_batch = Y_batch.to(device)
 X_len = X_len.to(device); Y_len = Y_len.to(device)
@@ -380,13 +377,12 @@ loss = MaskedSoftmaxCELoss()
 Y_hat, _ = net(X_batch, dec_input, X_len)
 l = loss(Y_hat, Y_batch, Y_len)
 l.sum().backward(); net.zero_grad()
-print(f'编译完成，耗时 {t.time() - t0:.0f} 秒')
 
-print('开始训练...')
+# 训练
 train_seq2seq_lstm(net, train_iter, 0.005, 10, tgt_vocab, device)
 
 NPU 注意事项：
-- PyPTOLSTM 单向、此处用单层（默认，支持多层），故编码器/解码器均为单层（torch 版为 2 层 nn.LSTM）
+- PyPTOLSTM 单向、支持多层，此处与 torch 版一致使用 2 层 LSTM，故编码器/解码器均为 2 层（torch 版为 2 层 nn.LSTM）
 - LSTM 的 state 是 (h, c) 二元组：init_state 直接返回 enc_outputs[1]，
   forward 中 context 取 state[0][-1]（顶层隐状态 h），与 torch 版一致
 - xavier 初始化对 PyPTOLSTM 的 W_ 前缀参数生效

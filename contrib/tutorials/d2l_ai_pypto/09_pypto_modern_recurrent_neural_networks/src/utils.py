@@ -43,7 +43,9 @@ from IPython import display
 
 
 def try_gpu(i=0):
-    """返回 gpu(i) 如果存在，否则返回 cpu()。"""
+    """返回 npu(i)/cuda(i) 如果存在，否则返回 cpu()。"""
+    if hasattr(torch, "npu") and torch.npu.is_available() and torch.npu.device_count() >= i + 1:
+        return torch.device(f"npu:{i}")
     if torch.cuda.device_count() >= i + 1:
         return torch.device(f"cuda:{i}")
     return torch.device("cpu")
@@ -517,8 +519,14 @@ def plot(X, Y=None, xlabel=None, ylabel=None, legend=None, xlim=None,
         if isinstance(X, (list, tuple)) and isinstance(Y, (list, tuple)):
             for x_i, y_i in zip(X, Y):
                 axes.plot(x_i, y_i)
+        elif isinstance(Y, list):
+            # 多条曲线共用同一个 X：必须逐条 plot(X, y_i)，
+            # 不能 plot(X, *Y) —— matplotlib 会把第 2 个及以后的 Y 当作"无 X 的曲线"
+            # 按索引 0..N-1 绘制，导致曲线只出现在 x 轴最左端。
+            for y_i in Y:
+                axes.plot(X, y_i)
         else:
-            axes.plot(X, *Y) if isinstance(Y, list) else axes.plot(X, Y)
+            axes.plot(X, Y)
     else:
         if isinstance(X, (list, tuple)):
             if len(X) > 0 and isinstance(X[0], (list, tuple, np.ndarray)):
@@ -847,8 +855,13 @@ def bleu(pred_seq, label_seq, k):
     """
     pred_tokens, label_tokens = pred_seq.split(" "), label_seq.split(" ")
     len_pred, len_label = len(pred_tokens), len(label_tokens)
+    if len_pred == 0:
+        return 0.0
     score = math.exp(min(0, 1 - len_label / len_pred))
     for n in range(1, k + 1):
+        # 预测序列不足 n 个词元时不存在 n-gram，BLEU 记为 0，避免分母为 0
+        if len_pred < n:
+            return 0.0
         num_matches, label_subs = 0, collections.defaultdict(int)
         for i in range(len_label - n + 1):
             label_subs[" ".join(label_tokens[i: i + n])] += 1
