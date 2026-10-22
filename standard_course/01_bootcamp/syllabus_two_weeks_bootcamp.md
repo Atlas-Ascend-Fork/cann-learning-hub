@@ -94,7 +94,7 @@
 | **D7 下午** | 第 14 讲 | Ascend C 调试调优与最佳实践（2） | msprof 性能分析；Roofline；瓶颈优化方法 | 2h, 共用第 13 讲 PPT |
 | **D8 上午** | 第 15 讲 | Ascend C 算子如何接入 PyTorch（单算子调用 + 入图验证） | 算子注册；单算子调用；AclGraph/GE 入图 | 2h, [PPT1](./two_weeks_course/14_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx)、[PPT2](./two_weeks_course/15_a2a3_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) |
 | **D8 下午** | 第 16 讲 | Ascend C 算子接入 PyTorch 实践 · 纯实践 | 端到端集成 → 入图验证 → 判题 | 4h, 共用第 15 讲 PPT |
-| **D9 上午** | 第 17 讲 | 基于 CANNBot 的 Ascend C 算子开发介绍 | CANNBot 生成 / 调试 / 优化；辅助开发实践 | 1h, [PPT](./two_weeks_course/16_cannbot_highlights_open_source_community_edition_0.5h.pptx) |
+| **D9 上午** | 第 17 讲 | 基于 CANNBot 的 Ascend C 算子开发介绍 | CANNBot 生成 / 调试 / 优化；辅助开发实践 | 1h, [PPT](./two_weeks_course/16_cannbot_operator_development_practice_1d.pptx)（全天专题版，1h 精简版另行规划） |
 | **D9 下午–D10** | 第 18 讲 | 结业项目 + 答辩 | 双算子开发；框架集成；性能优化；成果答辩 | 2~3h + 冲刺, [PPT](./two_weeks_course/17_a2a3_two_week_bootcamp_final_project.pptx) |
 
 > **关键节点说明：**

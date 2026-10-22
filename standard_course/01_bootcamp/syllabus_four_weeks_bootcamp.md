@@ -118,7 +118,7 @@
 
 | 时段 | 讲次 | 主题 | 内容要点 | 教材PPT |
 |------|------|------|---------|------|
-| **D11 全天** | 第 21 讲 | 基于 CANNBot 的算子开发实践 | CANNBot 生成 / 调试 / 优化；**尝试更改 skill 优化算子** | 2h + 4h, [PPT](./two_weeks_course/16_cannbot_highlights_open_source_community_edition_0.5h.pptx) |
+| **D11 全天** | 第 21 讲 | 基于 CANNBot 的算子开发实践 | CANNBot 生成 / 调试 / 优化；**尝试更改 skill 优化算子** | 2h + 4h, [PPT](./two_weeks_course/16_cannbot_operator_development_practice_1d.pptx) |
 | **D12 全天** | 第 22 讲 | 案例分析与实践：矢量算子（Add / Softmax 等）如何逐步实现极致性能 | 优化路径案例剖析（VF 粒度 / 双发射 / 访存优化）；复现与超越 | 2h 案例 + 4h 实践, 讲义建设中 |
 | **D13 全天** | 第 23 讲 | 案例分析与实践：Matmul 算子如何逐步实现极致性能 | 分块 / 数据布局 / 流水优化路径剖析；复现与超越 | 2h 案例 + 4h 实践, 讲义建设中 |
 | **D14 全天** | 第 24 讲 | 案例分析与实践：融合算子（Matmul+Gelu 等）如何逐步实现极致性能 | 以 Matmul+Gelu 融合算子为例：多算子协同 / 流水 / 零拷贝优化路径剖析；复现与超越 | 2h 案例 + 4h 实践, 讲义建设中 |
