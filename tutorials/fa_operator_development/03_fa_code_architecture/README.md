@@ -12,21 +12,21 @@
 
 | 小节 | 内容 | 状态 |
 |--|--|--|
-| [3.1 章节介绍](03.01_chapter_intro.ipynb) | 学习目标、路线图 | ✅ |
-| [3.2 算子调用通路](03.02_call_path.ipynb) | aclnn 两段式接口、FA 参数表（numHeads/numKeyValueHeads/scaleValue/preTokens/nextTokens/inputLayout）、单算子直调动线、框架集成视角 | ✅ |
-| [3.3 数据排布格式](03.03_data_layout.ipynb) | BSND/BNSD/BSH/TND 四种排布、padding 与尾块、actualSeqLengths 两种语义、GQA 排布（BSNGD→BN2SGD）、基本块切分 | ✅ |
-| [3.4 Tiling 设计原则](03.04_tiling_design.ipynb) | 五大设计原则（Scalar 上提、TilingKey 治 ICache Miss、负载均衡从简等）、多模板优先级调度、Cube/Vector 切分权衡 | ✅ |
-| [3.5 Tiling 源码走读](03.05_tiling_code_walkthrough.ipynb) | 单模板八步流程逐段读码：GQA 维度推导、基本块选择（64→128）、nRatio 配比、workspace 倍数、CalcTschBlockDim | ✅ |
-| [3.6 Kernel 整体框架](03.06_kernel_structure.ipynb) | Kernel 入参四件套、SPMD、核间切块（B/N2/S1 轴，KV 完整 S 轴加载）、负载均衡（splitFactorSize） | ✅ |
-| [3.7 核内切块与流水](03.07_kernel_pipeline.ipynb) | 四拍循环（mm1→vector1→mm2→vector2）、MM1/MM2 搬运链路（DataCopy/LoadData/LoadDataWithTranspose/FixPipe）、VF 指令与 64×128 基本块、乒乓内存与 Preload | ✅ |
-| [3.8 章节测验](03.08_chapter_test.ipynb) | 综合练习（[答案](answer/03.08_answer.txt)） | ✅ |
+| [3.1 章节介绍](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.01_chapter_intro.ipynb) | 学习目标、路线图 | ✅ |
+| [3.2 算子调用通路](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.02_call_path.ipynb) | aclnn 两段式接口、FA 参数表（numHeads/numKeyValueHeads/scaleValue/preTokens/nextTokens/inputLayout）、单算子直调动线、框架集成视角 | ✅ |
+| [3.3 数据排布格式](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.03_data_layout.ipynb) | BSND/BNSD/BSH/TND 四种排布、padding 与尾块、actualSeqLengths 两种语义、GQA 排布（BSNGD→BN2SGD）、基本块切分 | ✅ |
+| [3.4 Tiling 设计原则](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.04_tiling_design.ipynb) | 五大设计原则（Scalar 上提、TilingKey 治 ICache Miss、负载均衡从简等）、多模板优先级调度、Cube/Vector 切分权衡 | ✅ |
+| [3.5 Tiling 源码走读](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.05_tiling_code_walkthrough.ipynb) | 单模板八步流程逐段读码：GQA 维度推导、基本块选择（64→128）、nRatio 配比、workspace 倍数、CalcTschBlockDim | ✅ |
+| [3.6 Kernel 整体框架](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.06_kernel_structure.ipynb) | Kernel 入参四件套、SPMD、核间切块（B/N2/S1 轴，KV 完整 S 轴加载）、负载均衡（splitFactorSize） | ✅ |
+| [3.7 核内切块与流水](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.07_kernel_pipeline.ipynb) | 四拍循环（mm1→vector1→mm2→vector2）、MM1/MM2 搬运链路（DataCopy/LoadData/LoadDataWithTranspose/FixPipe）、VF 指令与 64×128 基本块、乒乓内存与 Preload | ✅ |
+| [3.8 章节测验](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/03.08_chapter_test.ipynb) | 综合练习（[答案](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/answer/03.08_answer.txt)） | ✅ |
 
 各小节测验答案见 [answer/](answer/) 目录。
 
 ## 前置知识
 
-- [第1章 昇腾开发基础](../01_ascend_dev_basics/README.md)
-- [第2章 FlashAttention 原理](../02_fa_principle/README.md)
+- [第1章 昇腾开发基础](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/01_ascend_dev_basics/README.md)
+- [第2章 FlashAttention 原理](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/02_fa_principle/README.md)
 
 ## 学习建议
 
@@ -36,4 +36,4 @@
 
 ## 下一章
 
-理解代码架构后，进入[第4章 FA 算子运行](../04_fa_operator_running/README.md)，亲手把官方 FA 算子跑起来。
+理解代码架构后，进入[第4章 FA 算子运行](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/04_fa_operator_running/README.md)，亲手把官方 FA 算子跑起来。

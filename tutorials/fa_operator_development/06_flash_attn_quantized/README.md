@@ -25,13 +25,13 @@
 
 | Notebook | 内容 | Link |
 |--|--|--|
-| 6.1 章节导学 | 量化动机与本章路线 | [06.01_chapter_intro.ipynb](06.01_chapter_intro.ipynb) |
-| 6.2 数据格式 | FP8 家族 / E8M0 / HiF8 | [06.02_data_formats.ipynb](06.02_data_formats.ipynb) |
-| 6.3 量化原理 | 量化数学与误差来源 | [06.03_quant_principle.ipynb](06.03_quant_principle.ipynb) |
-| 6.4 量化方式 | 粒度、组合与随路量化 | [06.04_quant_modes.ipynb](06.04_quant_modes.ipynb) |
-| 6.5 MXFP8 量化方案 | 块浮点 FA 的工程实现 | [06.05_fa_mxfp8.ipynb](06.05_fa_mxfp8.ipynb) |
-| 6.6 HiP8 量化方案 | 单数据格式 FA 的工程实现 | [06.06_fa_hif8.ipynb](06.06_fa_hif8.ipynb) |
-| 6.7 章节测验 | 综合测验 | [06.07_chapter_test.ipynb](06.07_chapter_test.ipynb) |
+| 6.1 章节导学 | 量化动机与本章路线 | [06.01_chapter_intro.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.01_chapter_intro.ipynb) |
+| 6.2 数据格式 | FP8 家族 / E8M0 / HiF8 | [06.02_data_formats.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.02_data_formats.ipynb) |
+| 6.3 量化原理 | 量化数学与误差来源 | [06.03_quant_principle.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.03_quant_principle.ipynb) |
+| 6.4 量化方式 | 粒度、组合与随路量化 | [06.04_quant_modes.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.04_quant_modes.ipynb) |
+| 6.5 MXFP8 量化方案 | 块浮点 FA 的工程实现 | [06.05_fa_mxfp8.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.05_fa_mxfp8.ipynb) |
+| 6.6 HiP8 量化方案 | 单数据格式 FA 的工程实现 | [06.06_fa_hif8.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.06_fa_hif8.ipynb) |
+| 6.7 章节测验 | 综合测验 | [06.07_chapter_test.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/06.07_chapter_test.ipynb) |
 
 > 6.2 ~ 6.4 节含可运行的 numpy 实验（E4M3 手工解码、对称/非对称量化、粒度误差对比），任意 Python 3.8+ 环境即可运行。
 
@@ -42,10 +42,10 @@
 
 ## 前置知识
 
-- [第5章 非量化 FA 开发](../05_flash_attn_non_quantized/README.md)（先掌握非量化实现）
-- [第1章 昇腾开发基础](../01_ascend_dev_basics/README.md)中的数据搬运与格式转换
-- [第3章 FA 算子代码结构](../03_fa_code_architecture/README.md)中的 Tiling / Kernel 两层结构
+- [第5章 非量化 FA 开发](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/README.md)（先掌握非量化实现）
+- [第1章 昇腾开发基础](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/01_ascend_dev_basics/README.md)中的数据搬运与格式转换
+- [第3章 FA 算子代码结构](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/README.md)中的 Tiling / Kernel 两层结构
 
 ## 下一章
 
-完成开发实战后，进入[第7章 性能优化基础](../07_performance_basics/README.md)，开始性能优化之旅。
+完成开发实战后，进入[第7章 性能优化基础](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/07_performance_basics/README.md)，开始性能优化之旅。

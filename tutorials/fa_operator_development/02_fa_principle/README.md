@@ -37,7 +37,7 @@ python -m pip install numpy ipykernel --user
 python -m ipykernel install --user --name python3 --display-name "Python 3 (fa-course)"
 ```
 
-在 IDE 中打开 notebook 并选择该内核，运行 `import numpy as np; print(np.__version__)` 输出版本号即说明就绪。详见 [2.1 章节介绍](02.01_chapter_intro.ipynb) 中的「环境准备」一节。
+在 IDE 中打开 notebook 并选择该内核，运行 `import numpy as np; print(np.__version__)` 输出版本号即说明就绪。详见 [2.1 章节介绍](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/02_fa_principle/02.01_chapter_intro.ipynb) 中的「环境准备」一节。
 
 ## 学习建议
 
@@ -49,4 +49,4 @@ python -m ipykernel install --user --name python3 --display-name "Python 3 (fa-c
 
 ## 下一章
 
-掌握 FlashAttention 的数学原理后，进入[第3章 FA 算子代码结构](../03_fa_code_architecture/README.md)，认识 FA 算子的工程骨架。
+掌握 FlashAttention 的数学原理后，进入[第3章 FA 算子代码结构](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/README.md)，认识 FA 算子的工程骨架。

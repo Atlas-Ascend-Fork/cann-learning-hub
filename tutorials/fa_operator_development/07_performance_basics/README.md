@@ -4,7 +4,7 @@
 
 ## 章节概述
 
-性能优化始于度量与建模。本章讲解性能建模的基本方法与 Roofline 模型，深入访存性能分析，并给出常用的性能优化步骤——这既是[第2章](../02_fa_principle/README.md)中 Roofline 理论在工程上的延伸，也是后续所有优化手段的理论依据。
+性能优化始于度量与建模。本章讲解性能建模的基本方法与 Roofline 模型，深入访存性能分析，并给出常用的性能优化步骤——这既是[第2章](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/02_fa_principle/README.md)中 Roofline 理论在工程上的延伸，也是后续所有优化手段的理论依据。
 
 学完本章，读者应能对给定 shape 的 FA 算子建立性能模型，判断其处于计算受限还是带宽受限区间，并推算理论性能上限；同时掌握「均衡性 → CV 流水与切块 → 核内流水」的通用优化路径。
 
@@ -18,9 +18,9 @@
 
 ## 前置知识
 
-- [第2章 FlashAttention 原理](../02_fa_principle/README.md)中的存储层次与 Roofline 基础
-- [第5章 非量化 FA 开发](../05_flash_attn_non_quantized/README.md)（有可优化的算子在手）
+- [第2章 FlashAttention 原理](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/02_fa_principle/README.md)中的存储层次与 Roofline 基础
+- [第5章 非量化 FA 开发](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/README.md)（有可优化的算子在手）
 
 ## 下一章
 
-掌握建模方法后，进入[第8章 性能优化进阶](../08_performance_advanced/README.md)，逐引擎优化 Cube、Vector 与 Scalar。
+掌握建模方法后，进入[第8章 性能优化进阶](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/08_performance_advanced/README.md)，逐引擎优化 Cube、Vector 与 Scalar。

@@ -12,12 +12,12 @@
 
 | 小节 | 内容 | 状态 |
 |--|--|--|
-| [9.1 章节介绍](09.01_chapter_intro.ipynb) | 负载均衡为什么是最后一公里、section/GS1/切 S2 概念 | ✅ |
-| [9.2 均衡问题的三层来源](09.02_imbalance_sources.ipynb) | shape 锯齿、mask 无效块、section 变长；有效块数计量 | ✅ |
-| [9.3 策略一：GS1 不合轴 + 切 S2](09.03_gs1_unmerged.ipynb) | 贪心分核流程、封核判据、六数组、flash decoding | ✅ |
-| [9.4 策略二：GS1 合轴 + 切 S2](09.04_gs1_merged.ipynb) | 合轴的收益与代价、选型判据、三个工程坑 | ✅ |
-| [9.5 切 S2 的 softmax 归并](09.05_s2_merge.ipynb) | (m, l, acc) 统计量、归并公式、merge kernel、成本账 | ✅ |
-| [9.6 章节测验](09.06_chapter_test.ipynb) | 综合测验（10 题） | ✅ |
+| [9.1 章节介绍](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/09.01_chapter_intro.ipynb) | 负载均衡为什么是最后一公里、section/GS1/切 S2 概念 | ✅ |
+| [9.2 均衡问题的三层来源](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/09.02_imbalance_sources.ipynb) | shape 锯齿、mask 无效块、section 变长；有效块数计量 | ✅ |
+| [9.3 策略一：GS1 不合轴 + 切 S2](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/09.03_gs1_unmerged.ipynb) | 贪心分核流程、封核判据、六数组、flash decoding | ✅ |
+| [9.4 策略二：GS1 合轴 + 切 S2](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/09.04_gs1_merged.ipynb) | 合轴的收益与代价、选型判据、三个工程坑 | ✅ |
+| [9.5 切 S2 的 softmax 归并](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/09.05_s2_merge.ipynb) | (m, l, acc) 统计量、归并公式、merge kernel、成本账 | ✅ |
+| [9.6 章节测验](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/09.06_chapter_test.ipynb) | 综合测验（10 题） | ✅ |
 
 ## 配图
 
@@ -26,10 +26,10 @@
 
 ## 前置知识
 
-- [第7章 性能优化基础](../07_performance_basics/README.md)（尤其 7.4 均衡性：CoreWeight、贪心分核、有效块统计）
-- [第5章 非量化 FA 开发](../05_flash_attn_non_quantized/README.md)：S2 外层循环与 softmax update
-- [第2章 FlashAttention 原理](../02_fa_principle/README.md)：在线 softmax
+- [第7章 性能优化基础](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/07_performance_basics/README.md)（尤其 7.4 均衡性：CoreWeight、贪心分核、有效块统计）
+- [第5章 非量化 FA 开发](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/README.md)：S2 外层循环与 softmax update
+- [第2章 FlashAttention 原理](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/02_fa_principle/README.md)：在线 softmax
 
 ## 下一章
 
-攻克负载均衡后，进入[第10章 性能优化指南](../10_performance_guide/README.md)，纵览全书的性能优化方法。
+攻克负载均衡后，进入[第10章 性能优化指南](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/10_performance_guide/README.md)，纵览全书的性能优化方法。

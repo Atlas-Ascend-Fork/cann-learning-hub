@@ -24,16 +24,16 @@
 
 | Notebook | 内容 | Link |
 |--|--|--|
-| 5.1 章节导学 | 七阶段路线图与学习方法 | [05.01_chapter_intro.ipynb](05.01_chapter_intro.ipynb) |
-| 5.2 非量化 FA 介绍 | 算子规格、计算流程与规格约束 | [05.02_flash_attention_introduction.ipynb](05.02_flash_attention_introduction.ipynb) |
-| 5.3 基础极简 FA | 阶段一：单核串行最小可运行 FA | [05.03_basic_fa.ipynb](05.03_basic_fa.ipynb) |
-| 5.4 BN1 简单分核 | 阶段二：按 B·N 无依赖切分 | [05.04_bn1_split.ipynb](05.04_bn1_split.ipynb) |
-| 5.5 buffer 复用 | 阶段三：Q 常驻 + KV pingpong | [05.05_pingpong.ipynb](05.05_pingpong.ipynb) |
-| 5.6 preload 流水 | 阶段四：消除 Cube 断流 | [05.06_preload.ipynb](05.06_preload.ipynb) |
-| 5.7 mask | 阶段五：sparsemode3 块级跳过 | [05.07_mask.ipynb](05.07_mask.ipynb) |
-| 5.8 尾块 | 阶段六：QS/KVS 带尾块支持 | [05.08_tail_block.ipynb](05.08_tail_block.ipynb) |
-| 5.9 负载均衡 | 阶段七：BN1S1 细粒度分核 | [05.09_load_balance.ipynb](05.09_load_balance.ipynb) |
-| 5.10 章节测验 | 综合测验 | [05.10_chapter_test.ipynb](05.10_chapter_test.ipynb) |
+| 5.1 章节导学 | 七阶段路线图与学习方法 | [05.01_chapter_intro.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.01_chapter_intro.ipynb) |
+| 5.2 非量化 FA 介绍 | 算子规格、计算流程与规格约束 | [05.02_flash_attention_introduction.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.02_flash_attention_introduction.ipynb) |
+| 5.3 基础极简 FA | 阶段一：单核串行最小可运行 FA | [05.03_basic_fa.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.03_basic_fa.ipynb) |
+| 5.4 BN1 简单分核 | 阶段二：按 B·N 无依赖切分 | [05.04_bn1_split.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.04_bn1_split.ipynb) |
+| 5.5 buffer 复用 | 阶段三：Q 常驻 + KV pingpong | [05.05_pingpong.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.05_pingpong.ipynb) |
+| 5.6 preload 流水 | 阶段四：消除 Cube 断流 | [05.06_preload.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.06_preload.ipynb) |
+| 5.7 mask | 阶段五：sparsemode3 块级跳过 | [05.07_mask.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.07_mask.ipynb) |
+| 5.8 尾块 | 阶段六：QS/KVS 带尾块支持 | [05.08_tail_block.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.08_tail_block.ipynb) |
+| 5.9 负载均衡 | 阶段七：BN1S1 细粒度分核 | [05.09_load_balance.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.09_load_balance.ipynb) |
+| 5.10 章节测验 | 综合测验 | [05.10_chapter_test.ipynb](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/05_flash_attn_non_quantized/05.10_chapter_test.ipynb) |
 
 ## 配图
 
@@ -41,10 +41,10 @@
 
 ## 前置知识
 
-- [第2章 FlashAttention 原理](../02_fa_principle/README.md)
-- [第3章 FA 算子代码结构](../03_fa_code_architecture/README.md)
-- [第4章 FA 算子运行](../04_fa_operator_running/README.md)
+- [第2章 FlashAttention 原理](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/02_fa_principle/README.md)
+- [第3章 FA 算子代码结构](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/03_fa_code_architecture/README.md)
+- [第4章 FA 算子运行](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/04_fa_operator_running/README.md)
 
 ## 下一章
 
-完成非量化 FA 开发后，进入[第6章 全量化 FA 开发](../06_flash_attn_quantized/README.md)。
+完成非量化 FA 开发后，进入[第6章 全量化 FA 开发](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/06_flash_attn_quantized/README.md)。

@@ -12,11 +12,11 @@
 
 | 小节 | 内容 | 状态 |
 |--|--|--|
-| [10.1 章节介绍](10.01_chapter_intro.ipynb) | 指南的定位与三份产出 | ✅ |
-| [10.2 全书优化方法地图](10.02_method_map.ipynb) | 四层方法总表、症状索引、贯穿案例定位 | ✅ |
-| [10.3 排查路径与决策树](10.03_troubleshooting.ipynb) | 总决策树、症状处方对照表、四条纪律、案例走查 | ✅ |
-| [10.4 优化 checklist 汇总](10.04_checklists.ipynb) | 建模/Cube/Vector/Scalar/核间五张清单与自检 | ✅ |
-| [10.5 章节测验与全书结语](10.05_chapter_test.ipynb) | 综合测验（8 题）+ 全书三段旅程回顾 | ✅ |
+| [10.1 章节介绍](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/10_performance_guide/10.01_chapter_intro.ipynb) | 指南的定位与三份产出 | ✅ |
+| [10.2 全书优化方法地图](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/10_performance_guide/10.02_method_map.ipynb) | 四层方法总表、症状索引、贯穿案例定位 | ✅ |
+| [10.3 排查路径与决策树](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/10_performance_guide/10.03_troubleshooting.ipynb) | 总决策树、症状处方对照表、四条纪律、案例走查 | ✅ |
+| [10.4 优化 checklist 汇总](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/10_performance_guide/10.04_checklists.ipynb) | 建模/Cube/Vector/Scalar/核间五张清单与自检 | ✅ |
+| [10.5 章节测验与全书结语](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/10_performance_guide/10.05_chapter_test.ipynb) | 综合测验（8 题）+ 全书三段旅程回顾 | ✅ |
 
 ## 配图
 
@@ -24,8 +24,8 @@
 
 ## 前置知识
 
-- [第7章 性能优化基础](../07_performance_basics/README.md)
-- [第8章 性能优化进阶](../08_performance_advanced/README.md)
-- [第9章 性能优化高阶](../09_performance_high_level/README.md)
+- [第7章 性能优化基础](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/07_performance_basics/README.md)
+- [第8章 性能优化进阶](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/08_performance_advanced/README.md)
+- [第9章 性能优化高阶](https://gitcode.com/cann/cann-learning-hub/blob/test/tutorials/fa_operator_development/09_performance_high_level/README.md)
 
 本章是它们的汇总收束，建议先学完再读。
