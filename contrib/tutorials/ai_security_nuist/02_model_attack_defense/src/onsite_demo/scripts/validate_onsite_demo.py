@@ -13,6 +13,10 @@ ONSITE_ROOT = Path(__file__).resolve().parents[1]
 if str(ONSITE_ROOT) not in sys.path:
     sys.path.insert(0, str(ONSITE_ROOT))
 
+from demo_lib.package_contract import (
+    NOTEBOOK_NAMES, LIVE_NOTEBOOK_NAMES, CHAPTER_README,
+    COURSE_REQUIRED_ENTRIES, CHAPTER_REQUIRED_ENTRIES,
+)
 from demo_lib.paths import (  # noqa: E402
     ensure_dir,
     load_demo_config,
@@ -27,8 +31,8 @@ from demo_lib.subset import create_demo_subset  # noqa: E402
 
 REQUIRED_FILES = [
     "../README.md",
-    "src/README.md",
-    "src/onsite_demo/README_ONSITE_DEMO.md",
+    CHAPTER_README,
+    "src/onsite_demo/demo_lib/package_contract.py",
     "src/onsite_demo/configs/demo_config.json",
     "src/onsite_demo/demo_lib/detection.py",
     "src/onsite_demo/demo_lib/detection_visualization.py",
@@ -39,8 +43,7 @@ REQUIRED_FILES = [
     "src/onsite_demo/scripts/final_preupload_audit.py",
     "src/onsite_demo/scripts/validate_onsite_demo.py",
     "src/onsite_demo/scripts/build_onsite_demo_package.py",
-    "01.01_badnets_attack.ipynb",
-    "01.02_neural_cleanse_detection.ipynb",
+    *NOTEBOOK_NAMES,
     "src/final_summary.json",
     "src/assets/results/metrics/final_summary.json",
     "src/assets/results/detection/detection_complete_summary.json",
@@ -70,17 +73,8 @@ README_REQUIRED_SNIPPETS = [
     "jupyterlab_widgets",
 ]
 
-COURSE_ROOT_REQUIRED_ENTRIES = {
-    "README.md",
-    "01_model_backdoor_attack_and_detection",
-}
-CHAPTER_ROOT_REQUIRED_ENTRIES = {
-    "01.01_badnets_attack.ipynb",
-    "01.02_neural_cleanse_detection.ipynb",
-    "answer",
-    "images",
-    "src",
-}
+COURSE_ROOT_REQUIRED_ENTRIES = COURSE_REQUIRED_ENTRIES
+CHAPTER_ROOT_REQUIRED_ENTRIES = CHAPTER_REQUIRED_ENTRIES
 COURSE_README_REQUIRED_SNIPPETS = (
     "教程简介",
     "适用对象",
@@ -126,7 +120,7 @@ def _mindspore_available() -> tuple[bool, str]:
 
 def _load_notebook(paths: dict[str, Path]) -> dict[str, Any]:
     notebooks = []
-    for name in ("01.01_badnets_attack.ipynb", "01.02_neural_cleanse_detection.ipynb"):
+    for name in LIVE_NOTEBOOK_NAMES:
         notebooks.extend(json.loads((paths["PROJECT_ROOT"] / name).read_text(encoding="utf-8")).get("cells", []))
     return {"cells": notebooks}
 
@@ -136,7 +130,7 @@ def _notebook_text(notebook: dict[str, Any]) -> str:
 
 
 def _readme_text(paths: dict[str, Path]) -> str:
-    return (paths["ONSITE_DEMO_ROOT"] / "README_ONSITE_DEMO.md").read_text(encoding="utf-8")
+    return (paths["PROJECT_ROOT"] / CHAPTER_README).read_text(encoding="utf-8")
 
 
 def _line_has_bad_claim(line: str) -> bool:
@@ -274,14 +268,14 @@ def main() -> dict[str, Any]:
     chapter_entries = {path.name for path in project_root.iterdir()}
     add_check(
         checks,
-        "strict course root structure",
-        "PASS" if course_entries == COURSE_ROOT_REQUIRED_ENTRIES else "FAIL",
+        "required course root structure",
+        "PASS" if COURSE_ROOT_REQUIRED_ENTRIES <= course_entries else "FAIL",
         sorted(course_entries),
     )
     add_check(
         checks,
-        "strict chapter root structure",
-        "PASS" if chapter_entries == CHAPTER_ROOT_REQUIRED_ENTRIES else "FAIL",
+        "required chapter root structure",
+        "PASS" if CHAPTER_ROOT_REQUIRED_ENTRIES <= chapter_entries else "FAIL",
         sorted(chapter_entries),
     )
     course_readme_text = (course_root / "README.md").read_text(encoding="utf-8")

@@ -17,16 +17,18 @@ if str(PROJECT_ROOT) not in sys.path:
 if str(ONSITE_ROOT) not in sys.path:
     sys.path.insert(0, str(ONSITE_ROOT))
 
+from demo_lib.package_contract import (
+    NOTEBOOK_NAMES, LIVE_NOTEBOOK_NAMES, CHAPTER_README, missing_zip_entries,
+)
 from demo_lib.paths import ensure_dir, load_demo_config, resolve_demo_mode_settings, resolve_project_root, save_json
 
 
 REQUIRED_FILES = [
     "../README.md",
-    "src/README.md",
-    "src/onsite_demo/README_ONSITE_DEMO.md",
+    CHAPTER_README,
+    "src/onsite_demo/demo_lib/package_contract.py",
     "src/onsite_demo/configs/demo_config.json",
-    "01.01_badnets_attack.ipynb",
-    "01.02_neural_cleanse_detection.ipynb",
+    *NOTEBOOK_NAMES,
     "src/onsite_demo/demo_lib/training.py",
     "src/onsite_demo/demo_lib/inference.py",
     "src/onsite_demo/demo_lib/evaluation.py",
@@ -124,18 +126,9 @@ def _check_candidate_zip(paths: dict[str, Path]) -> tuple[bool, str]:
     try:
         with zipfile.ZipFile(zip_path) as archive:
             names = archive.namelist()
-            required_prefixes = [
-                "01_model_backdoor_attack_and_detection/src/data/train/",
-                "01_model_backdoor_attack_and_detection/src/data/test/",
-                "01_model_backdoor_attack_and_detection/src/",
-                "01_model_backdoor_attack_and_detection/01.01_badnets_attack.ipynb",
-                "01_model_backdoor_attack_and_detection/01.02_neural_cleanse_detection.ipynb",
-                "01_model_backdoor_attack_and_detection/src/assets/evidence/server_artifacts/",
-                "01_model_backdoor_attack_and_detection/src/assets/results/detection/",
-            ]
-            for prefix in required_prefixes:
-                if not any(name.startswith(prefix) or f"/{prefix}" in name for name in names):
-                    return False, f"Candidate zip missing required entry: {prefix}"
+            missing = missing_zip_entries(names)
+            if missing:
+                return False, f"Candidate zip missing required entries: {missing}"
     except Exception as exc:  # noqa: BLE001
         return False, repr(exc)
     return True, str(zip_path)
@@ -167,13 +160,13 @@ def main() -> dict[str, Any]:
     output_dir = ensure_dir(paths["OUTPUT_ROOT"] / "final_preupload_audit")
 
     config = load_demo_config()
-    notebook_path = paths["PROJECT_ROOT"] / "01.01_badnets_attack.ipynb"
-    readme_path = paths["ONSITE_DEMO_ROOT"] / "README_ONSITE_DEMO.md"
+    notebook_path = paths["PROJECT_ROOT"] / LIVE_NOTEBOOK_NAMES[0]
+    readme_path = paths["PROJECT_ROOT"] / CHAPTER_README
     training_path = paths["ONSITE_DEMO_ROOT"] / "demo_lib" / "training.py"
     interactive_demo_path = paths["ONSITE_DEMO_ROOT"] / "demo_lib" / "interactive_demo.py"
 
     notebook_text = _load_notebook_text(notebook_path) + "\n" + _load_notebook_text(
-        paths["PROJECT_ROOT"] / "01.02_neural_cleanse_detection.ipynb"
+        paths["PROJECT_ROOT"] / LIVE_NOTEBOOK_NAMES[1]
     )
     readme_text = _read_text(readme_path)
     training_text = _read_text(training_path)

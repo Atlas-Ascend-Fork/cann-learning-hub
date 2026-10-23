@@ -19,6 +19,7 @@ ONSITE_ROOT = Path(__file__).resolve().parents[1]
 if str(ONSITE_ROOT) not in sys.path:
     sys.path.insert(0, str(ONSITE_ROOT))
 
+from demo_lib.package_contract import LIVE_NOTEBOOK_NAMES, CHAPTER_README
 from demo_lib.detection import load_formal_detection_bundle, run_strip_light_demo, save_strip_light_result
 from demo_lib.inference import load_model_from_checkpoint
 from demo_lib.interactive_demo import run_random_attack_test, show_single_trigger_attack_result
@@ -73,9 +74,9 @@ def _line_has_bad_claim(line: str) -> bool:
 def _no_bad_claims(paths: dict[str, Path]) -> bool:
     notebook_text = "\n".join(
         (paths["PROJECT_ROOT"] / name).read_text(encoding="utf-8")
-        for name in ("01.01_badnets_attack.ipynb", "01.02_neural_cleanse_detection.ipynb")
+        for name in LIVE_NOTEBOOK_NAMES
     )
-    readme_text = (paths["ONSITE_DEMO_ROOT"] / "README_ONSITE_DEMO.md").read_text(encoding="utf-8")
+    readme_text = (paths["PROJECT_ROOT"] / CHAPTER_README).read_text(encoding="utf-8")
     return not any(_line_has_bad_claim(line) for line in (notebook_text + "\n" + readme_text).splitlines())
 
 
