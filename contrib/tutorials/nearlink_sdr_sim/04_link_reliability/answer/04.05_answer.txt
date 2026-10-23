@@ -1,7 +1,7 @@
-1  h_hop = ch.get_channel_taps(code_n)[0, :]
+1  rx_iq = _channel_impair(iq, snr_db, "rayleigh", 0.0, 0.0, "none", cfg.sps, rng)
 2  tracker.record(success)
 3  tracker.apply_suggestion()
 4  补全说明：
-5    第1行：获取当前帧的 Rayleigh 信道系数，模拟跳频分集（每帧独立衰落）；
+5    第1行：对 IQ 信号施加独立的 Rayleigh 衰落与 AWGN 噪声（每次重传使用独立信道）；
 6    第2行：将 HARQ 重传后的最终 CRC 结果写入 LinkQualityTracker 滑动窗口；
 7    第3行：根据窗口 FER 决策并应用 MCS 调整（FER<1% 升，>10% 降）。
