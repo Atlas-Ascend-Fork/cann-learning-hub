@@ -8,13 +8,18 @@
 
 | 传统课程 | 融入模式 | 交付形态 | 文件 |
 |---------|---------|---------|------|
-| **计算机组成原理 / 计算机组成与系统结构**（课程十四；2024 版 64 学时 + 未来学院版 80 学时，双版适配） | M2/M5 + 专题主讲 | 新增 2~3 学时专题"**从 CPU 到 NPU——AI 算力底座与 Ascend C 实践**"（●：算力之问 → 芯片之芯 → 编程之道，两版通用；理论讲义落位 `05_npu_architecture` 待建，实践 quick_start）+ 五处小节扩充；未来学院版另享**模块 8 并行架构 × NPU 实例深化**与分层实验对接（试点首选） | [computer_organization.md](./computer_organization.md) |
+| **计算机组成原理 / 计算机组成与系统结构**（课程十四；2024 版 64 学时 + 未来学院版 80 学时，双版适配） | M2/M5 + 专题主讲 | 新增 2~3 学时专题"**从 CPU 到 NPU——AI 算力底座与 Ascend C 实践**"（●：算力之问 → 芯片之芯 → 编程之道，两版通用；理论讲义已就绪：[NPU 架构与 Ascend C 编程导论](../00_atomic_courses/04_ops_programming/01_ascendc/npu_architecture_and_ascend_c_programming_introduction.pptx)（64 页三篇），实践 quick_start）+ 五处小节扩充；未来学院版另享**模块 8 并行架构 × NPU 实例深化**与分层实验对接（试点首选） | [computer_organization.md](./computer_organization.md) |
 | **计算机体系结构**（本科高年级/研究生，13 次大课） | M2/M5 主讲融入 | "AI 时代的体系结构挑战"三幕剧三次主讲课（各 135 分钟） | [computer_architecture.md](./computer_architecture.md) |
+| **计算机体系结构与硬件安全**（天津大学网络空间安全拔尖创新班，64 学时 = 授课 48 + 实验 16） | M2 + 实验融入（**大纲原生内置**） | 体系结构 × 硬件安全双线课：**第 4 章"并行与异构计算"为 ● 昇腾/CANN 主讲章**（8 课时：AI 大模型诉求与 CPU 困境 → GPU/NPU 与 SPMD+SIMD/SIMT → **Ascend 950 架构设计** → CANN 异构计算架构 → Ascend C 算子编程（SIMD 为主、SIMT 为辅）→ 调试调优实践，约 6 学时主讲）＋ 第 7 章异构可信边界（◐）＋ **实验 1 昇腾运行基线与接口观测**（全程 CANN）＋ 实验 3 教学 AI 加速器 RTL 改进（NPU 缓冲/调度思想教学化） | [computer_architecture_and_hardware_security.md](./computer_architecture_and_hardware_security.md) |
+| **数字系统设计**（独立成纲，建议先修《现代体系结构》） | M2/M5 主讲融入（微结构层） | 三部分独立闭环：DNN 算法知识（硬件视角）→ **"结合 CANN 的数字系统设计"9 课时（3×3）**：算子→数据通路 / AI Core 微结构 RTL / CANN 工具链软硬闭环 → **`quant_matmul` 结业大作业**（参考启航营三档：判题跑通 + 微结构剖析[本课特色] + 可选 PyTorch 集成与持续优化） | [digital_system_design.md](./digital_system_design.md) |
+| **并行计算**（计算机类本科，学时暂定 42 = 授课 26 + 实验 16，对标 ECE408） | M2 + 实验融入（第四部分 ● 融入单元） | 传统并行主体（并行基础 / 并行算法 / OpenMP 共享存储 / MPI 消息传递）＋ **第四部分"面向 AI 的并行计算"● 昇腾/CANN 融入单元（第 6 章，暂定 2 课时：CPU 与 NPU 异构计算 → NPU 架构 → Ascend C 算子编程）**，主线为并行思想范式迁移（数据划分→Tiling / 通信计算重叠→双缓冲 / 归约→集合通信）；实验 3/4（NPU 认知 + Ascend C 算子开发调优，承载上机深度）＋ **"同一负载、四种范式"结业大作业**（串行→OpenMP→MPI→Ascend C）＋ CANNJudge 四档（`sigmoid` 必选入门 + `add_rms_norm` 功能/集成/优化三档可选，对齐启航营一天大作业） | [parallel_computing.md](./parallel_computing.md) |
 | **实时系统设计**（中国科学技术大学） | M2 单元植入 | 传统实时理论主体 + Ascend C 算子编程 6 次 × 3 课时（A2/A3 主线 + 950 新特性）+ 时延确定性分析大作业 | [real_time_system_design.md](./real_time_system_design.md) |
 | **计算机网络**（华东师范大学） | M2 单元植入 | "AI 集群通信"专题 2 学时 + 分布式大模型通信分析大作业 | [computer_network.md](./computer_network.md) |
 | **AI 芯片技术**（华东师范大学） | M2 主讲 + 实验融入 | 达芬奇架构实例解剖 3 学时 + CANN-Lab 双模实验（真板跑分/仿真解剖） | [ai_chip_technology.md](./ai_chip_technology.md) |
 | **人工智能通识课程**（课程十三） | ● 整课植入 | "从图灵到 CANN"4 学时通识讲座（75 页课件已就绪：AI 来龙去脉 → 大模型计算本质 → 昇腾 NPU/CANN 底座）+ quick_start 体验实践 | [ai_general_education.md](./ai_general_education.md) |
-| 其他 12 个学科 15 门课（并行计算 / DL 系统 / 图像处理 / 编译 / OS / 嵌入式 / 数值 / 计算科学 / 数据科学 / HPC 等） | M2–M4 | 方向性规划（见第四章学科覆盖总表） | 待立项后逐课建文 |
+| **CANN 基础介绍**（课程九；高校公选 / 新生研讨 / 企业入门培训，16 学时） | ● 整课复用 | 独立 CANN 入门课（非学科融入课）：4 次上课 × 4 课时，理论讲义、实践作业与 CANNJudge 判题**全部复用启航营两天营成熟素材**（生态架构 → 训推 → 矢量算子 → PyTorch/CANNBot），教师零改造开课；亦为 [AI 通识三讲](../03_new_courses/ai_general_education.md)（03_new_courses）的进阶出口 | [cann_basics_introduction.md](./cann_basics_introduction.md) |
+| **AI背后的中国芯——国产AI芯片与智能计算**（校企共建通识课，16 学时） | ● 整课共建（换芯不换课） | 四模块课序（AI 浪潮 → 算力底座 → 行业与格局 → 挑战未来）；第 5 次**"一键部署大模型"**高光实践（GitCode Notebook / ModelArts，零代码）；考核：参与 20 + 实践 30 + 产业短文 20 + 方案展示 30 | [chinas_chips_behind_ai.md](./chinas_chips_behind_ai.md) |
+| 其余学科方向（DL 系统 / 图像处理 / 编译 / OS / 嵌入式 / 数值 / 计算科学 / 数据科学 / HPC 等） | M2–M4 | 方向性规划（见第七章全学科覆盖总表） | 待立项后逐课建文 |
 
 ---
 
@@ -154,7 +159,7 @@
 **核心内容：**
 - 需求-方案对照总表（上节课甲方需求清单逐条应答）
 - **维度一·计算单元**：三核异构 = 磨坊分工（Cube=磨盘 / Vector=排刀 / Scalar=主厨）；面积经济学竞猜（CPU/GPU/NPU 计算面积占比）；SIMD/SIMT 双模式 = "两个都要"的工程答案
-- **维度二·存储层次**：CPU Cache=自动挡 vs 达芬奇 UB/L1/L0=手动挡赛车；三机制去向对照表（硬件预取→软件 Tiling / 硬件替换→UB 复用规划 / 硬件一致性→同步原语）；`__gm__/__ubuf__` 地址空间限定符；TQue 双缓冲
+- **维度二·存储层次**：CPU Cache=自动挡 vs 达芬奇 UB/L1/L0=手动挡赛车；三机制去向对照表（硬件预取→软件 Tiling / 硬件替换→UB 复用规划 / 硬件一致性→同步原语）；`__gm__/__ubuf__` 地址空间限定符；双缓冲流水
 - **维度三·数据搬运**：对齐/非对齐（标准托盘 vs 零担）；ND/NZ Layout（分区编号货架）；NDDMA（会认路的老司机，多维搬运一次指令）
 - **维度四·编程模型**：多级 API = 同一底盘配不同变速箱（C API=手动挡赛车 / Tensor API=自动挡 / PyPTO·框架层=智能驾驶）；同一段 GELU 三种写法并排展示
 - 乙方答辩：一分钟纸验收（甲方需求→我的方案→最大疑问）
@@ -225,7 +230,7 @@
 
 ## 八、落地路线（优先级）
 
-1. **【P0】体系结构课三次主讲课**（课次 9/10/11，三幕剧结构）：产出完整课件三讲（各 135 分钟）+ 互动素材包（辩论证据卡、三份病历、甲方需求清单/乙方答辩表/终章设计清单三张模板）+ 考题；核心产出图 = "三机制去向对照表"与"需求-方案对照总表"
+1. **【P0】体系结构课三次主讲课**（课次 9/10/11，三幕剧结构）：完整课件三讲已就绪（[05_npu_architecture](../00_atomic_courses/04_ops_programming/05_npu_architecture/) 三份 94/97/105 页）+ 互动素材包（辩论证据卡、三份病历、甲方需求清单/乙方答辩表/终章设计清单三张模板）+ 考题；核心产出图 = "三机制去向对照表"与"需求-方案对照总表"
 2. **【P0】DL 系统课"NPU 后端"单元包**：增量赛道，格局未定优先卡位
 3. **【P1】昇腾版并行编程主线课**：整学期方案 + CANNJudge 期末竞赛
 4. **【P1】计组"一讲版 NPU 概述"**：第 7 章位置 2 学时课件，最低采用门槛，随 101 计划教材推广

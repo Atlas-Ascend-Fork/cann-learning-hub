@@ -1,3 +1,3 @@
-# 两周启航营讲义（13 讲 PPT）
+# 两周启航营讲义（本目录 7 份 PPT）
 
-> 课程大纲：[../syllabus_two_weeks_bootcamp.md](../syllabus_two_weeks_bootcamp.md)；W1：架构/训练/推理/优化/导论；W2：SIMD 模型/Memory 矢量/矩阵/调优/PyTorch/入图/CANNBot/结业。
+> 课程大纲：[../syllabus_two_weeks_bootcamp.md](../syllabus_two_weeks_bootcamp.md)；本目录现行大纲引用 6 份：02_03 大模型训练（两周营）/ 02_04 量化（四周营）/ 04 部署推理 / 05 训推优化概述 / 16 CANNBot / 17 结业大作业（06 异构计算导论为备用副本，现行大纲改用原子课程 a2a3/01）；另 9 讲讲义位于 [../../00_atomic_courses/](../../00_atomic_courses/)（AI 基础 1 + a2a3 系列 7 + 950 入图 1），两周营合计 14 份支撑 18 讲次；四周营复用同组合（训练讲次替换为 02_04 量化）。

@@ -11,7 +11,7 @@
 | **学时安排** | **20 个工作日 ≈ 125 小时**（理论约 38h + 实践约 57h + 结业大作业与社区任务约 30h；上午理论 / 下午实践为主，含多个纯实践半日与全天实践日） |
 | **授课对象** | 有一定编程基础、希望系统掌握 CANN 大模型推理全链路、Ascend C 矢量 / 矩阵 / 融合算子开发与 PyPTO Python 算子编程的工程师（含高校学生，无需先修其他启航营） |
 | **先修要求** | Python/C/C++ 基础；了解 Makefile/GIT 操作等 |
-| **配套讲义** | 部分讲次复用 [two_weeks_course/](./two_weeks_course/)（13 份 PPT）；Transformer 架构、量化基础、PyPTO、极致性能案例等专属讲义建设中 |
+| **配套讲义** | 部分讲次复用 [two_weeks_course/](./two_weeks_course/)（5 份 PPT）与 [a2a3 原子课程](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/)（7 份）＋ [ascend950 图接入课程](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_09_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx)（1 份）；Transformer 架构、量化基础、PyPTO、极致性能案例等专属讲义建设中 |
 | **实践平台** | cann-learning-hub（教程型跟练 Notebook）＋ CANNJudge（判题型自动评测） |
 | **结业标准** | 独立完成 `add_rms_norm` 算子开发（QWen3-1.7B 场景）、PyTorch 整网集成与性能优化，并完成一项社区任务（提交 PR / issue 或参加算子竞赛） |
 
@@ -93,24 +93,24 @@
 | **D2 下午** | 第 4 讲 | 基于 CANN 的大模型推理优化与最佳实践 | 量化 / 算子融合 / 图模式 / KV Cache；Profiling 定位 | 2h + 2h, [PPT](./two_weeks_course/05_llm_training_and_inference_optimization_overview_with_cann_2h.pptx) |
 | **D3 上午** | 第 5 讲 | 大模型量化基础 | 量化基本原理（INT8 / INT4、对称 / 非对称量化）；W8A8 与权重量化；KV Cache 量化；精度与性能权衡 | 2h, [PPT](./two_weeks_course/02_04_llm_quantization_with_cann_2h.pptx) |
 | **D3 下午** | 第 6 讲 | 大模型推理实践 | 基线推理 → 优化手段验证 → 判题（CANN-LearningHub + CANNJudge 练习） | 4h 纯实践, 共用第 3~5 讲 PPT |
-| **D4 上午** | 第 7 讲 | 异构计算与 Ascend C 算子编程导论 | Host/Device 异构；NPU 架构概述；Ascend C 快速入门 | 2h + 2h, [PPT](./two_weeks_course/06_a2a3_heterogeneous_computing_and_ascend_c_operator_programming_introduction.pptx) |
-| **D4 下午** | 第 8 讲 | Ascend C(A2/A3) SIMD 编程模型介绍 | 核函数定义；内存层级；同步机制；算子编译与 Stream | 2h + 2h, [PPT](./two_weeks_course/07_a2a3_ascend_c_simd_programming_model.pptx) |
-| **D5 上午** | 第 9 讲 | Ascend C(A2/A3) Memory 矢量算子编程模型 | 数据搬运接口；矢量计算接口；Softmax 实现剖析 | 2h, [PPT](./two_weeks_course/08_a2a3_ascend_c_simd_memory_vector_operator_programming.pptx) |
+| **D4 上午** | 第 7 讲 | 异构计算与 Ascend C 算子编程导论 | Host/Device 异构；NPU 架构概述；Ascend C 快速入门 | 2h + 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/01_a2a3_heterogeneous_computing_and_ascend_c_operator_programming_introduction.pptx) |
+| **D4 下午** | 第 8 讲 | Ascend C(A2/A3) SIMD 编程模型介绍 | 核函数定义；内存层级；同步机制；算子编译与 Stream | 2h + 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/02_a2a3_ascend_c_simd_programming_model.pptx) |
+| **D5 上午** | 第 9 讲 | Ascend C(A2/A3) Memory 矢量算子编程模型 | 数据搬运接口；矢量计算接口；Softmax 实现剖析 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/03_a2a3_ascend_c_simd_memory_vector_operator_programming.pptx) |
 | **D5 下午** | 第 10 讲 | Memory 矢量算子（Softmax）编程实践 | Softmax 跟练 → 独立实现 → 判题（CANN-LearningHub + CANNJudge 练习） | 4h 纯实践, 共用第 9 讲 PPT |
 
 ### 第 2 周（W2）：矢量 / 矩阵 / 融合算子与调试接入（D6~D10）
 
 | 时段 | 讲次 | 主题 | 内容要点 | 教材PPT |
 |------|------|------|---------|------|
-| **D6 上午** | 第 11 讲 | Ascend C(A2/A3) 矩阵算子编程实践 | Cube 单元；Matmul 高阶 API；分块与数据布局 | 2h, [PPT](./two_weeks_course/10_a2a3_ascend_c_simd_matrix_operator_programming.pptx) |
+| **D6 上午** | 第 11 讲 | Ascend C(A2/A3) 矩阵算子编程实践 | Cube 单元；Matmul 高阶 API；分块与数据布局 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/04_a2a3_ascend_c_simd_matrix_operator_programming.pptx) |
 | **D6 下午** | 第 12 讲 | 矩阵算子（Matmul）编程实践 | GEMM 跟练 → 独立实现 → 判题（CANN-LearningHub + CANNJudge 练习） | 4h 纯实践, 共用第 11 讲 PPT |
-| **D7 上午** | 第 13 讲 | Ascend C(A2/A3) 融合算子编程实践（**基于基础 API**） | 融合算子模式；多算子协同；Matmul+LeakyReLU 剖析 | 2h, [PPT](./two_weeks_course/09_a2a3_ascend_c_simd_fused_operator_programming.pptx) |
+| **D7 上午** | 第 13 讲 | Ascend C(A2/A3) 融合算子编程实践（**基于基础 API**） | 融合算子模式；多算子协同；Matmul+LeakyReLU 剖析 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/05_a2a3_ascend_c_simd_fused_operator_programming.pptx) |
 | **D7 下午** | 第 14 讲 | （简单）融合算子（Matmul+LeakyReLU）编程实践 | 融合算子跟练 → 独立实现 → 判题（CANN-LearningHub + CANNJudge 练习） | 4h 纯实践, 共用第 13 讲 PPT |
-| **D8 上午** | 第 15 讲 | Ascend C 功能与性能调试概述 | CPU 仿真调试；NPU 板上调试；msprof 性能分析；Profile 使用方法与仿真性能统计 | 2h + 1h, [PPT](./two_weeks_course/12_a2a3_ascend_c_operator_debugging_tuning_and_best_practices.pptx) |
+| **D8 上午** | 第 15 讲 | Ascend C 功能与性能调试概述 | CPU 仿真调试；NPU 板上调试；msprof 性能分析；Profile 使用方法与仿真性能统计 | 2h + 1h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/06_a2a3_ascend_c_operator_debugging_tuning_and_best_practices.pptx) |
 | **D8 下午** | 第 16 讲 | Ascend C 最佳实践 | 常见问题定位；性能优化套路；工程规范；UB Bank 冲突案例、数据搬运 DataCopy 案例 | 1h + 2h, 共用第 15 讲 PPT |
-| **D9 上午** | 第 17 讲 | Ascend C 算子如何接入 PyTorch | 算子注册；单算子调用；Softmax/Matmul 接入演示 | 2h + 1h, [PPT](./two_weeks_course/14_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx) |
+| **D9 上午** | 第 17 讲 | Ascend C 算子如何接入 PyTorch | 算子注册；单算子调用；Softmax/Matmul 接入演示 | 2h + 1h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/07_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx) |
 | **D9 下午** | 第 18 讲 | Ascend C 算子接入 PyTorch 实践（Softmax/Matmul 等算子） | 端到端集成 → 验证 → 判题 | 3h 纯实践, 共用第 17 讲 PPT |
-| **D10 上午** | 第 19 讲 | Ascend C 算子如何接入 AclGraph（理论） | AclGraph 构图与执行；算子入图原理与流程 | 1h, [PPT](./two_weeks_course/15_a2a3_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) |
+| **D10 上午** | 第 19 讲 | Ascend C 算子如何接入 AclGraph（理论） | AclGraph 构图与执行；算子入图原理与流程 | 1h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_09_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) |
 | **D10 上午** | 第 20 讲 | Ascend C 算子如何接入 GE 图（理论） | GE 图接入；图编译与执行原理 | 1h, 共用第 19 讲 PPT |
 | **D10 下午** | 第 19~20 讲 | AclGraph / GE 入图实践（Softmax/Matmul 等算子） | 算子入图端到端 → 图执行验证 → 判题 | 3h 纯实践, 共用第 19 讲 PPT |
 
@@ -250,9 +250,9 @@
 
 | 方向 | 推荐路径 | 目标 |
 |------|---------|------|
-| **Ascend 950 算子编程** | 950 SIMD 编程模型 → Reg 矢量 → 矩阵 / 融合 → SIMT（L4-09~17）→ SIMD&SIMT 混合编程（L4-26~27） | 950 双平台算子开发能力 |
-| **算子极致性能** | A2/A3 极致性能三课（L4-20~22）→ 950 极致性能（L4-23~25） | 独立开发达到理论峰值 90%+ 的高性能算子 |
-| **算子工程化** | 算子入图（L4-28）→ Aclnn 工程化开发（L4-29）→ 通信算子自定义开发（L4-30） | 算子库级工程化能力 |
+| **Ascend 950 算子编程** | 950 SIMD 编程模型（L4-02）→ Reg 矢量（L4-04）→ 矩阵/融合（L4-05~06）→ SIMT（L4-07~08）→ SIMD&SIMT 混合编程（L4-12~13） | 950 双平台算子开发能力 |
+| **算子极致性能** | SIMD 最佳实践（L4-10）→ SIMT 最佳实践（L4-11）→ SIMD&SIMT 混合编程（L4-12~13，双平台统一） | 独立开发达到理论峰值 90%+ 的高性能算子 |
+| **算子工程化** | 算子入图（L4-15）→ 通信算子自定义开发（L4-17）→ Aclnn 扩展（L3-02） | 算子库级工程化能力 |
 | **多语言算子开发** | 课程内已完成 PyPTO 入门（D15）→ PyPTO 进阶（L4-31~35）→ TileLang（L4-36~40）→ PyAsc（L4-41~44） | 掌握多种算子编程范式 |
 | **框架与大模型系统** | L2 层推理 / 图框架进阶课程；如需补齐训练链路（SFT / RL），可继续学习大模型训练课程 | 框架开发与系统优化专家 |
 

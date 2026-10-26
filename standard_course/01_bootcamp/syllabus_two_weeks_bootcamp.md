@@ -11,7 +11,7 @@
 | **学时安排** | **10 个工作日 ≈ 60 小时**（理论 20h + 实践 40h；D1–D8 上午理论 2h + 下午实践 2~4h，D7 全天为调试调优上下两讲） |
 | **授课对象** | 零基础新入行者、竞赛新手、跨领域转型开发者 |
 | **先修要求** | Python/C/C++ 基础；了解Makefile/GIT操作等 |
-| **配套讲义** | [two_weeks_course/](./two_weeks_course/)（13 份 PPT，支撑 18 讲次，部分讲次共用讲义） |
+| **配套讲义** | [two_weeks_course/](./two_weeks_course/)（6 份 PPT）＋ [a2a3 原子课程](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/)（7 份）＋ [ascend950 图接入课程](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_09_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx)（1 份），支撑 18 讲次，部分讲次共用讲义 |
 | **实践平台** | cann-learning-hub（教程型跟练 Notebook）＋ CANNJudge（判题型自动评测） |
 | **结业标准** | 独立完成与 **Qwen3-1.7B 大模型匹配**的 `add_rms_norm` + `quant_matmul` 双算子开发，通过判题并接入 PyTorch 端到端验证 |
 
@@ -82,17 +82,17 @@
 | **D1 下午** | 第 2 讲 | 基于 CANN 如何训练大模型 | SFT/RL 训练概念；torchtitan 训练流程；Qwen3 基线 | 2h, [PPT](./two_weeks_course/02_03_llm_training_with_cann_2h.pptx) |
 | **D2 上午** | 第 3 讲 | 基于 CANN 如何部署和推理大模型 | CANN 推理工具链；ATC 模型转换；基线推理流程 | 2h, [PPT](./two_weeks_course/04_llm_deployment_and_inference_with_cann_2h.pptx) |
 | **D2 下午** | 第 4 讲 | 基于 CANN 的大模型推理优化与最佳实践 | 量化 / 算子融合 / 图模式 / KV Cache；Profiling 定位 | 2h, [PPT](./two_weeks_course/05_llm_training_and_inference_optimization_overview_with_cann_2h.pptx) |
-| **D3 上午** | 第 5 讲 | 异构计算与 Ascend C 算子编程导论 | Host/Device 异构；NPU 架构概述；Ascend C 快速入门 | 2h, [PPT](./two_weeks_course/06_a2a3_heterogeneous_computing_and_ascend_c_operator_programming_introduction.pptx) |
-| **D3 下午** | 第 6 讲 | Ascend C(A2/A3) SIMD 编程模型介绍 | 核函数定义；内存层级；同步机制；算子编译与 Stream | 2h, [PPT](./two_weeks_course/07_a2a3_ascend_c_simd_programming_model.pptx) |
-| **D4 上午** | 第 7 讲 | Ascend C(A2/A3) Memory 矢量算子编程实践（**基于基础 API**） | 基础 API编程范式；LocalMemoryAllocator；模板化开发 | 2h, [PPT](./two_weeks_course/08_a2a3_ascend_c_simd_memory_vector_operator_programming.pptx) |
+| **D3 上午** | 第 5 讲 | 异构计算与 Ascend C 算子编程导论 | Host/Device 异构；NPU 架构概述；Ascend C 快速入门 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/01_a2a3_heterogeneous_computing_and_ascend_c_operator_programming_introduction.pptx) |
+| **D3 下午** | 第 6 讲 | Ascend C(A2/A3) SIMD 编程模型介绍 | 核函数定义；内存层级；同步机制；算子编译与 Stream | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/02_a2a3_ascend_c_simd_programming_model.pptx) |
+| **D4 上午** | 第 7 讲 | Ascend C(A2/A3) Memory 矢量算子编程实践（**基于基础 API**） | 基础 API编程范式；LocalMemoryAllocator；模板化开发 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/03_a2a3_ascend_c_simd_memory_vector_operator_programming.pptx) |
 | **D4 下午** | 第 8 讲 | Memory 矢量算子（Softmax）编程实践 |  Softmax 跟练 → 独立实现 → 判题 | 4h, 共用第 7 讲 PPT |
-| **D5 上午** | 第 9 讲 | Ascend C(A2/A3) 矩阵算子编程实践（基于基础 API） | Cube 单元；Matmul 高阶 API；分块与数据布局 | 2h, [PPT](./two_weeks_course/10_a2a3_ascend_c_simd_matrix_operator_programming.pptx) |
+| **D5 上午** | 第 9 讲 | Ascend C(A2/A3) 矩阵算子编程实践（基于基础 API） | Cube 单元；Matmul 高阶 API；分块与数据布局 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/04_a2a3_ascend_c_simd_matrix_operator_programming.pptx) |
 | **D5 下午** | 第 10 讲 | 矩阵算子编程实践 · 纯实践 | GEMM 跟练 → 独立实现 → 判题 | 4h, 共用第 11 讲 PPT |
-| **D6 上午** | 第 11 讲 | Ascend C(A2/A3) 融合算子编程实践（**基于基础 API**） | 融合算子模式；多算子协同；Matmul+LeakyReLU 剖析 | 2h + 2h, [PPT](./two_weeks_course/09_a2a3_ascend_c_simd_fused_operator_programming.pptx) |
+| **D6 上午** | 第 11 讲 | Ascend C(A2/A3) 融合算子编程实践（**基于基础 API**） | 融合算子模式；多算子协同；Matmul+LeakyReLU 剖析 | 2h + 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/05_a2a3_ascend_c_simd_fused_operator_programming.pptx) |
 | **D6 下午** | 第 12 讲 | （简单）融合算子（Matmul+LeakyReLU）编程实践 | 融合算子跟练 → 独立实现 → 判题 | 4h 纯实践, 共用第 12 讲讲义 |
-| **D7 上午** | 第 13 讲 | Ascend C 调试调优与最佳实践（1） | CPU 仿真调试；NPU 板上调优；常见问题定位 | 2h, [PPT](./two_weeks_course/12_a2a3_ascend_c_operator_debugging_tuning_and_best_practices.pptx) |
+| **D7 上午** | 第 13 讲 | Ascend C 调试调优与最佳实践（1） | CPU 仿真调试；NPU 板上调优；常见问题定位 | 2h, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/06_a2a3_ascend_c_operator_debugging_tuning_and_best_practices.pptx) |
 | **D7 下午** | 第 14 讲 | Ascend C 调试调优与最佳实践（2） | msprof 性能分析；Roofline；瓶颈优化方法 | 2h, 共用第 13 讲 PPT |
-| **D8 上午** | 第 15 讲 | Ascend C 算子如何接入 PyTorch（单算子调用 + 入图验证） | 算子注册；单算子调用；AclGraph/GE 入图 | 2h, [PPT1](./two_weeks_course/14_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx)、[PPT2](./two_weeks_course/15_a2a3_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) |
+| **D8 上午** | 第 15 讲 | Ascend C 算子如何接入 PyTorch（单算子调用 + 入图验证） | 算子注册；单算子调用；AclGraph/GE 入图 | 2h, [PPT1](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/07_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx)、[PPT2](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_09_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) |
 | **D8 下午** | 第 16 讲 | Ascend C 算子接入 PyTorch 实践 · 纯实践 | 端到端集成 → 入图验证 → 判题 | 4h, 共用第 15 讲 PPT |
 | **D9 上午** | 第 17 讲 | 基于 CANNBot 的 Ascend C 算子开发介绍 | CANNBot 生成 / 调试 / 优化；辅助开发实践 | 1h, [PPT](./two_weeks_course/16_cannbot_operator_development_practice_1d.pptx)（全天专题版，1h 精简版另行规划） |
 | **D9 下午–D10** | 第 18 讲 | 结业项目 + 答辩 | 双算子开发；框架集成；性能优化；成果答辩 | 2~3h + 冲刺, [PPT](./two_weeks_course/17_a2a3_two_week_bootcamp_final_project.pptx) |
