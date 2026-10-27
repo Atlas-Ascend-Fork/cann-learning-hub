@@ -5,38 +5,6 @@
 [![Zread](https://img.shields.io/badge/Zread-Ask_AI-_.svg?style=flat&color=0052D9&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/hicann/cann-learning-hub) 点击上方徽章，开启在线智能代码学习与知识问答体验！
 
 ---
-## 🚀 三种环境体验方式介绍
-
-> 本仓大部分教程以 Notebook 形式提供，包含文本讲解与可执行代码，可交互式运行与修改。以下三种方式均可运行 Notebook 中的可执行代码，具体适用场景见各教程 README 说明。
-
-**方式一：在线体验（推荐，零配置）**
-
-打开 [人工智能基础](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=quick_start/cann_basics&scanFilePath=quick_start/cann_basics/01_ai_basics.ipynb)（第一课），点击「在线体验」即可在浏览器中运行你的第一个 Notebook，无需任何环境配置。
-
-> 支持在线体验的课程 README 中已为每个 Notebook 配置对应的在线体验链接，可直接点击运行。
-
-**方式二：CANNLab 云环境**
-
-进入 [CANNLab](https://gitcode.com/org/cann/cannlab) 创建 NPU 云环境（初始 100 小时，积分可兑换时长），clone 本仓后从目录树打开任意教程运行，注意选择课程支持的镜像版本和Python内核。
-
-> 具体使用方式参考 [CANNLab 云开发平台体验指南](./docs/CANNLab_env_experience_guide.md)。
-
-**方式三：本地部署**
-
-```bash
-git clone https://gitcode.com/cann/cann-learning-hub.git
-cd cann-learning-hub
-```
-
-| 依赖 | 要求 |
-|:---|:---|
-| 硬件 | 昇腾 NPU（Atlas A2/A3 系列等；部分认知类课程无需 NPU） |
-| CANN | 9.0.0 及以上，[下载安装](https://www.hiascend.com/cann/download) |
-| Python | 3.11 |
-
-> 各教程的具体依赖见其目录下的 `requirements.txt`；环境配置详见 [CANNLab 环境体验指南](./docs/CANNLab_env_experience_guide.md)。
-
----
 
 ## 🎯 角色导航
 
@@ -49,7 +17,7 @@ cd cann-learning-hub
 | ⚙️ **算子开发工程师** | [算子开发](#mainline-operator) — Ascend C 编程与自定义算子实战 |
 | 📱 **应用开发工程师** | [应用开发（离线推理）](#mainline-appdev) — ATC 编译、ACL 推理与性能调优 |
 | 📊 **推荐算法工程师** | [推荐系统](#mainline-recsys) — CTR 排序 + 召回全链路 |
-| 🏫 **高校师生** | [高校教学方案专区](#university)  |
+| 🏫 **高校老师** | [高校教学方案专区](#university)  |
 | 🏆 **竞赛选手** | [赛事备考专区](#competition) — CANNJudge 题库、大赛报名、备赛路径 |
 | 🤝 **社区开发者** |看[技术博客](#技术博客)· [科研案例](#科研案例) 实践， [参与贡献](#参与贡献) — 贡献教程与案例 |
 
