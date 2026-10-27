@@ -11,7 +11,7 @@
 | **学时安排** | **20 个工作日 ≈ 125 小时**（理论约 38h + 实践约 57h + 结业大作业与社区任务约 30h；上午理论 / 下午实践为主，含多个纯实践半日与全天实践日） |
 | **授课对象** | 有一定编程基础、希望系统掌握 CANN 大模型推理全链路、Ascend C 矢量 / 矩阵 / 融合算子开发与 PyPTO Python 算子编程的工程师（含高校学生，无需先修其他启航营） |
 | **先修要求** | Python/C/C++ 基础；了解 Makefile/GIT 操作等 |
-| **配套讲义** | 部分讲次复用 [two_weeks_course/](./two_weeks_course/)（5 份 PPT）与 [a2a3 原子课程](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/)（7 份）＋ [ascend950 图接入课程](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_09_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx)（1 份）；Transformer 架构、量化基础、PyPTO、极致性能案例等专属讲义建设中 |
+| **配套讲义** | 共 15 份 PPT：[two_weeks_course/](./two_weeks_course/) 5 份、[AI 基础](../00_atomic_courses/02_framework/01_overview/artificial_intelligence_basics.pptx) 1 份、[a2a3 原子课程](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/) 8 份、[ascend950 图接入课程](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_09_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) 1 份；Transformer 架构、PyPTO、矩阵与融合算子极致性能案例讲义建设中 |
 | **实践平台** | cann-learning-hub（教程型跟练 Notebook）＋ CANNJudge（判题型自动评测） |
 | **结业标准** | 独立完成 `add_rms_norm` 算子开发（QWen3-1.7B 场景）、PyTorch 整网集成与性能优化，并完成一项社区任务（提交 PR / issue 或参加算子竞赛） |
 
@@ -49,7 +49,7 @@
 | 调试调优与最佳实践 | 第 15~16 讲 | 功能与性能调试概述；Ascend C 最佳实践 | 性能瓶颈定位与优化报告 |
 | 框架与图接入 | 第 17~20 讲 | 算子接入 PyTorch；算子接入 AclGraph / GE 图 | 算子端到端调用 + 入图验证 |
 | 智能开发 | 第 21 讲 | 基于 CANNBot 的算子开发实践（含更改 skill 优化算子） | CANNBot 辅助开发与 skill 优化记录 |
-| 极致性能案例 | 第 22~24 讲 | 矢量（Add / Softmax）、Matmul、融合算子逐步实现极致性能的案例剖析 | 极致性能优化方法论 + 优化数据报告 |
+| 极致性能案例 | 第 22~24 讲 | 矢量（Softmax）、Matmul、融合算子逐步实现极致性能的案例剖析 | 极致性能优化方法论 + 优化数据报告 |
 | Python 算子编程（PyPTO） | 第 25~26 讲 | PyPTO 编程范式（MPMD / 计算图）；基础算子 Python 实现（上午理论 + 下午实践） | PyPTO 基础算子独立实现 + 判题 |
 | 结业项目与社区实践 | 第 27~28 讲 | `add_rms_norm` 开发、整网集成、持续优化；社区任务（PR / issue / 竞赛） | 结业大作业 + 社区贡献 |
 
@@ -119,7 +119,7 @@
 | 时段 | 讲次 | 主题 | 内容要点 | 教材PPT |
 |------|------|------|---------|------|
 | **D11 全天** | 第 21 讲 | 基于 CANNBot 的算子开发实践 | CANNBot 生成 / 调试 / 优化；**尝试更改 skill 优化算子** | 2h + 4h, [PPT](./two_weeks_course/16_cannbot_operator_development_practice_1d.pptx) |
-| **D12 全天** | 第 22 讲 | 案例分析与实践：矢量算子（Add / Softmax 等）如何逐步实现极致性能 | 优化路径案例剖析（VF 粒度 / 双发射 / 访存优化）；复现与超越 | 2h 案例 + 4h 实践, 讲义建设中 |
+| **D12 全天** | 第 22 讲 | 案例分析与实践：矢量算子 Softmax 如何逐步实现极致性能 | 优化路径案例剖析（多核 / TilingKey 分支 / Double Buffering / 流水优化 / UB 复用 / OnlineSoftmax）；复现与超越 | 2h 案例 + 4h 实践, [PPT](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/a2a3_softmax_membase_optimization_2h.pptx) |
 | **D13 全天** | 第 23 讲 | 案例分析与实践：Matmul 算子如何逐步实现极致性能 | 分块 / 数据布局 / 流水优化路径剖析；复现与超越 | 2h 案例 + 4h 实践, 讲义建设中 |
 | **D14 全天** | 第 24 讲 | 案例分析与实践：融合算子（Matmul+Gelu 等）如何逐步实现极致性能 | 以 Matmul+Gelu 融合算子为例：多算子协同 / 流水 / 零拷贝优化路径剖析；复现与超越 | 2h 案例 + 4h 实践, 讲义建设中 |
 | **D15 上午** | 第 25 讲 | CANN Python 算子编程：PyPTO 算子编程（理论） | PyPTO 与 Ascend C 的关系；Host / Kernel 分工与 MPMD 编程范式；计算图与泳道图；Hello World 执行流程 | 3h 理论, 讲义建设中 |
@@ -142,11 +142,11 @@
 
 ---
 
-## 五、每节课的实践内容（CANN-Learning-Hub 承载）
+## 五、每节课的实践内容
 
-> 每讲实践由 [cann-learning-hub](https://gitcode.com/cann/cann-learning-hub/) 的跟练 Notebook 承载，与理论课配对；纯实践半日 / 全天按「跟练 → 独立实现 → 判题」推进。
+> 每讲实践与理论课配对，由 [cann-learning-hub](https://gitcode.com/cann/cann-learning-hub/) 的跟练 Notebook 及配套样例承载；纯实践半日 / 全天按「跟练 → 独立实现 → 判题」推进。
 
-| 讲次 | 实践主题 | 实践内容 | 实践路径（cann-learning-hub） |
+| 讲次 | 实践主题 | 实践内容 | 实践路径 / 资源 |
 |------|---------|---------|------------------------------|
 | 第 1 讲 | NPU 环境初体验 | 跑通 PyTorch NPU HelloWorld，验证环境与算力 | `quick_start/cann_basics/` |
 | 第 2 讲 | Transformer 架构初探 | Qwen3 模型结构逐模块拆解（Attention / FFN / RMSNorm）与张量维度观察 | 待补充（实践中） |
@@ -162,7 +162,7 @@
 | 第 17~18 讲 | PyTorch 接入 | 算子注册与单算子调用 → 端到端验证（D9 下午 3h 纯实践） | `tutorials/ascendc_operator_development_light/02_AscendC_basic` |
 | 第 19~20 讲 | AclGraph / GE 图接入 | 算子入图 → 图执行端到端验证（D10 下午 3h 纯实践，覆盖 AclGraph 与 GE 两种图模式） | `tutorials/ge_development` |
 | 第 21 讲 | CANNBot 智能开发 | CANNBot 生成 / 调试 / 优化算子 + 更改 skill 优化算子记录 | `tutorials/CANNBot` |
-| 第 22 讲 | 矢量算子极致性能 | Add / Softmax 逐步极致优化实战 + 性能数据报告 | `tutorials/ascendc_operator_development/08_performance_optimization` |
+| 第 22 讲 | 矢量算子极致性能 | Softmax V00～V06 逐版本实现与验证，比较短 / 中 / 长行性能并提交优化报告 | [全版本练习仓](https://gitcode.com/xujiachen8/softmax-demo-dav2201-practise)（补齐 TODO 并运行 `bash test.sh`）；[官方样例](https://gitcode.com/cann/cann-samples/tree/master/Samples/2_Performance/softmax_membase_story) |
 | 第 23 讲 | 矩阵算子极致性能 | Matmul 逐步极致优化实战 + 优化数据报告 | `tutorials/ascendc_operator_development/08_performance_optimization` |
 | 第 24 讲 | 融合算子极致性能 | Matmul+Gelu 等融合算子逐步极致优化实战 + 优化数据报告 | `tutorials/ascendc_operator_development/08_performance_optimization` |
 | 第 25 讲 | PyPTO 编程范式上机 | PyPTO 环境体验（`pip install pypto`）→ Hello World 跑通 → 编程范式与计算图 | `tutorials/pypto_development/01_cann_chip_pypto_intro`、`tutorials/pypto_development/02_pypto_operator_development_basics` |
@@ -170,13 +170,13 @@
 | 第 27 讲 | 结业大作业 | `add_rms_norm` 开发 + QWen3-1.7B 整网集成 + 持续优化（判题由 CANNJudge 承载，见第六章） | — |
 | 第 28 讲 | 社区任务 | 挑选任意社区任务，提交 PR / issue 等（见第六章作业 4） | —（社区仓库，如 [cann-learning-hub](https://gitcode.com/cann/cann-learning-hub/)、[cann-samples](https://gitcode.com/cann/cann-samples/)） |
 
-> **实践目录说明：** 「实践路径」列为 [cann-learning-hub](https://gitcode.com/cann/cann-learning-hub/) 教程仓（本仓库）`quick_start/`、`tutorials/` 下的实际教程目录，进入对应目录即可跟练 Notebook。
+> **实践目录说明：** 无仓库前缀的相对路径位于 [cann-learning-hub](https://gitcode.com/cann/cann-learning-hub/)（本仓库）`quick_start/`、`tutorials/` 下；外部练习仓与官方样例使用完整链接。
 
 ---
 
 ## 六、课后习题与作业（CANNJudge 承载）
 
-> 课后习题用于每讲结束后的即时巩固（在线题库 / 判题），小作业用于实践产出验收（判题型，易=跟练跑通 / 中=变体改造 / 难=独立实现）；结业大作业为课程最终产出。**当前各讲课后习题、小作业及结业判题作业的 CANNJudge 题目链接均缺失**，待平台上线后补充（各讲缺失状态见 6.1「CANNJudge 链接」列）。
+> 课后习题用于每讲结束后的即时巩固（在线题库 / 判题），小作业用于实践产出验收（判题型，易=跟练跑通 / 中=变体改造 / 难=独立实现）；结业大作业为课程最终产出。**第 22 讲已提供 CANNJudge SoftmaxRowFP32 判题入口，其余题目链接待补充**（各讲状态见 6.1「CANNJudge 链接」列）。
 
 ### 6.1 每讲课后习题与小作业
 
@@ -201,7 +201,7 @@
 | 第 19 讲 | AclGraph 入图流程题 | AclGraph 构图与算子入图练习（D10 下午实践承载） | `01_simd_cpp_api/02_features/00_framework/00_pytorch`、`04_aclgraph` | 待补充 |
 | 第 20 讲 | GE 入图流程题 | GE 图接入端到端验证（D10 下午实践承载） | `01_simd_cpp_api/02_features/00_framework/03_ge` | 待补充 |
 | 第 21 讲 | CANNBot 功能概念题 | CANNBot 生成算子 + 更改 skill 优化记录 | learning-hub: `tutorials/CANNBot` | 待补充 |
-| 第 22 讲 | 矢量极致优化方法题 | Add / Softmax 算子性能优化报告（基线对比） | `01_simd_cpp_api/05_best_practices/00_vector_compute/add_high_performance` | 待补充 |
+| 第 22 讲 | 矢量极致优化方法题 | SoftmaxRowFP32 正确性验证与逐版本性能优化报告（基线对比） | [cann-samples：Softmax MemBase 官方样例](https://gitcode.com/cann/cann-samples/tree/master/Samples/2_Performance/softmax_membase_story) | [SoftmaxRowFP32](https://cannjudge.cn/public/vector/softmaxrowfp32) |
 | 第 23 讲 | 分块 / 流水策略题 | Matmul 算子优化数据报告（基线对比） | `01_simd_cpp_api/05_best_practices/01_matrix_compute/matmul_basic_api_high_performance` | 待补充 |
 | 第 24 讲 | 融合优化方法题 | Matmul+Gelu 融合算子优化数据报告（基线对比） | `01_simd_cpp_api/05_best_practices/03_fusion_compute/matmul_gelu_high_performance` | 待补充 |
 | 第 25 讲 | PyPTO 编程范式概念题（MPMD / 计算图 / 泳道图） | PyPTO Hello World + 编程范式练习 | learning-hub: `tutorials/pypto_development/01_cann_chip_pypto_intro`、`tutorials/pypto_development/02_pypto_operator_development_basics` | 待补充 |

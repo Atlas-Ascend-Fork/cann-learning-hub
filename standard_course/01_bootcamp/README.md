@@ -15,7 +15,7 @@
 | **前置要求** | C/C++ 基础；了解Makefile/GIT操作等 | C/C++ 基础；了解Makefile/GIT操作等 | C/C++ 基础；了解Makefile/GIT操作等 | C/C++ 基础；了解Makefile/GIT操作等 |
 | **结业标准** | 独立完成矢量算子开发，功能跑通 | 独立完成矢量算子开发（Qwen3-1.7B 场景），理解 NPU 编程模型 | 独立完成矢量+矩阵双算子开发，并集成到 PyTorch 框架 | 独立完成 `add_rms_norm` 开发（QWen3-1.7B）、整网集成与性能优化，并完成一项社区任务 |
 | **课程大纲** | [一天营详细大纲](./syllabus_one_day_bootcamp.md) | [两天营详细大纲](./syllabus_two_days_bootcamp.md) | [两周营详细大纲](./syllabus_two_weeks_bootcamp.md) | [四周营详细大纲](./syllabus_four_weeks_bootcamp.md) |
-| **讲义目录** | 共 4 份：[two_days_course/](./two_days_course/) 2 份 + 原子课程 2 份（与两天营共用） | 共 7 份（6 讲）：[two_days_course/](./two_days_course/) 5 份 + 原子课程 2 份 | 共 14 份支撑 18 讲次：[two_weeks_course/](./two_weeks_course/) 5 份 + 原子课程 9 份（AI 基础 1 + a2a3 系列 7 + 950 入图 1） | 复用两周营讲义 14 份（[two_weeks_course/](./two_weeks_course/)，其中训练讲次替换为 02_04 量化）+ 专属讲义建设中（共 28 讲次） |
+| **讲义目录** | 共 4 份：[two_days_course/](./two_days_course/) 2 份 + 原子课程 2 份（与两天营共用） | 共 7 份（6 讲）：[two_days_course/](./two_days_course/) 5 份 + 原子课程 2 份 | 共 14 份支撑 18 讲次：[two_weeks_course/](./two_weeks_course/) 5 份 + 原子课程 9 份（AI 基础 1 + a2a3 系列 7 + 950 入图 1） | 共 15 份支撑 28 讲次：[two_weeks_course/](./two_weeks_course/) 5 份 + 原子课程 10 份（AI 基础 1 + a2a3 系列 8 + 950 入图 1）；其余专属讲义建设中 |
 
 ---
 
@@ -66,10 +66,10 @@
 |------|------|---------|---------|
 | **W1**（D1~D5） | 大模型训推全链路与 Ascend C 入门 | 生态架构；训练（SFT+RL 基础 / SFT 性能优化）；推理（部署 / 优化 / 高级实践）；异构计算导论 + SIMD 编程模型 | D2 / D4 训推纯实践判题 |
 | **W2**（D6~D10） | 矢量 / 矩阵 / 融合算子与调试接入 | 矢量（Softmax）；矩阵（Matmul）；融合（Matmul+LeakyReLU）；调试调优与最佳实践；PyTorch 接入 | D6 / D7 / D8 / D10 下午纯实践 |
-| **W3**（D11~D15） | 图接入、CANNBot 与极致性能案例 | AclGraph / GE 入图；CANNBot 全天专题（含更改 skill 优化算子）；矢量 / Matmul / 融合极致性能案例三部曲 | D12 CANNBot 全天专题 |
+| **W3**（D11~D15） | CANNBot、极致性能案例与 PyPTO | CANNBot 全天专题（含更改 skill 优化算子）；Softmax / Matmul / 融合极致性能案例三部曲；PyPTO 编程实践 | D11 CANNBot；D12 Softmax；D15 PyPTO |
 | **W4**（D16~D20） | 结业大作业与社区实践 | `add_rms_norm` 开发、整网集成、持续优化；社区任务（PR / issue / 算子竞赛） | **D16~D17 结业大作业；D18~D20 社区任务** |
 
-> 四周营部分讲次复用两周营讲义（14 份 PPT）；W1~W2 以「上午理论 + 下午实践」推进（含 7 个纯实践半日），W3 为图接入、CANNBot 专题与极致性能案例三部曲，W4 为结业大作业与社区任务。
+> 四周营现有 15 份 PPT；W1~W2 以「上午理论 + 下午实践」推进，W3 为 CANNBot 专题、极致性能案例三部曲与 PyPTO，W4 为结业大作业与社区任务。
 
 ---
 
@@ -143,9 +143,9 @@
 
 | 资源类型 | 说明 | 获取方式 |
 |---------|------|---------|
-| **课程讲义 PPTX** | 按时间段英文子目录存放，每讲一份 | 一天营与两天营共用 [two_days_course/](./two_days_course/)；两周营 [two_weeks_course/](./two_weeks_course/)；四周营部分讲次复用 two_weeks_course/，SFT 性能优化 / 推理优化高级实践 / 融合算子 / 极致性能案例等专属讲义建设中 |
+| **课程讲义 PPTX** | 营内专用讲义按时间段英文子目录存放，可复用讲义统一维护在原子课程目录 | 一天营与两天营共用 [two_days_course/](./two_days_course/)；两周营 [two_weeks_course/](./two_weeks_course/)；四周营复用 two_weeks_course/ 与原子课程讲义；Transformer 架构 / PyPTO / 矩阵与融合算子极致性能案例讲义建设中 |
 | **详细课程大纲** | 含每节课程介绍、实践内容与链接、进一步学习参考 | [syllabus_one_day_bootcamp.md](./syllabus_one_day_bootcamp.md) / [syllabus_two_days_bootcamp.md](./syllabus_two_days_bootcamp.md) / [syllabus_two_weeks_bootcamp.md](./syllabus_two_weeks_bootcamp.md) / [syllabus_four_weeks_bootcamp.md](./syllabus_four_weeks_bootcamp.md) |
-| **实践作业平台** | CANNJudge 自动判题系统，提供正确性与性能反馈 | 平台上线后回填链接 |
+| **实践作业平台** | CANNJudge 自动判题系统，提供正确性与性能反馈 | [第 22 讲 SoftmaxRowFP32](https://cannjudge.cn/public/vector/softmaxrowfp32)；其余题目链接待补充 |
 | **跟练 Notebook** | cann-learning-hub 教程型 Notebook，配合每讲实践使用 | <https://gitcode.com/cann/cann-learning-hub/> |
 | **算子样例仓库** | 各领域算子参考实现，用于结业作业参考 | <https://gitcode.com/cann/cann-samples/tree/master/Samples/> |
 | **Ascend C 编程指南** | 官方编程模型、API 用法与最佳实践 | <https://asc.gitcode.com> |
