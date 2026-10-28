@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 300" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="940" height="300" fill="#ffffff"/>
+<text x="22" y="27" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">三种通信算法横向对比</text>
+<text x="22" y="46" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#7b8794" text-anchor="start" font-weight="400">同一个集合通信算子，可依据物理拓扑与数据量选择不同算法。</text>
+<rect x="22" y="62" width="292" height="218" rx="12" ry="12" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.6"/>
+<rect x="22" y="62" width="292" height="38" rx="12" ry="12" fill="#e8f1fd" stroke="none"/>
+<rect x="22" y="84" width="292" height="16" fill="#e8f1fd" stroke="none"/>
+<line x1="22" y1="100" x2="314" y2="100" stroke="#3d7ecc" stroke-width="1.4"/>
+<text x="168.0" y="87" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#1a5ba8" text-anchor="middle" font-weight="700">Ring（环形）</text>
+<text x="38" y="124" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">适用拓扑</text>
+<text x="298" y="124" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">Star、Tree 等规模</text>
+<line x1="38" y1="136" x2="298" y2="136" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="38" y="162" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">通信步骤</text>
+<text x="298" y="162" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">N-1 步</text>
+<line x1="38" y1="174" x2="298" y2="174" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="38" y="200" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">每步规模</text>
+<text x="298" y="200" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">每步传一块、收一块</text>
+<line x1="38" y1="212" x2="298" y2="212" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="38" y="238" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">特点</text>
+<text x="298" y="238" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">逐跳流转，链路复用充分</text>
+<rect x="330" y="62" width="292" height="218" rx="12" ry="12" fill="#ffffff" stroke="#2fa08a" stroke-width="1.6"/>
+<rect x="330" y="62" width="292" height="38" rx="12" ry="12" fill="#e3f6f1" stroke="none"/>
+<rect x="330" y="84" width="292" height="16" fill="#e3f6f1" stroke="none"/>
+<line x1="330" y1="100" x2="622" y2="100" stroke="#2fa08a" stroke-width="1.4"/>
+<text x="476.0" y="87" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#186b5b" text-anchor="middle" font-weight="700">Mesh（全连接）</text>
+<text x="346" y="124" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">适用拓扑</text>
+<text x="606" y="124" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">Full-mesh</text>
+<line x1="346" y1="136" x2="606" y2="136" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="346" y="162" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">通信步骤</text>
+<text x="606" y="162" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">仅 1 步</text>
+<line x1="346" y1="174" x2="606" y2="174" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="346" y="200" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">每步规模</text>
+<text x="606" y="200" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">同时并发访问所有 NPU</text>
+<line x1="346" y1="212" x2="606" y2="212" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="346" y="238" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">特点</text>
+<text x="606" y="238" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">步数最少，但对拓扑要求高</text>
+<rect x="638" y="62" width="292" height="218" rx="12" ry="12" fill="#ffffff" stroke="#7b5bd6" stroke-width="1.6"/>
+<rect x="638" y="62" width="292" height="38" rx="12" ry="12" fill="#f0ebfb" stroke="none"/>
+<rect x="638" y="84" width="292" height="16" fill="#f0ebfb" stroke="none"/>
+<line x1="638" y1="100" x2="930" y2="100" stroke="#7b5bd6" stroke-width="1.4"/>
+<text x="784.0" y="87" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#5535a8" text-anchor="middle" font-weight="700">Halving-Doubling</text>
+<text x="654" y="124" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">适用拓扑</text>
+<text x="914" y="124" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">Fat-Tree 等</text>
+<line x1="654" y1="136" x2="914" y2="136" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="654" y="162" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">通信步骤</text>
+<text x="914" y="162" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">log₂N 步</text>
+<line x1="654" y1="174" x2="914" y2="174" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="654" y="200" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">每步规模</text>
+<text x="914" y="200" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">访问步长按 2^k 增长</text>
+<line x1="654" y1="212" x2="914" y2="212" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="654" y="238" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">特点</text>
+<text x="914" y="238" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#52606d" text-anchor="end" font-weight="400">步数与步长折中，适合大规模</text>
+</svg>

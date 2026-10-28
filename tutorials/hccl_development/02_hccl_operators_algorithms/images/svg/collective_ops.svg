@@ -1,0 +1,444 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 815" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="1020" height="815" fill="#ffffff"/>
+<text x="24" y="28" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">八个常见集合通信算子</text>
+<text x="24" y="50" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#7b8794" text-anchor="start" font-weight="400">方块 = 一份数据：a 来自 R0、b 来自 R1、c 来自 R2、d 来自 R3。每张卡片左边是操作前、右边是操作后，看每个 Rank 手上分别有什么。</text>
+<rect x="20" y="68" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.4"/>
+<rect x="20" y="68" width="480" height="26" rx="9" ry="9" fill="#e8f1fd" stroke="none"/>
+<rect x="20" y="82" width="480" height="12" fill="#e8f1fd" stroke="none"/>
+<line x1="20" y1="94" x2="500" y2="94" stroke="#3d7ecc" stroke-width="1.2"/>
+<text x="32" y="86" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#1a5ba8" text-anchor="start" font-weight="700">Gather</text>
+<text x="488" y="86" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="end" font-weight="600">多对一 · 汇集</text>
+<rect x="30" y="102" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="38" y="118" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R0</text>
+<rect x="64" y="106.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="72.5" y="117.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="30" y="128" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="38" y="144" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R1</text>
+<rect x="64" y="132.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="72.5" y="143.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="30" y="154" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="38" y="170" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R2</text>
+<rect x="64" y="158.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="72.5" y="169.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="30" y="180" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="38" y="196" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R3</text>
+<rect x="64" y="184.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="72.5" y="195.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<line x1="176" y1="114" x2="246" y2="114" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="176" y1="140" x2="246" y2="140" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="176" y1="166" x2="246" y2="166" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="176" y1="192" x2="246" y2="192" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<rect x="252" y="102" width="238" height="102" rx="6" ry="6" fill="#fbfcfd" stroke="#3d7ecc" stroke-width="1.4"/>
+<text x="262" y="157.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="start" font-weight="700">root</text>
+<rect x="296" y="145.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="304.5" y="156.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="316.0" y="145.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="324.5" y="156.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="336.0" y="145.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="344.5" y="156.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="356.0" y="145.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="364.5" y="156.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<text x="32" y="224" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">各 Rank 的数据汇集到 root：root 手上变成完整 4 份。</text>
+<rect x="520" y="68" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.4"/>
+<rect x="520" y="68" width="480" height="26" rx="9" ry="9" fill="#e8f1fd" stroke="none"/>
+<rect x="520" y="82" width="480" height="12" fill="#e8f1fd" stroke="none"/>
+<line x1="520" y1="94" x2="1000" y2="94" stroke="#3d7ecc" stroke-width="1.2"/>
+<text x="532" y="86" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#1a5ba8" text-anchor="start" font-weight="700">Reduce</text>
+<text x="988" y="86" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="end" font-weight="600">多对一 · 归约</text>
+<rect x="530" y="102" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="538" y="118" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R0</text>
+<rect x="564" y="106.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="572.5" y="117.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="530" y="128" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="538" y="144" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R1</text>
+<rect x="564" y="132.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="572.5" y="143.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="530" y="154" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="538" y="170" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R2</text>
+<rect x="564" y="158.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="572.5" y="169.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="530" y="180" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="538" y="196" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R3</text>
+<rect x="564" y="184.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="572.5" y="195.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<line x1="676" y1="114" x2="746" y2="114" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="676" y1="140" x2="746" y2="140" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="676" y1="166" x2="746" y2="166" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="676" y1="192" x2="746" y2="192" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<rect x="752" y="102" width="238" height="102" rx="6" ry="6" fill="#fbfcfd" stroke="#3d7ecc" stroke-width="1.4"/>
+<text x="762" y="157.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="start" font-weight="700">root</text>
+<rect x="796" y="145.5" width="51.800000000000004" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="821.9" y="156.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a+b+c+d</text>
+<text x="532" y="224" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">汇集后在 root 做归约：4 份合成 1 份「a+b+c+d」。</text>
+<rect x="20" y="247" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.4"/>
+<rect x="20" y="247" width="480" height="26" rx="9" ry="9" fill="#e8f1fd" stroke="none"/>
+<rect x="20" y="261" width="480" height="12" fill="#e8f1fd" stroke="none"/>
+<line x1="20" y1="273" x2="500" y2="273" stroke="#3d7ecc" stroke-width="1.2"/>
+<text x="32" y="265" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#1a5ba8" text-anchor="start" font-weight="700">Broadcast</text>
+<text x="488" y="265" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="end" font-weight="600">一对多 · 广播</text>
+<rect x="30" y="281" width="140" height="102" rx="6" ry="6" fill="#fbfcfd" stroke="#3d7ecc" stroke-width="1.4"/>
+<text x="40" y="336.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="start" font-weight="700">root</text>
+<rect x="74" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="82.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="94.0" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="102.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="114.0" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="122.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="134.0" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="142.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<line x1="176" y1="293" x2="246" y2="293" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="176" y1="319" x2="246" y2="319" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="176" y1="345" x2="246" y2="345" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="176" y1="371" x2="246" y2="371" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<rect x="252" y="281" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="260" y="297" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R0</text>
+<rect x="286" y="285.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="294.5" y="296.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="306.0" y="285.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="314.5" y="296.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="326.0" y="285.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="334.5" y="296.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="346.0" y="285.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="354.5" y="296.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<rect x="252" y="307" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="260" y="323" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R1</text>
+<rect x="286" y="311.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="294.5" y="322.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="306.0" y="311.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="314.5" y="322.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="326.0" y="311.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="334.5" y="322.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="346.0" y="311.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="354.5" y="322.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<rect x="252" y="333" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="260" y="349" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R2</text>
+<rect x="286" y="337.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="294.5" y="348.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="306.0" y="337.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="314.5" y="348.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="326.0" y="337.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="334.5" y="348.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="346.0" y="337.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="354.5" y="348.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<rect x="252" y="359" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="260" y="375" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R3</text>
+<rect x="286" y="363.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="294.5" y="374.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="306.0" y="363.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="314.5" y="374.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="326.0" y="363.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="334.5" y="374.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="346.0" y="363.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="354.5" y="374.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<text x="32" y="403" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">root 的整份数据原样复制给每个 Rank：人手一份，内容完全相同。</text>
+<rect x="520" y="247" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.4"/>
+<rect x="520" y="247" width="480" height="26" rx="9" ry="9" fill="#e8f1fd" stroke="none"/>
+<rect x="520" y="261" width="480" height="12" fill="#e8f1fd" stroke="none"/>
+<line x1="520" y1="273" x2="1000" y2="273" stroke="#3d7ecc" stroke-width="1.2"/>
+<text x="532" y="265" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#1a5ba8" text-anchor="start" font-weight="700">Scatter</text>
+<text x="988" y="265" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="end" font-weight="600">一对多 · 拆分</text>
+<rect x="530" y="281" width="140" height="102" rx="6" ry="6" fill="#fbfcfd" stroke="#3d7ecc" stroke-width="1.4"/>
+<text x="540" y="336.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#1a5ba8" text-anchor="start" font-weight="700">root</text>
+<rect x="574" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="582.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="594.0" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="602.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="614.0" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="622.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="634.0" y="324.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="642.5" y="335.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<line x1="676" y1="293" x2="746" y2="293" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="676" y1="319" x2="746" y2="319" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="676" y1="345" x2="746" y2="345" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<line x1="676" y1="371" x2="746" y2="371" stroke="#3d7ecc" stroke-width="1.5" marker-end="url(#arw-blue)"/>
+<rect x="752" y="281" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="760" y="297" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R0</text>
+<rect x="786" y="285.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="794.5" y="296.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">a</text>
+<rect x="752" y="307" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="760" y="323" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R1</text>
+<rect x="786" y="311.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="794.5" y="322.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">b</text>
+<rect x="752" y="333" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="760" y="349" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R2</text>
+<rect x="786" y="337.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="794.5" y="348.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">c</text>
+<rect x="752" y="359" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.1"/>
+<text x="760" y="375" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="start" font-weight="700">R3</text>
+<rect x="786" y="363.5" width="17.0" height="15" rx="3" ry="3" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.0"/>
+<text x="794.5" y="374.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">d</text>
+<text x="532" y="403" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">root 的整份数据被拆开：每个 Rank 只拿到其中一片。</text>
+<rect x="20" y="426" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#2fa08a" stroke-width="1.4"/>
+<rect x="20" y="426" width="480" height="26" rx="9" ry="9" fill="#e3f6f1" stroke="none"/>
+<rect x="20" y="440" width="480" height="12" fill="#e3f6f1" stroke="none"/>
+<line x1="20" y1="452" x2="500" y2="452" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="32" y="444" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="start" font-weight="700">AllReduce</text>
+<text x="488" y="444" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="end" font-weight="600">多对多 · 归约 + 广播</text>
+<rect x="30" y="460" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="476" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="64" y="464.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="30" y="486" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="502" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="64" y="490.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="30" y="512" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="528" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="64" y="516.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="30" y="538" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="554" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="64" y="542.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<line x1="176" y1="472" x2="246" y2="472" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="176" y1="498" x2="246" y2="498" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="176" y1="524" x2="246" y2="524" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="176" y1="550" x2="246" y2="550" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<rect x="252" y="460" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="476" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="286" y="464.5" width="51.800000000000004" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="311.9" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a+b+c+d</text>
+<rect x="252" y="486" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="502" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="286" y="490.5" width="51.800000000000004" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="311.9" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a+b+c+d</text>
+<rect x="252" y="512" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="528" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="286" y="516.5" width="51.800000000000004" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="311.9" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a+b+c+d</text>
+<rect x="252" y="538" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="554" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="286" y="542.5" width="51.800000000000004" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="311.9" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a+b+c+d</text>
+<text x="32" y="582" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">先归约成 1 份结果，再让每个 Rank 都拿到这同一份。</text>
+<rect x="520" y="426" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#2fa08a" stroke-width="1.4"/>
+<rect x="520" y="426" width="480" height="26" rx="9" ry="9" fill="#e3f6f1" stroke="none"/>
+<rect x="520" y="440" width="480" height="12" fill="#e3f6f1" stroke="none"/>
+<line x1="520" y1="452" x2="1000" y2="452" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="532" y="444" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="start" font-weight="700">AllGather</text>
+<text x="988" y="444" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="end" font-weight="600">多对多 · 汇集（不归约）</text>
+<rect x="530" y="460" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="476" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="564" y="464.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="572.5" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="530" y="486" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="502" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="564" y="490.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="572.5" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="530" y="512" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="528" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="564" y="516.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="572.5" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="530" y="538" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="554" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="564" y="542.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="572.5" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<line x1="676" y1="472" x2="746" y2="472" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="676" y1="498" x2="746" y2="498" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="676" y1="524" x2="746" y2="524" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="676" y1="550" x2="746" y2="550" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<rect x="752" y="460" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="476" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="786" y="464.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="794.5" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="806.0" y="464.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="814.5" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="826.0" y="464.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="834.5" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="846.0" y="464.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="854.5" y="475.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<rect x="752" y="486" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="502" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="786" y="490.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="794.5" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="806.0" y="490.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="814.5" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="826.0" y="490.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="834.5" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="846.0" y="490.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="854.5" y="501.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<rect x="752" y="512" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="528" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="786" y="516.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="794.5" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="806.0" y="516.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="814.5" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="826.0" y="516.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="834.5" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="846.0" y="516.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="854.5" y="527.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<rect x="752" y="538" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="554" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="786" y="542.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="794.5" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="806.0" y="542.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="814.5" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="826.0" y="542.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="834.5" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="846.0" y="542.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="854.5" y="553.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<text x="532" y="582" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">把各家的数据拼成完整一份：每个 Rank 都拿到全部 4 份（不归约）。</text>
+<rect x="20" y="605" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#2fa08a" stroke-width="1.4"/>
+<rect x="20" y="605" width="480" height="26" rx="9" ry="9" fill="#e3f6f1" stroke="none"/>
+<rect x="20" y="619" width="480" height="12" fill="#e3f6f1" stroke="none"/>
+<line x1="20" y1="631" x2="500" y2="631" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="32" y="623" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="start" font-weight="700">ReduceScatter</text>
+<text x="488" y="623" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="end" font-weight="600">多对多 · 归约 + 拆分</text>
+<rect x="30" y="639" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="655" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="64" y="643.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a</text>
+<rect x="30" y="665" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="681" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="64" y="669.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b</text>
+<rect x="30" y="691" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="707" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="64" y="695.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c</text>
+<rect x="30" y="717" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="38" y="733" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="64" y="721.5" width="17.0" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="72.5" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d</text>
+<line x1="176" y1="651" x2="246" y2="651" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="176" y1="677" x2="246" y2="677" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="176" y1="703" x2="246" y2="703" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="176" y1="729" x2="246" y2="729" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<rect x="252" y="639" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="655" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="286" y="643.5" width="26.200000000000003" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="299.1" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">1/4</text>
+<rect x="252" y="665" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="681" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="286" y="669.5" width="26.200000000000003" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="299.1" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">2/4</text>
+<rect x="252" y="691" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="707" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="286" y="695.5" width="26.200000000000003" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="299.1" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">3/4</text>
+<rect x="252" y="717" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="260" y="733" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="286" y="721.5" width="26.200000000000003" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="299.1" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">4/4</text>
+<text x="32" y="761" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">归约后的那 1 份结果再切成 4 份：每个 Rank 只拿其中一份。</text>
+<rect x="520" y="605" width="480" height="165" rx="9" ry="9" fill="#ffffff" stroke="#2fa08a" stroke-width="1.4"/>
+<rect x="520" y="605" width="480" height="26" rx="9" ry="9" fill="#e3f6f1" stroke="none"/>
+<rect x="520" y="619" width="480" height="12" fill="#e3f6f1" stroke="none"/>
+<line x1="520" y1="631" x2="1000" y2="631" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="532" y="623" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="start" font-weight="700">AlltoAll</text>
+<text x="988" y="623" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="end" font-weight="600">多对多 · 互相交换</text>
+<rect x="530" y="639" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="655" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="564" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="573.9" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a1</text>
+<rect x="586.8" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="596.6999999999999" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a2</text>
+<rect x="609.5999999999999" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="619.4999999999999" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a3</text>
+<rect x="632.3999999999999" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="642.2999999999998" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a4</text>
+<rect x="530" y="665" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="681" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="564" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="573.9" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b1</text>
+<rect x="586.8" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="596.6999999999999" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b2</text>
+<rect x="609.5999999999999" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="619.4999999999999" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b3</text>
+<rect x="632.3999999999999" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="642.2999999999998" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b4</text>
+<rect x="530" y="691" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="707" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="564" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="573.9" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c1</text>
+<rect x="586.8" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="596.6999999999999" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c2</text>
+<rect x="609.5999999999999" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="619.4999999999999" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c3</text>
+<rect x="632.3999999999999" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="642.2999999999998" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c4</text>
+<rect x="530" y="717" width="140" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="538" y="733" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="564" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="573.9" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d1</text>
+<rect x="586.8" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="596.6999999999999" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d2</text>
+<rect x="609.5999999999999" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="619.4999999999999" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d3</text>
+<rect x="632.3999999999999" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="642.2999999999998" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d4</text>
+<line x1="676" y1="651" x2="746" y2="651" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="676" y1="677" x2="746" y2="677" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="676" y1="703" x2="746" y2="703" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<line x1="676" y1="729" x2="746" y2="729" stroke="#2fa08a" stroke-width="1.5" marker-end="url(#arw-teal)"/>
+<rect x="752" y="639" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="655" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R0</text>
+<rect x="786" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="795.9" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a1</text>
+<rect x="808.8" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="818.6999999999999" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b1</text>
+<rect x="831.5999999999999" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="841.4999999999999" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c1</text>
+<rect x="854.3999999999999" y="643.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="864.2999999999998" y="654.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d1</text>
+<rect x="752" y="665" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="681" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R1</text>
+<rect x="786" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="795.9" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a2</text>
+<rect x="808.8" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="818.6999999999999" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b2</text>
+<rect x="831.5999999999999" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="841.4999999999999" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c2</text>
+<rect x="854.3999999999999" y="669.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="864.2999999999998" y="680.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d2</text>
+<rect x="752" y="691" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="707" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R2</text>
+<rect x="786" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="795.9" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a3</text>
+<rect x="808.8" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="818.6999999999999" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b3</text>
+<rect x="831.5999999999999" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="841.4999999999999" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c3</text>
+<rect x="854.3999999999999" y="695.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="864.2999999999998" y="706.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d3</text>
+<rect x="752" y="717" width="238" height="24" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.1"/>
+<text x="760" y="733" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="start" font-weight="700">R3</text>
+<rect x="786" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="795.9" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">a4</text>
+<rect x="808.8" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="818.6999999999999" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">b4</text>
+<rect x="831.5999999999999" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="841.4999999999999" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">c4</text>
+<rect x="854.3999999999999" y="721.5" width="19.8" height="15" rx="3" ry="3" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="864.2999999999998" y="732.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#186b5b" text-anchor="middle" font-weight="700">d4</text>
+<text x="532" y="761" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">每个 Rank 把数据切成 4 段，各发一段给每个 Rank（a2 = Rank0 的第 2 段）。</text>
+<text x="24" y="799" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">两个最容易混的区别：Broadcast 发的是同一份（人人一样），Scatter 发的是拆开的（各拿一片）；AllReduce 是「归约成一份再广播」，AllGather 只是「拼起来」、不做归约。</text>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="900" height="440" fill="#ffffff"/>
+<text x="22" y="27" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">通信域组织通信成员，通信算子承载通信算法</text>
+<text x="22" y="46" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#7b8794" text-anchor="start" font-weight="400">一个计算集群可创建多个通信域；一个通信成员可加入多个通信域。</text>
+<rect x="40" y="74" width="360" height="300" rx="10" ry="10" fill="#fbfcfd" stroke="#3d7ecc" stroke-width="1.6"/>
+<text x="220.0" y="100" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" fill="#1a5ba8" text-anchor="middle" font-weight="700">通信域（Communication Domain）</text>
+<line x1="56" y1="112" x2="384" y2="112" stroke="#cbd2d9" stroke-width="1"/>
+<rect x="84" y="148" width="118" height="74" rx="8" ry="8" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.5"/>
+<text x="143.0" y="174" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#1a5ba8" text-anchor="middle" font-weight="700">Rank0</text>
+<text x="143.0" y="196" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">计算 ▸ 通信</text>
+<text x="143.0" y="212" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#7b8794" text-anchor="middle" font-weight="400">（芯片 / Die / 进程）</text>
+<rect x="228" y="148" width="118" height="74" rx="8" ry="8" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.5"/>
+<text x="287.0" y="174" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#1a5ba8" text-anchor="middle" font-weight="700">Rank1</text>
+<text x="287.0" y="196" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">计算 ▸ 通信</text>
+<text x="287.0" y="212" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#7b8794" text-anchor="middle" font-weight="400">（芯片 / Die / 进程）</text>
+<rect x="84" y="256" width="118" height="74" rx="8" ry="8" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.5"/>
+<text x="143.0" y="282" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#1a5ba8" text-anchor="middle" font-weight="700">Rank2</text>
+<text x="143.0" y="304" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">计算 ▸ 通信</text>
+<text x="143.0" y="320" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#7b8794" text-anchor="middle" font-weight="400">（芯片 / Die / 进程）</text>
+<rect x="228" y="256" width="118" height="74" rx="8" ry="8" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.5"/>
+<text x="287.0" y="282" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#1a5ba8" text-anchor="middle" font-weight="700">Rank3</text>
+<text x="287.0" y="304" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">计算 ▸ 通信</text>
+<text x="287.0" y="320" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#7b8794" text-anchor="middle" font-weight="400">（芯片 / Die / 进程）</text>
+<text x="220.0" y="360" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#52606d" text-anchor="middle" font-weight="400">通信成员 = 参与通信的最小逻辑实体，一般称为 Rank</text>
+<rect x="440" y="74" width="420" height="96" rx="10" ry="10" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.6"/>
+<text x="456" y="98" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#186b5b" text-anchor="start" font-weight="700">通信算子（Operator）</text>
+<text x="456" y="118" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">在通信域内完成通信任务的算子；集合通信指所有成员一起参与的操作。</text>
+<text x="456" y="138" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">通信域内，通信算子串行执行。</text>
+<rect x="456" y="148" width="120" height="16" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="516" y="160" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="middle" font-weight="600">Broadcast</text>
+<rect x="588" y="148" width="120" height="16" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="648" y="160" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="middle" font-weight="600">AllReduce</text>
+<rect x="720" y="148" width="120" height="16" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.2"/>
+<text x="780" y="160" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#186b5b" text-anchor="middle" font-weight="600">All2All</text>
+<line x1="650" y1="170" x2="650" y2="194" stroke="#2fa08a" stroke-width="1.8" marker-end="url(#arw-teal)"/>
+<rect x="440" y="202" width="420" height="172" rx="10" ry="10" fill="#f0ebfb" stroke="#7b5bd6" stroke-width="1.6"/>
+<text x="456" y="226" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#5535a8" text-anchor="start" font-weight="700">通信算法（Algorithm）</text>
+<text x="456" y="246" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">完成某个算子的具体实现方案；不同拓扑 / 数据量用不同算法。</text>
+<text x="456" y="264" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="400">一个算法一般包含多个通信步骤，实现不同的流量规划策略。</text>
+<rect x="456" y="278" width="120" height="26" rx="6" ry="6" fill="#ffffff" stroke="#7b5bd6" stroke-width="1.3"/>
+<text x="516" y="295" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#5535a8" text-anchor="middle" font-weight="700">Ring</text>
+<rect x="588" y="278" width="120" height="26" rx="6" ry="6" fill="#ffffff" stroke="#7b5bd6" stroke-width="1.3"/>
+<text x="648" y="295" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#5535a8" text-anchor="middle" font-weight="700">Mesh</text>
+<rect x="720" y="278" width="120" height="26" rx="6" ry="6" fill="#ffffff" stroke="#7b5bd6" stroke-width="1.3"/>
+<text x="780" y="295" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#5535a8" text-anchor="middle" font-weight="700">Halving-Doubling</text>
+<text x="650" y="330" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#52606d" text-anchor="middle" font-weight="400">N-1 步 / 1 步 / log₂N 步 …</text>
+<text x="456" y="362" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="start" font-weight="400">例：同一个 AllReduce 算子，在环状拓扑上用 Ring，在 Full-Mesh 上可用 Mesh。</text>
+</svg>

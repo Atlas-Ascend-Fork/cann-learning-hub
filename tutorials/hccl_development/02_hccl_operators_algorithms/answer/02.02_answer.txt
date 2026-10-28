@@ -1,0 +1,25 @@
+========================================
+2.2 HCCL 算子介绍 · 课堂小练答案
+========================================
+1、（连线题）常见的集合通信算子
+答：
+    按维度执行归约并发送到对应 NPU 上          →  D. ReduceScatter
+    收集每个 NPU 所有的数据到每个 NPU 上        →  A. AllGather
+    所有 NPU 互相 scatter 和 gather 数据        →  C. All2All
+    从多个 NPU 获取数据到所有 NPU 并做归约运算   →  B. AllReduce
+    解析：归约后切开分下去 = ReduceScatter；人人一份完整数据 = AllGather；
+    人人既发又收 = All2All；归约结果人人一份 = AllReduce。
+2、（单选题）稀疏 MoE 训练中 Dispatch-Combine 流程使用的算子类别是？
+答：C) AlltoAll 类算子。需要两次 All2All：Dispatch 把 token 分发到持有目标专家的卡；
+    Combine 把专家算完的结果发回 token 原本所在的卡。
+3、（单选题）下列关于四类并行方式与其通信算子的对应，错误的是？
+答：C。张量并行（TP）用的是 allreduce / allgather / reducescatter，不是 all2all。
+4、（判断题）Broadcast 与 Scatter 的区别只是「发的人多少」。
+答：错误。两者都是「一 → 多」，但 Broadcast 发的是同一份完整数据（人人一样）；
+    Scatter 是把 root 的数据拆开，每人只拿一片。
+5、（单选题）下列哪个算子让每个成员都拿到同一份归约结果？
+答：C) AllReduce。AllGather 拿到的是完整数据、不是归约结果；Reduce 只有 root 拿到；
+    ReduceScatter 是把归约结果切开分给各成员。
+6、（判断题）专家并行（EP）的通信能被计算隐藏，对训练效率影响很小。
+答：错误。EP 的通信量确实不大，但通信与计算是串行的：必须先 All2All 分发到位，专家才能
+    开始算；算完还要 All2All 回收。藏不住——这正是 MoE 训练最需要优化通信的原因。

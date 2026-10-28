@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 500" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="980" height="500" fill="#ffffff"/>
+<text x="22" y="27" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">集群训练的四类常用并行方式</text>
+<text x="22" y="46" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#7b8794" text-anchor="start" font-weight="400">DP / PP 切「数据或模型的层」，TP 切「同一个矩阵运算」，EP 切「不同的专家子网络」。</text>
+<rect x="22" y="62" width="226" height="420" rx="12" ry="12" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.4"/>
+<rect x="22" y="62" width="226" height="38" rx="12" ry="12" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.4"/>
+<rect x="22" y="84" width="226" height="16" fill="#e8f1fd" stroke="none"/>
+<line x1="22" y1="100" x2="248" y2="100" stroke="#3d7ecc" stroke-width="1.4"/>
+<text x="135.0" y="80" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#1a5ba8" text-anchor="middle" font-weight="700">数据并行 DP</text>
+<text x="135.0" y="95" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="middle" font-weight="400" font-style="italic">Data Parallelism</text>
+<rect x="260" y="62" width="226" height="420" rx="12" ry="12" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.4"/>
+<rect x="260" y="62" width="226" height="38" rx="12" ry="12" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.4"/>
+<rect x="260" y="84" width="226" height="16" fill="#e3f6f1" stroke="none"/>
+<line x1="260" y1="100" x2="486" y2="100" stroke="#2fa08a" stroke-width="1.4"/>
+<text x="373.0" y="80" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#186b5b" text-anchor="middle" font-weight="700">流水并行 PP</text>
+<text x="373.0" y="95" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="middle" font-weight="400" font-style="italic">Pipeline Parallelism</text>
+<rect x="498" y="62" width="226" height="420" rx="12" ry="12" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.4"/>
+<rect x="498" y="62" width="226" height="38" rx="12" ry="12" fill="#f0ebfb" stroke="#7b5bd6" stroke-width="1.4"/>
+<rect x="498" y="84" width="226" height="16" fill="#f0ebfb" stroke="none"/>
+<line x1="498" y1="100" x2="724" y2="100" stroke="#7b5bd6" stroke-width="1.4"/>
+<text x="611.0" y="80" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#5535a8" text-anchor="middle" font-weight="700">张量并行 TP</text>
+<text x="611.0" y="95" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="middle" font-weight="400" font-style="italic">Tensor Parallelism</text>
+<rect x="736" y="62" width="226" height="420" rx="12" ry="12" fill="#ffffff" stroke="#cbd2d9" stroke-width="1.4"/>
+<rect x="736" y="62" width="226" height="38" rx="12" ry="12" fill="#fdf0e3" stroke="#d98324" stroke-width="1.4"/>
+<rect x="736" y="84" width="226" height="16" fill="#fdf0e3" stroke="none"/>
+<line x1="736" y1="100" x2="962" y2="100" stroke="#d98324" stroke-width="1.4"/>
+<text x="849.0" y="80" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#a35a0c" text-anchor="middle" font-weight="700">专家并行 EP</text>
+<text x="849.0" y="95" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="middle" font-weight="400" font-style="italic">Expert Parallelism</text>
+<rect x="92.0" y="161.6" width="118" height="32" rx="3" ry="3" fill="#dbe9fb" stroke="#9dc2ee" stroke-width="1" opacity="0.45"/>
+<rect x="92.0" y="200.6" width="118" height="32" rx="3" ry="3" fill="#f4813f" stroke="#e2661f" stroke-width="1" opacity="0.45"/>
+<rect x="92.0" y="239.6" width="118" height="32" rx="3" ry="3" fill="#3b4ef0" stroke="#2a37c9" stroke-width="1" opacity="0.45"/>
+<rect x="84.0" y="164.8" width="118" height="32" rx="3" ry="3" fill="#dbe9fb" stroke="#9dc2ee" stroke-width="1" opacity="0.45"/>
+<rect x="84.0" y="203.8" width="118" height="32" rx="3" ry="3" fill="#f4813f" stroke="#e2661f" stroke-width="1" opacity="0.45"/>
+<rect x="84.0" y="242.8" width="118" height="32" rx="3" ry="3" fill="#3b4ef0" stroke="#2a37c9" stroke-width="1" opacity="0.45"/>
+<rect x="76.0" y="168" width="118" height="32" rx="3" ry="3" fill="#dbe9fb" stroke="#9dc2ee" stroke-width="1.2"/>
+<rect x="76.0" y="207" width="118" height="32" rx="3" ry="3" fill="#f4813f" stroke="#e2661f" stroke-width="1.2"/>
+<rect x="76.0" y="246" width="118" height="32" rx="3" ry="3" fill="#3b4ef0" stroke="#2a37c9" stroke-width="1.2"/>
+<line x1="135.0" y1="138" x2="135.0" y2="162" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<line x1="135.0" y1="284" x2="135.0" y2="308" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<text x="135.0" y="326" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">每卡一套完整模型副本</text>
+<text x="135.0" y="340" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">各自喂不同的数据子集</text>
+<rect x="314.0" y="168" width="118" height="32" rx="3" ry="3" fill="#dbe9fb" stroke="#9dc2ee" stroke-width="1.2"/>
+<rect x="314.0" y="207" width="118" height="32" rx="3" ry="3" fill="#f4813f" stroke="#e2661f" stroke-width="1.2"/>
+<rect x="314.0" y="246" width="118" height="32" rx="3" ry="3" fill="#3b4ef0" stroke="#2a37c9" stroke-width="1.2"/>
+<line x1="302.0" y1="203.5" x2="444.0" y2="203.5" stroke="#cf3a3a" stroke-width="1.6" stroke-dasharray="5 4"/>
+<line x1="302.0" y1="242.5" x2="444.0" y2="242.5" stroke="#cf3a3a" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="446.0" y="188.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#cf3a3a" text-anchor="start" font-weight="600">stage1</text>
+<text x="446.0" y="227.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#cf3a3a" text-anchor="start" font-weight="600">stage2</text>
+<text x="446.0" y="266.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#cf3a3a" text-anchor="start" font-weight="600">stage3</text>
+<line x1="373.0" y1="138" x2="373.0" y2="162" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<line x1="373.0" y1="284" x2="373.0" y2="308" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<text x="373.0" y="326" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">按「层」切成多段</text>
+<text x="373.0" y="340" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">stage 之间传激活值</text>
+<rect x="546.0" y="164" width="130" height="116" rx="6" ry="6" fill="#ffffff" stroke="#7b5bd6" stroke-width="1.6"/>
+<text x="611.0" y="179" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#5535a8" text-anchor="middle" font-weight="700">同一个矩阵运算  W × X</text>
+<rect x="554.0" y="190.0" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="571.8" y="190.0" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="589.7" y="190.0" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="554.0" y="208.6" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="571.8" y="208.6" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="589.7" y="208.6" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="554.0" y="227.2" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="571.8" y="227.2" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="589.7" y="227.2" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="554.0" y="245.9" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="571.8" y="245.9" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="589.7" y="245.9" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<text x="579.5" y="272" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#5535a8" text-anchor="middle" font-weight="600">卡0 的 1/2</text>
+<rect x="617.0" y="190.0" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="634.8" y="190.0" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="652.7" y="190.0" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="617.0" y="208.6" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="634.8" y="208.6" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="652.7" y="208.6" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="617.0" y="227.2" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="634.8" y="227.2" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="652.7" y="227.2" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="617.0" y="245.9" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="634.8" y="245.9" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="652.7" y="245.9" width="15.3" height="16.1" rx="1.6" ry="1.6" fill="#efe9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<text x="642.5" y="272" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#5535a8" text-anchor="middle" font-weight="600">卡1 的 1/2</text>
+<line x1="611.0" y1="190" x2="611.0" y2="262" stroke="#cf3a3a" stroke-width="1.7" stroke-dasharray="4 3"/>
+<line x1="611.0" y1="138" x2="611.0" y2="162" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<line x1="611.0" y1="284" x2="611.0" y2="308" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<text x="611.0" y="326" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">切「同层内的张量」</text>
+<text x="611.0" y="340" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">算完要拼回 / 归约</text>
+<rect x="784.0" y="174" width="28.75" height="96" rx="5" ry="5" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.5"/>
+<rect x="784.0" y="174" width="28.75" height="16" rx="5" ry="5" fill="#3d7ecc" stroke="none"/>
+<rect x="784.0" y="185" width="28.75" height="5" fill="#3d7ecc" stroke="none"/>
+<text x="798.375" y="186" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="700">E0</text>
+<rect x="789.0" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#3d7ecc" stroke-width="0.9"/>
+<rect x="799.4" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#3d7ecc" stroke-width="0.9"/>
+<rect x="789.0" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#3d7ecc" stroke-width="0.9"/>
+<rect x="799.4" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#3d7ecc" stroke-width="0.9"/>
+<rect x="789.0" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#3d7ecc" stroke-width="0.9"/>
+<rect x="799.4" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#3d7ecc" stroke-width="0.9"/>
+<rect x="817.75" y="174" width="28.75" height="96" rx="5" ry="5" fill="#ffffff" stroke="#d98324" stroke-width="1.5"/>
+<rect x="817.75" y="174" width="28.75" height="16" rx="5" ry="5" fill="#d98324" stroke="none"/>
+<rect x="817.75" y="185" width="28.75" height="5" fill="#d98324" stroke="none"/>
+<text x="832.125" y="186" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="700">E1</text>
+<rect x="822.8" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#d98324" stroke-width="0.9"/>
+<rect x="833.1" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#d98324" stroke-width="0.9"/>
+<rect x="822.8" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#d98324" stroke-width="0.9"/>
+<rect x="833.1" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#d98324" stroke-width="0.9"/>
+<rect x="822.8" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#d98324" stroke-width="0.9"/>
+<rect x="833.1" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#d98324" stroke-width="0.9"/>
+<rect x="851.5" y="174" width="28.75" height="96" rx="5" ry="5" fill="#ffffff" stroke="#7b5bd6" stroke-width="1.5"/>
+<rect x="851.5" y="174" width="28.75" height="16" rx="5" ry="5" fill="#7b5bd6" stroke="none"/>
+<rect x="851.5" y="185" width="28.75" height="5" fill="#7b5bd6" stroke="none"/>
+<text x="865.875" y="186" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="700">E2</text>
+<rect x="856.5" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="866.9" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="856.5" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="866.9" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="856.5" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="866.9" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#7b5bd6" stroke-width="0.9"/>
+<rect x="885.25" y="174" width="28.75" height="96" rx="5" ry="5" fill="#ffffff" stroke="#2fa08a" stroke-width="1.5"/>
+<rect x="885.25" y="174" width="28.75" height="16" rx="5" ry="5" fill="#2fa08a" stroke="none"/>
+<rect x="885.25" y="185" width="28.75" height="5" fill="#2fa08a" stroke="none"/>
+<text x="899.625" y="186" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="700">E3</text>
+<rect x="890.2" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#2fa08a" stroke-width="0.9"/>
+<rect x="900.6" y="196.0" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#2fa08a" stroke-width="0.9"/>
+<rect x="890.2" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#2fa08a" stroke-width="0.9"/>
+<rect x="900.6" y="218.7" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#2fa08a" stroke-width="0.9"/>
+<rect x="890.2" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#2fa08a" stroke-width="0.9"/>
+<rect x="900.6" y="241.3" width="8.4" height="20.7" rx="1.5" ry="1.5" fill="#f7f9fb" stroke="#2fa08a" stroke-width="0.9"/>
+<line x1="849.0" y1="138" x2="849.0" y2="162" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<line x1="849.0" y1="284" x2="849.0" y2="308" stroke="#4a5560" stroke-width="1.8" marker-end="url(#arw-gray)"/>
+<text x="849.0" y="326" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">不同专家放到不同卡上</text>
+<text x="849.0" y="340" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#8a94a0" text-anchor="middle" font-weight="400">每个专家 = 一个独立 FFN</text>
+<line x1="40" y1="392" x2="230" y2="392" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<rect x="36" y="404" width="198" height="46" rx="7" ry="7" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.3"/>
+<text x="135.0" y="422" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">通信需求</text>
+<text x="135.0" y="440" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#1a5ba8" text-anchor="middle" font-weight="700">AllReduce 梯度同步</text>
+<line x1="278" y1="392" x2="468" y2="392" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<rect x="274" y="404" width="198" height="46" rx="7" ry="7" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.3"/>
+<text x="373.0" y="422" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">通信需求</text>
+<text x="373.0" y="440" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#186b5b" text-anchor="middle" font-weight="700">相邻阶段传激活值</text>
+<line x1="516" y1="392" x2="706" y2="392" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<rect x="512" y="404" width="198" height="46" rx="7" ry="7" fill="#f0ebfb" stroke="#7b5bd6" stroke-width="1.3"/>
+<text x="611.0" y="422" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">通信需求</text>
+<text x="611.0" y="440" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#5535a8" text-anchor="middle" font-weight="700">AllReduce / AllGather</text>
+<line x1="754" y1="392" x2="944" y2="392" stroke="#cbd2d9" stroke-width="1" stroke-dasharray="3 3"/>
+<rect x="750" y="404" width="198" height="46" rx="7" ry="7" fill="#fdf0e3" stroke="#d98324" stroke-width="1.3"/>
+<text x="849.0" y="422" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="middle" font-weight="400">通信需求</text>
+<text x="849.0" y="440" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#a35a0c" text-anchor="middle" font-weight="700">All2All 分发与回收</text>
+</svg>

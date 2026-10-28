@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 424" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="900" height="424" fill="#ffffff"/>
+<text x="24" y="28" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">MoE 专家并行：token 与专家的两次 All2All</text>
+<text x="24" y="49" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#7b8794" text-anchor="start" font-weight="400">每个设备放一部分专家（FFN）。token 要送到「它该用的那个专家」所在的卡上算，算完再把结果送回原卡 —— 一来一回，就是两次 All2All。</text>
+<rect x="44" y="84" width="288" height="198" rx="11" ry="11" fill="#ffffff" stroke="#3d7ecc" stroke-width="1.8"/>
+<text x="188.0" y="108" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle" font-weight="700">设备 0</text>
+<rect x="60" y="122" width="256" height="76" rx="7" ry="7" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.4"/>
+<text x="188.0" y="142" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="middle" font-weight="700">专家 E0</text>
+<text x="188.0" y="159" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="middle" font-weight="400">一个完整的 FFN</text>
+<rect x="82.0" y="170" width="64.66666666666667" height="18" rx="3" ry="3" fill="#ffffff" stroke="#2fa08a" stroke-width="1.0"/>
+<rect x="155.66666666666669" y="170" width="64.66666666666667" height="18" rx="3" ry="3" fill="#ffffff" stroke="#2fa08a" stroke-width="1.0"/>
+<rect x="229.33333333333334" y="170" width="64.66666666666667" height="18" rx="3" ry="3" fill="#ffffff" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="188.0" y="224" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#7b8794" text-anchor="middle" font-weight="400">本地 token</text>
+<text x="188.0" y="250" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="16" fill="#1a5ba8" text-anchor="middle" font-weight="700">a、b</text>
+<rect x="568" y="84" width="288" height="198" rx="11" ry="11" fill="#ffffff" stroke="#2fa08a" stroke-width="1.8"/>
+<text x="712.0" y="108" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle" font-weight="700">设备 1</text>
+<rect x="584" y="122" width="256" height="76" rx="7" ry="7" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.4"/>
+<text x="712.0" y="142" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="middle" font-weight="700">专家 E1</text>
+<text x="712.0" y="159" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="middle" font-weight="400">一个完整的 FFN</text>
+<rect x="606.0" y="170" width="64.66666666666667" height="18" rx="3" ry="3" fill="#ffffff" stroke="#2fa08a" stroke-width="1.0"/>
+<rect x="679.6666666666666" y="170" width="64.66666666666667" height="18" rx="3" ry="3" fill="#ffffff" stroke="#2fa08a" stroke-width="1.0"/>
+<rect x="753.3333333333334" y="170" width="64.66666666666667" height="18" rx="3" ry="3" fill="#ffffff" stroke="#2fa08a" stroke-width="1.0"/>
+<text x="712.0" y="224" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#7b8794" text-anchor="middle" font-weight="400">本地 token</text>
+<text x="712.0" y="250" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="16" fill="#1a5ba8" text-anchor="middle" font-weight="700">c、d</text>
+<text x="450.0" y="132" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#5535a8" text-anchor="middle" font-weight="700">① Dispatch</text>
+<line x1="350" y1="150" x2="550" y2="150" stroke="#7b5bd6" stroke-width="2.6" marker-end="url(#arw-purple)" marker-start="url(#arw-purple)"/>
+<text x="450.0" y="168" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="middle" font-weight="400">（token 送过去）</text>
+<text x="450.0" y="212" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#186b5b" text-anchor="middle" font-weight="700">② Combine</text>
+<line x1="350" y1="230" x2="550" y2="230" stroke="#2fa08a" stroke-width="2.6" marker-end="url(#arw-teal)" marker-start="url(#arw-teal)"/>
+<text x="450.0" y="248" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="middle" font-weight="400">（结果送回来）</text>
+<line x1="24" y1="294" x2="876" y2="294" stroke="#cbd2d9" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="24" y="306" width="410" height="66" rx="8" ry="8" fill="#fbfcfd" stroke="#7b5bd6" stroke-width="1.4"/>
+<text x="40" y="331" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#7b5bd6" text-anchor="start" font-weight="700">① 第一次 All2All · Dispatch（分发）</text>
+<text x="40" y="353" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.8" fill="#52606d" text-anchor="start" font-weight="400">各卡按 Gating 结果，把每个 token 发到「它要用的那个专家」所在的卡。</text>
+<rect x="466" y="306" width="410" height="66" rx="8" ry="8" fill="#fbfcfd" stroke="#2fa08a" stroke-width="1.4"/>
+<text x="482" y="331" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#2fa08a" text-anchor="start" font-weight="700">② 第二次 All2All · Combine（回收）</text>
+<text x="482" y="353" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.8" fill="#52606d" text-anchor="start" font-weight="400">专家算完后，把结果送回「这个 token 原本所在的卡」。</text>
+<text x="24" y="414" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#7b8794" text-anchor="start" font-weight="400">举例：token b 在设备 0，却要用设备 1 上的专家 E1 —— Dispatch 把 b 送到设备 1，算完 Combine 再把 b 的结果送回设备 0。</text>
+</svg>

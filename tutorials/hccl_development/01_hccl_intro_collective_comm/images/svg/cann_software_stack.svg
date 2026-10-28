@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 430" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="860" height="430" fill="#ffffff"/>
+<text x="20" y="26" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">CANN 软件栈分层</text>
+<text x="20" y="45" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#7b8794" text-anchor="start" font-weight="400">HCCL 位于「通信库」层，与 HCOMM 分层解耦；整栈全开源</text>
+<rect x="40" y="66" width="640" height="52" rx="9" ry="9" fill="#f2f4f5" stroke="#9aa5b1" stroke-width="1.6"/>
+<text x="360.0" y="88" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#1f2933" text-anchor="middle" font-weight="600">训练 / 推理框架（PyTorch 等）</text>
+<text x="360.0" y="106" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#52606d" text-anchor="middle" font-weight="400">决定何时通信、通信什么数据、由谁参与</text>
+<line x1="360.0" y1="118" x2="360.0" y2="140" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arw-gray)"/>
+<rect x="40" y="126" width="640" height="62" rx="9" ry="9" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="2"/>
+<text x="240" y="152" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="14" fill="#1a5ba8" text-anchor="start" font-weight="700">HCCL 仓 · 集合通信库</text>
+<text x="240" y="170" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#52606d" text-anchor="start" font-weight="400">集合通信算子  ·  通信算法</text>
+<text x="664" y="168" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#1a5ba8" text-anchor="end" font-weight="600">业务场景层</text>
+<line x1="360.0" y1="188" x2="360.0" y2="210" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arw-gray)"/>
+<rect x="40" y="210" width="640" height="62" rx="9" ry="9" fill="#e3f6f1" stroke="#2fa08a" stroke-width="2"/>
+<text x="240" y="236" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="14" fill="#186b5b" text-anchor="start" font-weight="700">HCOMM 仓 · 通信基础库</text>
+<text x="240" y="254" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" fill="#52606d" text-anchor="start" font-weight="400">通信域管理  ·  基础通信能力</text>
+<text x="664" y="252" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#186b5b" text-anchor="end" font-weight="600">基础能力层</text>
+<line x1="360.0" y1="272" x2="360.0" y2="294" stroke="#9aa5b1" stroke-width="1.6" marker-end="url(#arw-gray)"/>
+<rect x="40" y="294" width="640" height="52" rx="9" ry="9" fill="#f2f4f5" stroke="#9aa5b1" stroke-width="1.6"/>
+<text x="360.0" y="316" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#1f2933" text-anchor="middle" font-weight="600">RTS / DRV 驱动  ·  昇腾芯片</text>
+<text x="360.0" y="334" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#52606d" text-anchor="middle" font-weight="400">提供芯片通信能力（HCCS / RoCE 等）</text>
+<rect x="706" y="126" width="132" height="146" rx="10" ry="10" fill="#fbfcfd" stroke="#cbd2d9" stroke-width="1.4"/>
+<text x="772.0" y="150" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12" fill="#1f2933" text-anchor="middle" font-weight="700">分层解耦</text>
+<line x1="720" y1="162" x2="824" y2="162" stroke="#cbd2d9" stroke-width="1"/>
+<rect x="720" y="174" width="104" height="30" rx="6" ry="6" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.3"/>
+<text x="772.0" y="193" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#1a5ba8" text-anchor="middle" font-weight="600">业务场景</text>
+<text x="772.0" y="221" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="14" fill="#7b8794" text-anchor="middle" font-weight="700">≠</text>
+<rect x="720" y="232" width="104" height="30" rx="6" ry="6" fill="#e3f6f1" stroke="#2fa08a" stroke-width="1.3"/>
+<text x="772.0" y="251" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#186b5b" text-anchor="middle" font-weight="600">基础能力</text>
+<path d="M 684 157 L 700 157" fill="none" stroke="#cbd2d9" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4 4"/>
+<path d="M 684 241 L 700 241" fill="none" stroke="#cbd2d9" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="772.0" y="292" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#7b8794" text-anchor="middle" font-weight="400">接口稳定</text>
+<text x="772.0" y="308" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#7b8794" text-anchor="middle" font-weight="400">独立演进</text>
+<text x="20" y="418" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10" fill="#7b8794" text-anchor="start" font-weight="400">说明：图中分层顺序自上而下，箭头表示调用/依赖方向。</text>
+</svg>

@@ -1,50 +1,78 @@
-# HCCL 集合通信系列课程
+# HCCL 集合通信系列教程
 
-**HCCL（Huawei Collective Communication Library）是华为集合通信库**，是CANN的基础组件之一，依托昇腾芯片高效的通信引擎与总线/网络协议，为昇腾计算集群提供**高性能、高可靠、高易用集合通信解决方案**。本系列课程从HCCL基础概念入手，逐步深入到核心算子、算法实现以及模拟验证工具，帮助开发者全面掌握HCCL的设计原理与应用实践。
+本教程面向昇腾集合通信库 HCCL（Huawei Collective Communication Library）初学者，从单卡训练的瓶颈讲起，帮助读者理解集合通信的由来与 HCCL 的定位；随后认全常用集合通信算子，理解 Ring、Mesh、Halving-Doubling 三种算法的差别与适用场景；并带领读者在**普通 CPU 环境**（无需昇腾 NPU）中运行 HCCL-VM 虚拟通信平台，亲手跑通通信测试、解读结果，完成一次「问题定位 → 修改验证」的完整闭环。后续章节将覆盖 HCCL 软件架构与编程模型、AICPU_TS / CCU / AIV 引擎，以及 AI 集群中的 HCCL 问题定位。
 
-本课程分为初级、中级和高级三个阶段。其中1-3章节为初级课程，涵盖**HCCL简介与集合通信基础**、**HCCL基础算子和算法**、**北极星工具介绍** 等核心内容，适合刚刚接触分布式集群通信的开发者入门学习；4-6章节为中级课程，涵盖**HCCL软件架构和编程模型**、**基于AICPU引擎的HCCL算子开发**、**基于CCU引擎的HCCL算子开发**等内容，适合希望深入了解昇腾集合通信机制并尝试上手实践的开发者学习；第7-8章节为高级课程：第7章围绕**基于AIV引擎的HCCL算子开发**展开，涵盖AIV矢量计算单元与通信引擎架构、基于Ascend C的AIV编程模型与接口、多核并行与大数据分块，并以AIV AllGather算子为例完整讲解算子控制面与数据面的开发流程，适合希望掌握昇腾矢量编程模型、独立开发高性能集合通信算子的开发者学习；第8章围绕**AI大集群功能性能问题定位分析**展开，涵盖HCCL三阶段业务流程与数据流（通信域初始化、通信算子加载、通信算子执行）及各阶段功能故障点与日志分析方法、hccn_tool网卡配置查询工具、HCCL心跳增强特性，以及基于profiling的性能问题定位方法与MindStudio Insight通信分析，适合希望在大集群场景下独立开展HCCL功能与性能问题定位的开发者学习。
+教程按章节划分，每个章节包含以下内容：
 
-课程支持的硬件产品：Atlas 950 系列产品。
-HCCL北极星工具的系统依赖请见：https://gitcode.com/cann/hcomm/tree/master/test/hccl_vm
+- Notebooks：包含课程知识点与课堂小练，适用于自主学习或讲师引导式教学，可在 cannlab 环境里运行，也可在自行搭建的 JupyterLab 环境中使用。
+- images：包含 Notebook 引用的原理示意图、算法动图与实跑截图。
+- answer：包含章节练习参考答案。
 
-## 课程内容
+## 软硬件配套说明
 
-### 初级课程
+| 项目 | 要求 |
+| --- | --- |
+| 支持硬件 | 第 1~2 章为理论讲解，无需任何设备；第 3 章基于 HCCL-VM 通信仿真平台，普通 CPU 即可运行，**无需昇腾 NPU** |
+| 云端环境（推荐） | **cannlab 环境**：CPU、架构 aarch64；自带 CANN 9.0.0（**包不依赖它**，见下） |
+| 本地环境（选看） | Windows 11 + WSL2 + Ubuntu 24.04（x86_64），需自装 CANN |
+| 绿色包 | `hccl_vm_pack.tar.gz`，约 82 MB，见仓库 Release 附件 |
+| Python | 3.x（Notebook 使用 python3 内核） |
 
-| 序号 | 主题 | 主要内容 | 课件 |
-| :---: | :--- | :--- | :--- |
-| 1 | HCCL简介与集合通信基础 | HCCL架构概述、集合通信基础概念、昇腾通信机制介绍 | [01_hccl_intro_collective_comm.pdf](./slides/01_hccl_intro_collective_comm.pdf) |
-| 2 | HCCL基础算子和算法介绍 | HCCL基础算子、通信算法 | [02_hccl_basic_operators_algorithms.pdf](./slides/02_hccl_basic_operators_algorithms.pdf) |
-| 3 | HCCL北极星工具介绍 | 北极星工具功能详解、问题定位实践 | [03_hccl_polaris_tool.pdf](./slides/03_hccl_polaris_tool.pdf)<br>详细工具使用指导：https://gitcode.com/cann/hcomm/tree/master/test/hccl_vm |
+## 第 3 章 HCCL-VM在线体验注意事项
 
-### 中级课程
+第 3 章提供**两条路径**：
+- **云端（主线）**：在 cannlab 环境里下载一个 82 MB 的绿色包即可运行，**不需要安装 CANN、不需要编译**，约 5 分钟出结果；
+- **本地（选看）**：在自己电脑的 WSL 里装 CANN、编译 HCCL-VM，可以改源码、重新打包，见 [3.9](./03_hccl_vm_guide/03.09_appendix_local_env.ipynb)。
 
-| 序号 | 主题 | 主要内容 | 课件 |
-| :---: | :--- | :--- | :--- |
-| 4 | HCCL 软件架构和算子编程模型 | HCCL整体软件架构、算子编程模型详解、HCCL算子常用编程API介绍 | [04_hccl_software_architecture.pdf](./slides/04_hccl_software_architecture.pdf) |
-| 5 | HCCL 算子开发入门 - AICPU_TS 引擎 | AICPU_TS引擎算子执行流程、算子开发实战演练 | [05_hccl_aicpu_ts_engine.pdf](./slides/05_hccl_aicpu_ts_engine.pdf) |
-| 6 | HCCL 算子开发入门 - CCU 引擎 | CCU简介、CCU编程模型和API介绍、算子开发实战演练 | [06_hccl_ccu_engine.pdf](./slides/06_hccl_ccu_engine.pdf) |
+> **注意：**
+> - 第 3 章云端路径已在 **cannlab 环境（aarch64 + CANN 9.0.0）** 上完整实测；本地路径在 **x86_64** 上实测。
+>   其它架构/版本使用可能存在问题，欢迎开发者提出 issue 或 PR 进行共建。
+> - 绿色包与**架构**绑定（仅 aarch64）；与运行环境的 CANN 版本无关——包内自带库并由 RPATH 强制优先。
 
-### 高级课程
+从 [3.3 获取并解压 HCCL-VM 绿色包](./03_hccl_vm_guide/03.03_cloud_pack_setup.ipynb) 开始，完成绿色包的下载安装，
+再按 [3.5 跑通第一个通信测试并解读结果](./03_hccl_vm_guide/03.05_first_comm_test.ipynb) 的顺序点运行，
+最后看到 `CHECKER_RUN_SUMMARY  All Success` 即为跑通。
 
-| 序号 | 主题 | 主要内容 | 课件 |
-| :---: | :--- | :--- | :--- |
-| 7 | HCCL 算子开发入门 - AIV 引擎 | AIV矢量计算单元与通信引擎架构、基于Ascend C的AIV编程模型（SPMD/核函数/数据搬运与软同步）、多核并行与大数据分块、AIV算子控制面与数据面接口、AIV AllGather算子开发实战 | [07_hccl_aiv_engine.pdf](./slides/07_hccl_aiv_engine.pdf)<br>算子样例：https://gitcode.com/cann/hccl/tree/master/examples/05_custom_ops_allgather/aiv |
-| 8 | AI大集群功能性能问题定位分析 | HCCL三阶段业务流程与数据流（通信域初始化/通信算子加载/通信算子执行）、功能问题定位（Root Rank建链分析、加载超时依赖关系梳理、执行Notify超时日志分析、心跳增强单点故障检测）、hccn_tool网卡配置查询工具、性能问题定位（AllReduce数据流与任务编排、profiling三步分析法、MindStudio Insight通信耗时与快慢卡分析） | [08_troubleshooting_hccl_for_ai_clusters.pdf](./slides/08_troubleshooting_hccl_for_ai_clusters.pdf) |
+## Notebooks
 
-## 目录结构
+### HCCL 简介与集合通信基础（初级）
 
-```
-hccl_development/
-├── slides/                                    # 课件目录
-│   ├── 01_hccl_intro_collective_comm.pdf      # HCCL简介与集合通信基础
-│   ├── 02_hccl_basic_operators_algorithms.pdf # HCCL基础算子和算法介绍
-│   ├── 03_hccl_polaris_tool.pdf               # HCCL北极星工具介绍
-│   ├── 04_hccl_software_architecture.pdf      # HCCL软件架构和算子编程模型
-│   ├── 05_hccl_aicpu_ts_engine.pdf            # HCCL算子开发入门-AICPU_TS引擎
-│   ├── 06_hccl_ccu_engine.pdf                 # HCCL算子开发入门-CCU引擎
-│   ├── 07_hccl_aiv_engine.pdf                 # HCCL算子开发入门-AIV引擎
-│   └── 08_troubleshooting_hccl_for_ai_clusters.pdf # AI大集群功能性能问题定位分析
-└── README.md
-```
+| Notebook | Link | 状态 |
+| --- | --- | --- |
+| 1.1 本章介绍 | [查看 Notebook](./01_hccl_intro_collective_comm/01.01_chapter_intro.ipynb) | ✅ 已发布 |
+| 1.2 集群通信介绍 | [查看 Notebook](./01_hccl_intro_collective_comm/01.02_cluster_comm_intro.ipynb) | ✅ 已发布 |
+| 1.3 HCCL | [查看 Notebook](./01_hccl_intro_collective_comm/01.03_hccl_intro.ipynb) | ✅ 已发布 |
 
+### HCCL 基础算子与算法（初级）
+
+| Notebook | Link | 状态 |
+| --- | --- | --- |
+| 2.1 本章介绍 | [查看 Notebook](./02_hccl_operators_algorithms/02.01_chapter_intro.ipynb) | ✅ 已发布 |
+| 2.2 HCCL 算子介绍 | [查看 Notebook](./02_hccl_operators_algorithms/02.02_operators.ipynb) | ✅ 已发布 |
+| 2.3 HCCL 算法简介 | [查看 Notebook](./02_hccl_operators_algorithms/02.03_algorithms.ipynb) | ✅ 已发布 |
+
+### 北极星工具 HCCL-VM：安装与应用（初级）
+
+| Notebook | Link | 状态 |
+| --- | --- | --- |
+| 3.1 本章介绍 | [查看 Notebook](./03_hccl_vm_guide/03.01_chapter_intro.ipynb) | ✅ 已发布 |
+| 3.2 平台背景与原理 | [查看 Notebook](./03_hccl_vm_guide/03.02_hccl_vm_platform_overview.ipynb) | ✅ 已发布 |
+| 3.3 获取并解压 HCCL-VM 绿色包 | [查看 Notebook](./03_hccl_vm_guide/03.03_cloud_pack_setup.ipynb) | ✅ 已发布 |
+| 3.4 认识算例：hccl_test 的用法与结果解读 | [查看 Notebook](./03_hccl_vm_guide/03.04_test_cases.ipynb) | ✅ 已发布 |
+| 3.5 跑通第一个通信测试并解读结果 | [查看 Notebook](./03_hccl_vm_guide/03.05_first_comm_test.ipynb) | ✅ 已发布 |
+| 3.6 配置自己的通信测试：集群、通信域与 rank 映射 | [查看 Notebook](./03_hccl_vm_guide/03.06_configure_tests.ipynb) | ✅ 已发布 |
+| 3.7 通信用例实战：四个用例走完一组测试 | [查看 Notebook](./03_hccl_vm_guide/03.07_communication_cases.ipynb) | ✅ 已发布 |
+| 3.8 问题定位：按步骤排查与日志阅读 | [查看 Notebook](./03_hccl_vm_guide/03.08_debug_and_verify.ipynb) | ✅ 已发布 |
+| 3.9 本地 WSL 环境与自建绿色包（选看） | [查看 Notebook](./03_hccl_vm_guide/03.09_appendix_local_env.ipynb) | ✅ 已发布 |
+
+### 后续章节（待发布）
+
+以下章节的 PDF 课件见配套的 slides 目录，Notebook 版正在按「小节标题 + 实跑验证」的同一标准逐章转写，小节划分与链接将在各章转写完成后补充。
+
+| 章节 | Notebook | 状态 |
+| --- | --- | --- |
+| 4. HCCL 软件架构与编程模型 | — | 🔄 待发布 |
+| 5. AICPU_TS 引擎 | — | 🔄 待发布 |
+| 6. CCU 引擎 | — | 🔄 待发布 |
+| 7. AIV 引擎 | — | 🔄 待发布 |
+| 8. AI 集群 HCCL 问题定位 | — | 🔄 待发布 |

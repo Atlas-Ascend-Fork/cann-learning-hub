@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 486" width="100%" role="img" style="max-width:100%;height:auto">
+
+<defs>
+  <marker id="arw-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b8794"/>
+  </marker>
+  <marker id="arw-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#3d7ecc"/>
+  </marker>
+  <marker id="arw-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#2fa08a"/>
+  </marker>
+  <marker id="arw-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#7b5bd6"/>
+  </marker>
+  <marker id="arw-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#d98324"/>
+  </marker>
+  <marker id="arw-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+          markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 9 5 L 0 9 z" fill="#cf3a3a"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="960" height="486" fill="#ffffff"/>
+<text x="22" y="27" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#1f2933" text-anchor="start" font-weight="700">什么叫「把通信隐藏起来」？</text>
+<text x="22" y="47" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#7b8794" text-anchor="start" font-weight="400">通信和计算同时进行，通信耗时就被「藏」在计算时间里，不额外占时间。下面两组用同样多的计算和通信做对比。</text>
+<rect x="24" y="66" width="912" height="180" rx="10" ry="10" fill="#e8f1fd" stroke="#3d7ecc" stroke-width="1.5"/>
+<text x="40" y="90" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" fill="#1a5ba8" text-anchor="start" font-weight="700">① 能隐藏：数据并行 DP —— 通信与计算同时进行</text>
+<text x="40" y="232" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.8" fill="#52606d" text-anchor="start" font-weight="400">总耗时 = 计算时间。通信完全被藏在计算后面，不额外占时间。</text>
+<text x="38" y="125.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="600">计算</text>
+<text x="38" y="163.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="600">通信</text>
+<rect x="116" y="106" width="184" height="30" rx="5" ry="5" fill="#3d7ecc" stroke="#3d7ecc" stroke-width="1.3"/>
+<text x="208.0" y="124.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600">反向层4</text>
+<rect x="306" y="106" width="184" height="30" rx="5" ry="5" fill="#3d7ecc" stroke="#3d7ecc" stroke-width="1.3"/>
+<text x="398.0" y="124.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600">反向层3</text>
+<rect x="496" y="106" width="184" height="30" rx="5" ry="5" fill="#3d7ecc" stroke="#3d7ecc" stroke-width="1.3"/>
+<text x="588.0" y="124.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600">反向层2</text>
+<rect x="306" y="144" width="130" height="30" rx="5" ry="5" fill="#fdf0e3" stroke="#d98324" stroke-width="1.3"/>
+<text x="371.0" y="162.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#a35a0c" text-anchor="middle" font-weight="600">AllReduce 层4</text>
+<rect x="496" y="144" width="130" height="30" rx="5" ry="5" fill="#fdf0e3" stroke="#d98324" stroke-width="1.3"/>
+<text x="561.0" y="162.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#a35a0c" text-anchor="middle" font-weight="600">AllReduce 层3</text>
+<line x1="116" y1="204" x2="912" y2="204" stroke="#cbd2d9" stroke-width="1.2" marker-end="url(#arw-gray)"/>
+<text x="914" y="207.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="start" font-weight="400">时间</text>
+<rect x="24" y="262" width="912" height="180" rx="10" ry="10" fill="#fdf0e3" stroke="#d98324" stroke-width="1.5"/>
+<text x="40" y="286" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" fill="#a35a0c" text-anchor="start" font-weight="700">② 不能隐藏：专家并行 EP —— 通信与计算必须排队</text>
+<text x="40" y="428" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.8" fill="#52606d" text-anchor="start" font-weight="400">总耗时 = 通信 + 计算 + 通信。必须先等分发到位才能算，算完还要等结果收回来。</text>
+<text x="38" y="321.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="600">通信</text>
+<text x="38" y="359.0" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.5" fill="#52606d" text-anchor="start" font-weight="600">计算</text>
+<rect x="116" y="302" width="96" height="30" rx="5" ry="5" fill="#fdf0e3" stroke="#d98324" stroke-width="1.3"/>
+<text x="164.0" y="320.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#a35a0c" text-anchor="middle" font-weight="600">All2All 分发</text>
+<rect x="212" y="340" width="564" height="30" rx="5" ry="5" fill="#3d7ecc" stroke="#3d7ecc" stroke-width="1.3"/>
+<text x="494.0" y="358.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="600">专家计算</text>
+<rect x="782" y="302" width="96" height="30" rx="5" ry="5" fill="#fdf0e3" stroke="#d98324" stroke-width="1.3"/>
+<text x="830.0" y="320.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="8.5" fill="#a35a0c" text-anchor="middle" font-weight="600">All2All 回收</text>
+<line x1="116" y1="400" x2="912" y2="400" stroke="#cbd2d9" stroke-width="1.2" marker-end="url(#arw-gray)"/>
+<text x="914" y="403.5" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9" fill="#7b8794" text-anchor="start" font-weight="400">时间</text>
+<text x="22" y="470" font-family="-apple-system,'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB','Source Han Sans SC','Noto Sans CJK SC',Roboto,Helvetica,Arial,sans-serif" font-size="9.8" fill="#7b8794" text-anchor="start" font-weight="400">所以「能不能隐藏」不是看通信量大不大，而是看通信和计算之间有没有依赖——有依赖就只能排队。</text>
+</svg>
