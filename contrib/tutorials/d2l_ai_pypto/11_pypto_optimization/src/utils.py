@@ -32,7 +32,42 @@ __all__ = [
     'train_ch11', 'train_concise_ch11',
     'train_2d', 'show_trace_2d',
     'try_gpu', 'accuracy', 'load_data_fashion_mnist', 'evaluate_accuracy_gpu',
+    'setup_pto_cache',
 ]
+
+
+# ---------------------------------------------------------------------------
+# 环境配置：PyPTO 编译缓存目录
+# ---------------------------------------------------------------------------
+def setup_pto_cache(cache_dir=None):
+    """固定 PyPTO 编译缓存目录：内核/Jupyter 重启后无需从零重新编译算子。
+
+    PTO_TILE_LIB_CODE_PATH 目录还必须包含 include/pto（pto-isa 头文件），
+    否则算子编译时报 PTO_ISA_NOT_FOUND；用软链指向 CANN 自带的头文件即可。
+
+    默认缓存目录为本模块所在目录的上级的上级（即 d2l_ai_pypto/）下的
+    ptile_cache，主 notebook 与 answers/ 子目录中的 notebook 共用；
+    cache_dir 参数可显式覆盖。返回缓存目录的绝对路径。
+    """
+    if cache_dir is None:
+        cache_dir = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__)))), 'ptile_cache')
+    lib = os.path.abspath(cache_dir)
+    os.environ['PTO_TILE_LIB_CODE_PATH'] = lib
+    os.makedirs(os.path.join(lib, 'include'), exist_ok=True)
+    pto_isa_link = os.path.join(lib, 'include', 'pto')
+    if not os.path.exists(pto_isa_link):
+        import glob
+        isa_candidates = glob.glob(os.path.expanduser(
+            '~/Ascend/cann-*/aarch64-linux/include/pto'))
+        if isa_candidates:
+            os.symlink(os.path.abspath(isa_candidates[0]), pto_isa_link)
+        else:
+            raise RuntimeError(
+                '未找到 pto-isa 头文件目录'
+                '（~/Ascend/cann-*/aarch64-linux/include/pto）')
+    return lib
 
 
 # ---------------------------------------------------------------------------
@@ -277,7 +312,7 @@ def train_ch11(trainer_fn, states, hyperparams, data_iter,
                              (evaluate_loss(net, data_iter, loss),))
                 timer.start()
     print(f'loss: {animator.Y[0][-1]:.3f}, {timer.avg():.3f} sec/epoch')
-    return timer.cumsum(), animator.Y[0]
+    return timer.cumsum(), animator.X[0], animator.Y[0]
 
 
 def train_concise_ch11(trainer_fn, hyperparams, data_iter, num_epochs=4):

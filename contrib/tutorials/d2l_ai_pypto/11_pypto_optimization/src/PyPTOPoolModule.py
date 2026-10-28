@@ -1,16 +1,14 @@
-"""PyPTO Pool2d v2 — AvgPool2d / MaxPool2d (fwd + bwd)
+"""PyPTO Pool2d — AvgPool2d / MaxPool2d (fwd + bwd)
 
-基于 custom_module_pool / PyPTOPoolModule 重构, 参考 conv v3 风格:
 - **快路径 (stride==kernel 且无 padding 且整除)**: reshape + sum/amax 归约,
-  合并 N*C 维 (替代旧版 per-n host 展开, 减少 N 倍 dispatch):
+  合并 N*C 维 (减少 N 倍 dispatch):
     avg fwd: reshape (NC,H,W)→(NC,H/kh,kh,W)→sum(dim=2)→(NC,H/kh,W/kw,kw)→sum(dim=3)
     avg bwd: expand_clone 上采样 kh×kw 后除面积
     max fwd: 同 avg fwd 但 amax
   整个 kernel 无循环, 固定 ~7 个 op, 性能与 torch 相当。
-- **通用路径 (重叠/padding)**: host im2col (as_strided, 与 conv v3 同款) +
-  torch 归约。PyPTO vector 2D 归约 (sum/amax) 在 M 大时框架级退化
+- **通用路径 (重叠/padding)**: host im2col (as_strided) + torch 归约。
+  PyPTO vector 2D 归约 (sum/amax) 在 M 大时框架级退化
   (实测 (519168, 9) 归约 285ms vs torch 0.4ms), 故归约在 host 完成。
-  旧版 4 层逐点嵌套循环 ~100x 慢, 且其 _pad4d_fast 在新 pypto 下编译失败。
 - **bwd 通用路径**: host col2im 散射累加 (index_add_; as_strided view +=
   在 torch_npu 上会被 materialize, 重叠累加错误), 支持任意重叠窗口。
   max bwd 用 host argmax 定位 (fwd 无额外开销)。

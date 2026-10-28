@@ -1,19 +1,13 @@
-"""PyPTO Conv2d 模块 (AIC 优化版 v3, 基于 custom_module_conv2 重构)
+"""PyPTO Conv2d 模块 (AIC matmul 路线)
 
-fwd / dK / dX 全部走 PyPTO ``matmul`` (AIC/Cube, FP32), 与
-custom_module_conv2/PyPTOConv2DModule_copy.py 同路线。
-
-vs v2 的改进:
-- **消除 3 处转置拷贝** (v2 每轮 fwd/dK/dX 各做一次 .t().contiguous()):
-  - fwd:  C = matmul(cols, K2d, b_trans=True)   K2d = K.reshape(Cout, K) 零拷贝 view
-  - dK:   C = matmul(cols, dY2d, a_trans=True)  免 cols^T 拷贝
-  - dX:   C = matmul(cols, K_ic,  b_trans=True) 免 K_ic^T 拷贝
-- kernel 从 3 个精简为 2 个: b_trans kernel 供 fwd/dX 共用, a_trans kernel 供 dK
+fwd / dK / dX 全部走 PyPTO ``matmul`` (AIC/Cube, FP32):
+- fwd:  C = matmul(cols, K2d, b_trans=True)   K2d = K.reshape(Cout, K) 零拷贝 view
+- dK:   C = matmul(cols, dY2d, a_trans=True)  免 cols^T 拷贝
+- dX:   C = matmul(cols, K_ic,  b_trans=True) 免 K_ic^T 拷贝
+- 共 2 个 kernel: b_trans kernel 供 fwd/dX 共用, a_trans kernel 供 dK
   (trans 标志必须编译期硬编码, 不能作为运行时参数)
-- 移除 transposed 分支与 2D 函数式 API (均未验证, 以简洁的报错替代)
-- 移除 run_mode argv 解析等样板代码
 
-限制: stride 任意, dilation=1, transposed=False (与 v2 实测路径一致)。
+限制: stride 任意, dilation=1, transposed=False。
 """
 
 import torch
