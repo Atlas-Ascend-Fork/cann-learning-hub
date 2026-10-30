@@ -40,7 +40,7 @@
 
 ### 3.1 torch.compile自定义后端集成npugraph_ex
 
-`torch.compile`支持自定义后端，要求后端函数具有`(gm: torch.fx.GraphModule, example_inputs: List[torch.Tensor]) -> Callable` 的约定,返回的就是自定义后端利用输入FX图编译优化后的可执行对象，要求`(*args: torch.Tensor) -> List[torch.Tensor]`。
+`torch.compile`支持自定义后端，要求后端函数具有`(gm: torch.fx.GraphModule, example_inputs: List[torch.Tensor]) -> Callable` 的约定，返回的就是自定义后端利用输入FX图编译优化后的可执行对象，要求`(*args: torch.Tensor) -> List[torch.Tensor]`。
 
 TorchAir提供了`get_compiler`接口返回`_NpuFxCompiler`实例：
 
@@ -358,7 +358,7 @@ class SerializableArtifact(ABC):
         ...
 ```
 
-可以看到通过定义`__call__`方法继承`SerializableArtifact`的实例可以直接作为可调用对象执行编译优化后的图，因此在`ge_compiler`中虽然根据是否存在Triton算子返回了不同的类型对象，但是作为调用对象功能是一致的,不需要再做额外的区分处理。同时子类通过实现`convert_to_bytes`和`rebuild_from_bytes`完成编译产物的缓存和加载功能，`NpuSerializableArtifact`中的实现如下：
+可以看到通过定义`__call__`方法继承`SerializableArtifact`的实例可以直接作为可调用对象执行编译优化后的图，因此在`ge_compiler`中虽然根据是否存在Triton算子返回了不同的类型对象，但是作为调用对象功能是一致的，不需要再做额外的区分处理。同时子类通过实现`convert_to_bytes`和`rebuild_from_bytes`完成编译产物的缓存和加载功能，`NpuSerializableArtifact`中的实现如下：
 
 ```python
 class NpuSerializableArtifact(SerializableArtifact):

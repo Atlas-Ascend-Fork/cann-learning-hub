@@ -117,11 +117,11 @@ Backend 负责判断融合结构是否能被 AutoFuse 后端实现，主要包�
 
 ![autofuse_code_generation_pipeline](images/autofuse_code_generation_pipeline.png)
 
-- `Schedule`：对输入的AscGraph进行重排和优化,并生成多个候选优化图供后续挑选.
+- `Schedule`：对输入的AscGraph进行重排和优化，并生成多个候选优化图供后续挑选.
 
 - `Auto Tiling`：结合输入shape和硬件约束从候选优化图中选择最合适的优化图，并计算出此种优化图下最佳的Tiling参数。
 
-- `Codegen`：对Schedule生成的多张候选图各生成一份可执行的硬件代码,并接收Auto Tiling计算的Tiling参数确认此次输入下应该选择的执行代码.三个阶段的详细介绍可参考此前发布的文章：[AutoFuse×TorchInductor实现算子自动融合，提升DeepSeekV3.1-Terminus性能17%！](https://mp.weixin.qq.com/s?__biz=MzA4MzM0ODMyMA==&mid=2447518312&idx=3&sn=af7fe04e2a743ea1d82cff5f921f635b&scene=21#wechat_redirect)
+- `Codegen`：对Schedule生成的多张候选图各生成一份可执行的硬件代码，并接收Auto Tiling计算的Tiling参数确认此次输入下应该选择的执行代码.三个阶段的详细介绍可参考此前发布的文章：[AutoFuse×TorchInductor实现算子自动融合，提升DeepSeekV3.1-Terminus性能17%！](https://mp.weixin.qq.com/s?__biz=MzA4MzM0ODMyMA==&mid=2447518312&idx=3&sn=af7fe04e2a743ea1d82cff5f921f635b&scene=21#wechat_redirect)
 
 ## TensorFlow + AutoFuse 使用示例
 

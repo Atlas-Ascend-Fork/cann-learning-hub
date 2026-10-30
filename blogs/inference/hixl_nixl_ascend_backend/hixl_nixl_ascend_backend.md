@@ -26,15 +26,15 @@ HIXL 是昇腾面向高性能数据传输场景提供的通信能力组件，支
 
 ### 2.2 HIXL点对点远端通信介绍
 
-假设现在存在节点A和B,节点A需要读取或者给B发送数据,使用HIXL接口实现的流程图如下:
+假设现在存在节点A和B,节点A需要读取或者给B发送数据，使用HIXL接口实现的流程图如下:
 
 ![hixl_point_to_point_communication_flow](images/hixl_point_to_point_communication_flow.jpeg)
 
 其中的关键点:
 
-1.由于是节点A发起请求,因此建链以及传输指令都是由节点A执行,节点B只需要在建链之前完成好内存的申请注册.
+1.由于是节点A发起请求，因此建链以及传输指令都是由节点A执行，节点B只需要在建链之前完成好内存的申请注册.
 
-2.由于使用的异步传输接口TransferAsync,因此节点A需要使用GetTransferStatus循环获取传输状态,直到确认传输成功后将消息通过SendNotify发送给节点B,此时节点A,B都确认传输完成,才能进行后续的资源释放.
+2.由于使用的异步传输接口TransferAsync,因此节点A需要使用GetTransferStatus循环获取传输状态，直到确认传输成功后将消息通过SendNotify发送给节点B,此时节点A,B都确认传输完成，才能进行后续的资源释放.
 
 ### 3 通过HIXL适配NIXL昇腾后端介绍
 
@@ -98,7 +98,7 @@ NIXL 采用模块化插件架构，不同后端都可以通过注册插件的方
 
 2.NIXL 额外定义了远端连接与远端内存元信息相关接口
 
-相较于 HIXL，NIXL 额外定义了 getPublicData()、getConnInfo()、loadRemoteConnInfo()、loadRemoteMD() 和 unloadMD() 这 5 个接口。出现这些接口的根本原因在于两者的抽象层次不同。HIXL 原生接口中，应用直接通过"ip:port" 字符串标识形式识别远端节点，并通过内存地址和内存地址大小完成远端内存访问，使用便捷简单,因此 HIXL 本身并不需要额外维护统一的“远端连接元信息”和“远端内存元信息”抽象。
+相较于 HIXL，NIXL 额外定义了 getPublicData()、getConnInfo()、loadRemoteConnInfo()、loadRemoteMD() 和 unloadMD() 这 5 个接口。出现这些接口的根本原因在于两者的抽象层次不同。HIXL 原生接口中，应用直接通过"ip:port" 字符串标识形式识别远端节点，并通过内存地址和内存地址大小完成远端内存访问，使用便捷简单，因此 HIXL 本身并不需要额外维护统一的“远端连接元信息”和“远端内存元信息”抽象。
 
 而 NIXL 作为统一的上层通信框架，需要兼容不同后端的连接模型和远端内存访问模型，因此必须抽象出一套通用的 metadata 导出、交换、加载与释放机制。因此对于昇腾后端来说，这几个接口实现时可以采用轻量化适配方式：
 
