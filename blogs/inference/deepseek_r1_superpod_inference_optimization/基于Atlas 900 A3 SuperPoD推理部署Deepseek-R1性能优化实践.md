@@ -5,9 +5,9 @@
 
 本次实践以DeepSeek-R1模型在Atlas 900 A3 SuperPoD的高吞吐推理为目标，以"TTFT＜2s、TPOT＜50ms"为核心SLA约束，通过Omni-Infer框架优化特性为牵引，协同CANN全栈优化完成多层级迭代，在3000条数据集(最大输入16k，平均输入3.5k;最大输出32k，平均输出1.2k)、11节点（7P8-1D32）集群环境中，达成608QPM高吞吐，充分验证了上层套件Omni-Infer与底层软件CANN协同优化的突出效果。
 
-### 二．Omni-Infer 套件侧优化
+## 二．Omni-Infer 套件侧优化
 
-#### **2.1 MoE专家负载均衡(OmniPlacement)+稀疏注意力加速(OmniAttn)**
+### **2.1 MoE专家负载均衡(OmniPlacement)+稀疏注意力加速(OmniAttn)**
 
 Omni-Infer是一套专为昇腾硬件平台定制的强大推理加速套件，完全兼容业界目前主流的开源大模型推理框架（比如vLLM等），旨在提供高性能、企业级推理能力。
 
@@ -24,7 +24,7 @@ Omni-Infer是一套专为昇腾硬件平台定制的强大推理加速套件，�
 - 层级压缩：以 Transformer 层为最小压缩单元，避免张量并行（TP）下的同步延迟；
 - 模式搜索：采用进化算法（遗传算法）发现最优压缩模式，以仅推理的成本高效且全面地探索配置空间
 
-#### **2.2 OmniProxy**
+### **2.2 OmniProxy**
 
 OmniProxy是一个全局的、具有解聚感知能力的调度层，它利用性能预测、推理周期性以及自动前缀缓存（APC）感知的缓存协调，在动态工作负载下联合优化预填充和解码阶段。
 
@@ -34,7 +34,7 @@ OmniProxy是一个全局的、具有解聚感知能力的调度层，它利用�
  ③延迟提交与重排序：结合上游批处理周期，优化请求分组和负载均衡；
  ④Omni自适应调度（OAS）算法：预填充侧采用缓存感知负载均衡调度，解码侧采用最长处理时间优先（LPT）调度。
 
-#### **2.3 调整Decode与Prefill的平衡**
+### **2.3 调整Decode与Prefill的平衡**
 
 要提升整体吞吐量，主要是两大核心：(1)持续降低TPOT(decode阶段优化)；(2)增大并发。
 
@@ -52,9 +52,9 @@ OmniProxy是一个全局的、具有解聚感知能力的调度层，它利用�
 
 实际测试中6P1D的配比下QPM虽然达到了613.2，但是TTFT耗时仍然较高达到了5s，因此需要进一步增加P节点数量增大Prefill 并发降低 TTFT 延迟。最终调整配比将当前的6P1D扩展为7P1D，并增大并发数为3168，TTFT显著降低达到了1.93s。由于扩展为7P1D，导致Decode需要降低TPOT，弥补扩比造成的QPM平摊。因此针对Decode侧，主要使用CANN底层优化，将TPOT从50ms降低到47ms。
 
-### **三. CANN 底层优化**
+## **三. CANN 底层优化**
 
-#### **3.1 Micro-Batch双流水线优化**
+### **3.1 Micro-Batch双流水线优化**
 
 在LLM推理的Prefill阶段，计算任务密集，通信开销也较为显著。由于计算与通信由不同硬件单元处理，若能实现两者的并行执行，可显著提升该阶段性能。理想情况下，通信耗时能被完全掩盖，从而大幅提高计算效率。
  为此，一种优化策略是将输入序列划分为两个microbatch，并设计双流水线机制。通过定制流水线调度，使计算与通信操作重叠，以充分释放Prefill阶段的性能潜力。
@@ -67,7 +67,7 @@ OmniProxy是一个全局的、具有解聚感知能力的调度层，它利用�
 
 ![microbatch_dual_pipeline_optimization_execution_diagram](images/microbatch_dual_pipeline_optimization_execution_diagram.png)
 
-#### **3.2 SuperKernel**
+### **3.2 SuperKernel**
 
 SuperKernel主要是根据计算图，利用JIT的编译能力，将标记范围内算子的Kernel代码重新编译为新的算子，如下所示：
 
@@ -78,14 +78,14 @@ SuperKernel主要是根据计算图，利用JIT的编译能力，将标记范围
 
 当前已经支持将DeepSeek-R1模型61层网络中的58层融合为1个SuperKernel算子，整网收益平均10~20%左右。
 
-#### **3.3 TorchAir图缓存策略**
+### **3.3 TorchAir图缓存策略**
 
 torch.compile是一种即时编译器（Just-In-Time compiler），其成图的首次编译时间通常较长，而大模型推理场景对时延敏感，因此有必要优化首次编译时长。在推理服务、弹性扩容等业务场景，使用编译缓存可有效缩短服务启动后首次推理时延。
  成图编译通常包括两段耗时，一段是Dynamo的编译耗时，一段是Ascend IR计算图的编译耗时。TorchAir提供了一种模型编译缓存方案（通过[cache_compile](https://www.hiascend.com/document/detail/zh/Pytorch/710/modthirdparty/torchairuseguide/torchair_00081.html)接口），可将首次编译结果落盘，以加速torch.compile图模式的启动时间。实践中对于Decode阶段采用缓存编译方式，将TPOT提升2ms左右。
 
 ![torchair_graph_optimize](images/torchair_compile_cache.png)
 
-### **总结：Omni-Infer与CANN协同优化价值及开源成果**
+## **总结：Omni-Infer与CANN协同优化价值及开源成果**
 
 本次DeepSeek-R1模型在Atlas 900 A3 SuperPoD的性能突破实践，核心是构建了"Omni-Infer框架主导+CANN全栈支撑"的协同优化体系，精准解决了大规模集群推理中的通信瓶颈、调度不均、启动时延高、计算冗余等痛点，最终达到608QPM的突出成果。实践充分验证了Omni-Infer套件对于大模型调度的管理能力以及CANN作为底层软件栈对于大模型推理的优化能力，形成了一套高效的Ascend平台大模型推理优化方案。
 

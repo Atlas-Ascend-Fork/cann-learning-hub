@@ -12,7 +12,7 @@ Prefix Caching是大语言模型（LLM）推理中的一项重要功能，不同
 
    昇腾CANN 的全面开源开放为亲和昇腾硬件的 KV Cache 池化与传输方案落地提供了有力的支持，通过开源CANN  HIXL（昇腾单边通信组件），开发者获得了PD 分离传输中KV Cache在Prefill节点和Decode节点快速传输的关键能力，结合Mooncake和vLLM的框架能力，快速实现了大集群推理场景下KV Cache池化与高性能传输方案。
 
-### 整体方案
+## 整体方案
 
 HIXL（ Huawei Xfer Library ）是CANN通信库中提供点对点数据传输能力的单边通信库，面向集群场景提供简易、可靠、高效的点对点数据传输。依托Mooncake开源组件Transfer Engine（传输引擎）和Mooncake Store（存储组件）为大模型推理引擎vLLM提供亲和昇腾的高效KV Cache传输与池化存储能力，优化推理性能。
 
@@ -29,7 +29,7 @@ HIXL（ Huawei Xfer Library ）是CANN通信库中提供点对点数据传输能
 - 优化存储接口，适配昇腾高吞吐特性
   为 Mooncake Store 新增了 batch_put_from_multi_buffers 与 batch_get_into_multi_buffers 接口，优化 Mooncake 的传输调度逻辑，将多次小数据操作合并为批量任务，更契合昇腾硬件的高吞吐特性，从而提升整体调度效率。(参考https://github.com/kvcache-ai/Mooncake/pull/929)
 
-### 总结
+## 总结
 
 HIXL秉持极简易用的设计原则，具备高度可集成性，并积极融入主流生态社区。此次 HIXL 顺利与 Mooncake、vLLM 实现集成，正是 CANN 开源价值的具体体现：开源发布后，借助社区的力量，对接业界常用的KV池化和传输库Mooncake，进一步打通了 vLLM + Mooncake + HIXL 的技术链路，使该方案成为 Ascend 上池化方案的首选。并以此为依托，和用户完成联创将大模型推理的 TTFT 提升了 40%。
 

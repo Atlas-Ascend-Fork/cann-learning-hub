@@ -6,9 +6,9 @@ LongCat-Flash-Lite 是开源的高效 MoE 大模型。该模型在 LongCat-Flash
 
 本次 LongCat-Flash-Lite 在昇腾完成推理适配，在TP4+DP8+EP32的切分模式下，围绕模型自身的 N-gram Embedding 与 EAGLE3 投机解码两项关键特性进行支持，并结合昇腾侧定制优化进一步释放推理性能：通过 ComputeNGramIds Ascend C 自定义算子加速 N-gram ID 生成，通过 SuperKernel 将模型算子融合成一个大算子，减少运行时调度耗时。适配优化后，模型 TPOT 突破 5ms，展现出优异的低时延推理性能。
 
-### 一、模型技术特性
+## 一、模型技术特性
 
-#### 1. N-gram Embedding：从扩专家到扩 Embedding
+### 1. N-gram Embedding：从扩专家到扩 Embedding
 
 MoE 架构通过“总参数大、激活参数少”的方式提升模型容量。每个 token 只路由到部分专家，因此模型可以在控制单 token 计算量的同时扩大总参数规模。但当专家数量持续增加后，模型表现收益会逐渐放缓，同时还会带来更高的路由、通信、访存和调度压力。也就是说，继续单纯扩大专家规模，并不总是最高效的扩容方式。
 
@@ -28,7 +28,7 @@ N-gram Embedding 就是在这个思路上进一步扩展。这里的 gram 可以
 
 - 降低 MoE 层激活压力。模型将一部分容量转移到 Embedding 层后，可以在较低激活参数量下保持较强表达能力，为推理部署提供更好的性能。
 
-#### 2. EAGLE3 投机解码：一次验证推进多个 token
+### 2. EAGLE3 投机解码：一次验证推进多个 token
 
 大语言模型解码通常是逐 token 自回归生成，每一步都需要调用主模型完成一次前向计算。随着输出长度增加，逐 token 解码会带来较高的端到端时延。投机解码的核心思想是：先由轻量 Draft 路径快速预测多个候选 token，再由目标模型对这些候选 token 进行验证。如果候选 token 被接受，就可以在一次主模型验证中推进多个 token，从而减少逐 token 调用主模型的次数。目标模型仍然负责最终校验，因此在提升速度的同时可以保持生成质量。
 
@@ -42,9 +42,9 @@ EAGLE3 的核心特点包括：
 
 - training-time test。投机解码在真实推理时会连续生成多个候选 token，后续候选 token 会依赖 Draft 路径前一步的预测结果。如果训练阶段只学习单步预测，训练和推理之间容易出现分布不一致。EAGLE3 在训练阶段模拟多步推理过程，让 Draft 路径提前适应“用自己的预测继续往后生成”的场景，从而提升多步候选序列的稳定性。
 
-### 二、昇腾定制优化
+## 二、昇腾定制优化
 
-#### 1. ComputeNGramIds Ascend C 算子：加速 N-gram ID 生成
+### 1. ComputeNGramIds Ascend C 算子：加速 N-gram ID 生成
 
 N-gram Embedding 在真正查表之前，需要先为每个 token 计算多个连续 token 片段对应的表项 ID。模型需要结合当前位置 token 与前序 token，按照不同片段长度 n 和不同子表 k 计算 Hash 结果，再加上各子表的前缀偏移，得到最终用于 Embedding 查表的行号。
 
@@ -56,7 +56,7 @@ N-gram Embedding 在真正查表之前，需要先为每个 token 计算多个�
 
 通过这一 Ascend C 算子，N-gram ID 生成中的多层循环、Hash 计算、取模和偏移处理被融合到一个 NPU Kernel 内完成，减少了多个小算子调度开销，也避免了频繁的中间结果搬运，N-gram Embedding模块的整体效率得以提升。
 
-#### 2. SuperKernel：融合算子减少调度耗时
+### 2. SuperKernel：融合算子减少调度耗时
 
 在大模型推理过程中，耗时不仅来自矩阵乘等核心计算，也来自算子调度、下发和同步等非计算开销。针对这一问题，昇腾提供了通用的模型优化技术 SuperKernel。SuperKernel 可以将模型中指定范围内的多个算子融合成一个超级内核统一下发执行，从而减少算子之间频繁切换、逐算子调度和运行时等待带来的额外开销。
 
@@ -72,6 +72,6 @@ N-gram Embedding 在真正查表之前，需要先为每个 token 计算多个�
 
 这与 ComputeNGramIds 算子优化形成互补：ComputeNGramIds 负责将 N-gram ID 生成流程融合到 NPU Kernel 内，降低 N-gram Embedding 的局部计算开销；SuperKernel 则从整网执行层面压缩算子调度开销，使 LongCat-Flash-Lite 在低激活参数量和投机解码带来的结构优势之外，进一步获得端到端低时延收益。
 
-### 总结
+## 总结
 
 LongCat-Flash-Lite 是一次 MoE 模型未来发展方向的重要探索。模型通过 N-gram Embedding 将大规模参数扩展引入 Embedding 层，在保持低激活参数量的同时提升模型表达能力；通过 EAGLE3 投机解码，进一步提升推理阶段的有效 token 产出效率。模型在昇腾平台除了适配这些技术特性外，还利用昇腾的硬件和软件特性进一步优化，获得了不菲的性能收益。未来，昇腾 CANN 将持续面向 MoE、投机解码等大模型关键场景增强推理能力，助力更多开源模型在昇腾上高效部署与应用。
