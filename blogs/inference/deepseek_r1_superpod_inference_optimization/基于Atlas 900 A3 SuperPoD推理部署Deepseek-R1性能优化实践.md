@@ -1,7 +1,7 @@
 # 基于Atlas 900 A3 SuperPoD推理部署Deepseek-R1性能优化实践
 
 
-### 一．背景介绍
+## 一．背景介绍
 
 本次实践以DeepSeek-R1模型在Atlas 900 A3 SuperPoD的高吞吐推理为目标，以"TTFT＜2s、TPOT＜50ms"为核心SLA约束，通过Omni-Infer框架优化特性为牵引，协同CANN全栈优化完成多层级迭代，在3000条数据集(最大输入16k，平均输入3.5k;最大输出32k，平均输出1.2k)、11节点（7P8-1D32）集群环境中，达成608QPM高吞吐，充分验证了上层套件Omni-Infer与底层软件CANN协同优化的突出效果。
 

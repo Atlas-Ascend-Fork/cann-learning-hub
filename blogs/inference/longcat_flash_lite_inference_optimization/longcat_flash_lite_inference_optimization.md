@@ -1,6 +1,6 @@
 # LongCat-Flash-Lite昇腾推理优化实践
 
-### 背景介绍
+## 背景介绍
 
 LongCat-Flash-Lite 是开源的高效 MoE 大模型。该模型在 LongCat-Flash 架构基础上引入 N-gram Embedding，将参数扩展从传统 MoE 专家层进一步拓展到 Embedding 层，在保持较低激活参数量的同时提升模型表达能力。LongCat-Flash-Lite 模型总参数量为 68.5B，每 token 动态激活约 2.9B 至 4.5B 参数，其中 N-gram Embedding 参数量达到 31.4B，占总参数约 46%。这一设计使模型在智能体、代码、数学推理等任务中具备较强竞争力，并在推理阶段带来低激活参数量与高吞吐的性能优势。
 

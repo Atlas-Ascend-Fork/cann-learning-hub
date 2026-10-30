@@ -1,6 +1,6 @@
 # 基于Atlas 900 A3 SuperPoD的LongCat-Flash模型推理性能优化实践
 
-### 背景介绍
+## 背景介绍
 
 LongCat-Flash是一款功能强大且高效的混合专家（MoE）架构开源大模型，具有560B参数量。LongCat-Flash模型采用了两项创新设计：
 

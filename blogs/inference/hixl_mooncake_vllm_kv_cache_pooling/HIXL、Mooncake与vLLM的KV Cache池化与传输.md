@@ -1,6 +1,6 @@
 # HIXL、Mooncake与vLLM的KV Cache池化与传输
 
-### 背景
+## 背景
 
 Prefix Caching是大语言模型（LLM）推理中的一项重要功能，不同Request复用Prompt公共前缀，减少Prefill所需计算Token数，减少TTFT（Time To First Token）耗时。在长序列、长System Prompt、多轮对话、垂直领域业务等场景下，收益显著。提高Prefix Cache命中率成为集群推理收益关键点。
 
