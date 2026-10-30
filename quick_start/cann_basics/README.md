@@ -55,7 +55,7 @@ print("NPU device count:", torch.npu.device_count())
 | 1 | [人工智能基础](./01_ai_basics.ipynb) | AI 发展历程 → AI/ML/DL → 模型 → 训练与推理 → 常见架构 → 计算图 → 算子 → 张量 → 从模型到昇腾 NPU | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=quick_start/cann_basics&scanFilePath=quick_start/cann_basics/01_ai_basics.ipynb) |
 | 2 | [什么是 NPU](./02_what_is_npu.ipynb) | 为什么需要 NPU → CPU vs NPU 算力差距 → 昇腾产品全览 → Host/Device → NPU 内部 6 组件 → AI Core 三大部分 → 多核并行 → GPU 对比 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=quick_start/cann_basics&scanFilePath=quick_start/cann_basics/02_what_is_npu.ipynb) |
 | 3 | [什么是 CANN](./03_what_is_cann.ipynb) | 从 NPU 到 CANN → 架构总览 → 各组件详解（框架适配/算子库/通信库/图引擎/加速库/Ascend C/编译器/运行时/驱动）→ 一行代码的完整旅程 → CANN vs CUDA → 环境验证 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=quick_start/cann_basics&scanFilePath=quick_start/cann_basics/03_what_is_cann.ipynb) |
-| 4 | [NPU 实践](./04_npu_practice.ipynb) | 四道难度递进的 NPU 实践题：张量运算、矩阵乘法性能对比、Batch 运算、图像高斯模糊卷积 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=quick_start/cann_basics&scanFilePath=quick_start/cann_basics/04_npu_practice.ipynb) |
+| 4 | [NPU 实践](./04_npu_practice.ipynb)（[配套附录](./04_npu_practice_appendix.md)） | 四道难度递进的 NPU 实践题：张量运算、矩阵乘法性能对比、Batch 运算、图像高斯模糊卷积 | [在线体验](https://ai.gitcode.com/user/username/notebookcann?repoUrl=https://gitcode.com/cann/cann-learning-hub.git&ttl=120&diskSize=40Gi&path=quick_start/cann_basics&scanFilePath=quick_start/cann_basics/04_npu_practice.ipynb) |
 
 ## 课件
 
@@ -81,6 +81,11 @@ print("NPU device count:", torch.npu.device_count())
 ```text
 cann_basics/
 ├── README.md
+├── 01_ai_basics.ipynb          # 课程 1：人工智能基础
+├── 02_what_is_npu.ipynb        # 课程 2：什么是 NPU
+├── 03_what_is_cann.ipynb       # 课程 3：什么是 CANN
+├── 04_npu_practice.ipynb       # 课程 4：NPU 实践
+├── 04_npu_practice_appendix.md # 课程 4 配套附录（详解与知识点）
 ├── images/       # 课程图片资源
 └── answer/       # 练习答案与批改脚本
 ```
