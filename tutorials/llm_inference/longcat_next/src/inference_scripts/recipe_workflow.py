@@ -175,6 +175,7 @@ def resolve_model_path(quiet: bool = False) -> str:
     if env_path:
         path = Path(env_path).expanduser()
         if (path / "model.safetensors.index.json").is_file():
+            _validate_checkpoint(path)
             _write_model_path_cache(path)
             if not quiet:
                 print(f"[模型路径] 使用环境变量指定的本地权重: {path}")
@@ -188,10 +189,15 @@ def resolve_model_path(quiet: bool = False) -> str:
     if cache_file.is_file():
         cached = Path(cache_file.read_text(encoding="utf-8").strip()).expanduser()
         if (cached / "model.safetensors.index.json").is_file():
-            # 不受 quiet 抑制：解释"本次为何没有下载"。
-            print(f"[模型路径] 复用已解析的模型路径: {cached}")
-            print(f"[模型路径] （如需重新解析，删除缓存文件 {cache_file}）")
-            return str(cached)
+            try:
+                _validate_checkpoint(cached)
+            except FileNotFoundError:
+                pass
+            else:
+                # 不受 quiet 抑制：解释"本次为何没有下载"。
+                print(f"[模型路径] 复用已解析的模型路径: {cached}")
+                print(f"[模型路径] （如需重新解析，删除缓存文件 {cache_file}）")
+                return str(cached)
         cache_file.unlink(missing_ok=True)
         print(f"[模型路径] 缓存的路径已失效（{cached}），重新解析")
 
