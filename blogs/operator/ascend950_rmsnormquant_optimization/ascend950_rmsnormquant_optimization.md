@@ -477,7 +477,7 @@ int64_t maxUbFactor = (ubSize - fixedSize) / linearCoef;  // ≈ 10
 
 2. 主导流水占比 82.9%，仍维持在 80% 以上，但较 Step 4 略有下降——Scalar 调度占比的降低使得 VEC 和 MTE2 的 ratio 被动下降，并非效率退化。
 
-49.0 us 为性能最优点。 累计加速 157 倍。
+49.0 us 为性能最优点。累计加速 157 倍。
 
 至此，我们的5步性能优化就全部完成了，汇总数据变化如下：
 
@@ -491,7 +491,7 @@ int64_t maxUbFactor = (ubSize - fixedSize) / linearCoef;  // ≈ 10
 
 Step 3~5 中，行内平方和通过 float32 寄存器上的 128 次 `Add(vregReduceSum, vregReduceSum, vregXQuared)` 完成，构成典型的线性累加（sequential summation）。float32 的机器精度 $\varepsilon \approx 1.2 \times 10^{-7}$（$2^{-23}$），线性累加的浮点相对误差界为 $O(n \cdot \varepsilon)$——对于 $n=8192$，误差上界约 $10^{-3}$。这意味着 RMS 值在千分之一量级上存在偏差，在量化边界附近可能导致输出偏移 1 个 quant level，大规模推理中逐层累积。误差根源在于浮点加法不可结合：$(a \oplus b) \oplus c \neq a \oplus (b \oplus c)$，线性累加每一步的舍入误差都被后续操作放大。
 
-二分累加。 核心思想是缩短累加链深度。将长度为 $n$ 的向量递归分成两半分别求和再合并：
+二分累加。核心思想是缩短累加链深度。将长度为 $n$ 的向量递归分成两半分别求和再合并：
 
 $\text{Sum}(x_0, \ldots, x_{n-1}) = \text{Sum}(x_0, \ldots, x_{n/2-1}) + \text{Sum}(x_{n/2}, \ldots, x_{n-1})$
 
@@ -519,7 +519,7 @@ ReduceSum(vregReduceSum, vregReduceSum, pregAll);          // 归约为一标量
 
 代价是 `rmsBuf_` 从 `ubFactor × 4B` 增至 `ubFactor × 256B`，`ubFactor` 从 10 降至 9，UB 循环从 7 次变为 8 次，影响极小。
 
-迭代求 rsqrt。 归一化需计算 $\text{rstd} = 1/\sqrt{\text{var}}$。Step 3~5 使用的指令链为：
+迭代求 rsqrt。归一化需计算 $\text{rstd} = 1/\sqrt{\text{var}}$。Step 3~5 使用的指令链为：
 
 ```
 // Step 3~5: 硬件 Div + Sqrt
@@ -554,7 +554,7 @@ Mul(rstd, y, t1, pregLoop);           // rstd = y₀ * (1.5 - 0.5 * var * y₀²
 
 `Mula(dst, src1, src2)` = `dst += src1 * src2`，实现乘加融合。
 
-第二轮（残差形式 Newton 修正）： 令 $e = 1 - \text{var} \cdot y_1^2$，修正步为 $y_2 = y_1 \cdot \left(1 + \frac{e}{2}\right)$——该形式与 Newton-Raphson 公式代数等价，但更便于在寄存器上直接操作。
+第二轮（残差形式 Newton 修正）：令 $e = 1 - \text{var} \cdot y_1^2$，修正步为 $y_2 = y_1 \cdot \left(1 + \frac{e}{2}\right)$——该形式与 Newton-Raphson 公式代数等价，但更便于在寄存器上直接操作。
 
 ```
 Duplicate(s, 1.0);                      // ★ s 必须预置 1，因为后续是累加语义 Mula

@@ -56,13 +56,13 @@ Scalar指令分发示意图
 
 ScalarBound对性能的影响主要体现在两个层面：
 
-影响一：导致流水中断，破坏指令并行性。 以下Conv2D算子的例子中，MTE2和MTE1的间隔超过1000个cycle，流水线出现明显空泡，指令级并行严重受损：
+影响一：导致流水中断，破坏指令并行性。以下Conv2D算子的例子中，MTE2和MTE1的间隔超过1000个cycle，流水线出现明显空泡，指令级并行严重受损：
 
 ![conv2d_pipeline_stall](images/conv2d_pipeline_stall.png)
 
 Conv2D流水线中断示例
 
-影响二：Scalar本身的高耗时直接拖慢算子总耗时。 即使暂不考虑对其他流水线的中断影响，Scalar自身的执行耗时也是不可忽视的开销。下图展示了一个BatchMatmul算子各流水线的耗时分布，其中Scalar耗时为18155个cycle，远超其他流水线：
+影响二：Scalar本身的高耗时直接拖慢算子总耗时。即使暂不考虑对其他流水线的中断影响，Scalar自身的执行耗时也是不可忽视的开销。下图展示了一个BatchMatmul算子各流水线的耗时分布，其中Scalar耗时为18155个cycle，远超其他流水线：
 
 ![batch_matmul_pipeline_latency](images/batch_matmul_pipeline_latency.png)
 

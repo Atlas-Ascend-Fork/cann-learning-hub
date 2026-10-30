@@ -17,7 +17,7 @@
 **为了充分发挥算法的能力，融合算子是一个很重要的优化项，所以在CANN算子仓不存在该算子的时候，我们需要开发自定义算子**。
  后续章节我们将详细的描述基于昇腾已有的开源文档和用例，如何开发自定义算子实现我们算法方案，达成优化目标。
 
-设计详情可参考方案设计issue([https://gitcode.com/cann/ops-transformer/issues/61](https://gitcode.com/cann/ops-transformer/issues/61) )。 更为详细的算法原理可以参考我们的已投CVPR的**算法论文Efficient Matrix Implementation for Rotary Position Embedding**，预计2月份公开。
+设计详情可参考方案设计issue([https://gitcode.com/cann/ops-transformer/issues/61](https://gitcode.com/cann/ops-transformer/issues/61) )。更为详细的算法原理可以参考我们的已投CVPR的**算法论文Efficient Matrix Implementation for Rotary Position Embedding**，预计2月份公开。
  当前章节我们先展示最终优化效果，如表所示，我们算法简称为RoME，在单算子和整网(整网测试可以使用Mindspeed)中都能得到很好的效果。
  ![rome_single_operator_performance](images/rome_single_operator_performance.png)
 
@@ -25,7 +25,7 @@
 
 #### 二、自定义算子开发：基于官网pybind教程开发
 
-在算子开发前，我们首先需要将我们的需求从算法原理转换为文字描述：本算法设计公式为`out=x * cos + x @ mat * sin`， 其中`x=[B,N,S,D]`为RoPE算法原始输入，`mat=[D,D]`为本方案特有的新增矩阵， `sin/cos=[1, 1, S, D]`与原始RoPE算法相同。 所以本算法是一个**同时需要使用Cube(矩阵乘)和Vector(向量)的MIX融合算子**。 通过调研发现，业界最常用的`D=128`，所以本文所述自定义算子仅编写支持`D=128`的输入和昇腾`910系列`环境，后续泛化版本预计通过CANN正式版本发布。
+在算子开发前，我们首先需要将我们的需求从算法原理转换为文字描述：本算法设计公式为`out=x * cos + x @ mat * sin`，其中`x=[B,N,S,D]`为RoPE算法原始输入，`mat=[D,D]`为本方案特有的新增矩阵， `sin/cos=[1, 1, S, D]`与原始RoPE算法相同。所以本算法是一个**同时需要使用Cube(矩阵乘)和Vector(向量)的MIX融合算子**。通过调研发现，业界最常用的`D=128`，所以本文所述自定义算子仅编写支持`D=128`的输入和昇腾`910系列`环境，后续泛化版本预计通过CANN正式版本发布。
 
 ##### Step1：算子开发准备工作：
 
@@ -38,7 +38,7 @@
 
 ##### Step2：算子开发
 
-实现流程设计：由于910系列 CV分离(Cube上的数据传入Vector必须经过L2或高带宽内存)的特性，我们分析发现matmul计算和Vector计算理论上都是memory bound， 所以我们决策采用先计算matmul后再计算Vector的方式完成编程。
+实现流程设计：由于910系列 CV分离(Cube上的数据传入Vector必须经过L2或高带宽内存)的特性，我们分析发现matmul计算和Vector计算理论上都是memory bound，所以我们决策采用先计算matmul后再计算Vector的方式完成编程。
  参考样例的实现，我们使用`ASCEND_IS_AIC, ASCEND_IS_AIV`去区分Cube和Vector部分，按照官网说法，这个好处是Cube和Vector解耦，无需关心Cube和Vector数量问题(C/V=1/2)，再通过`CrossCoreSetFlag， CrossCoreWaitFlag`去控制C和V之间的通信关系。
 
 ```
@@ -60,13 +60,13 @@
 
 ##### Step3：适配torch
 
-遍历`https://gitee.com/ascend/samples/tree/master/operator/ascendc/0_introduction`， 我们通过测试找到了（参考13_matmulleakyrelu_kernellaunch和22_baremix_kernellaunch）一个可以支持MIX融合算子编译的cmake以及torch对应的适配和编译方式，并对其做了精简，保留其中核心的两项:
+遍历`https://gitee.com/ascend/samples/tree/master/operator/ascendc/0_introduction`，我们通过测试找到了（参考13_matmulleakyrelu_kernellaunch和22_baremix_kernellaunch）一个可以支持MIX融合算子编译的cmake以及torch对应的适配和编译方式，并对其做了精简，保留其中核心的两项:
 
  **1. 编译功能**
  
  A). CMakeLists.txt: 用于编译出kernel侧执行的so文件，其中使用了auto_gen的策略生成了一些中间文件，这些东西用户无需关心，只要注意export对应的so即可；
  
- B). setup.py: 用于编译torch pybind功能，编译完成后安装"python setup.py build_ext --inplace"， 之后可直接使用torch调用。
+ B). setup.py: 用于编译torch pybind功能，编译完成后安装"python setup.py build_ext --inplace"，之后可直接使用torch调用。
  
  **2. 接口实现 torch_interface.cpp：用户需要适配的核心组件**
 
@@ -113,11 +113,11 @@ at::Tensor rope_matrix_kernel_bf16(at::Tensor x, at::Tensor y, at::Tensor sin, a
 
 ##### Step4：性能优化
 
-完成Step2和Step3后，可编写`python+torch`的测试用例，使用`torch_profiling`做性能测试， 我们发现算子无论Vector还是Cube侧的`memory copy in(MTE2)`开销都超过预期，所以我们分别对两者进行了细致的分析和优化。
+完成Step2和Step3后，可编写`python+torch`的测试用例，使用`torch_profiling`做性能测试，我们发现算子无论Vector还是Cube侧的`memory copy in(MTE2)`开销都超过预期，所以我们分别对两者进行了细致的分析和优化。
 
  **(1) tiling优化：tiling改为切S方向，在BN方向上做pingpong。**
  
- 通过注释掉matmul组件代码，仅执行Vector的profiling，可发现 `Vector memory copy in`的开销比预期的要高1倍有余，通过对比我们的实现和原版的RoPE融合算子（`https://gitcode.com/cann/ops-transformer/blob/master/posembedding/rotary_position_embedding/rotate_half_bf16.h`），我们发现tiling的差异：由于x的维度`[B,N,S,D]`, sin/cos维度`[1,1,S,D]`，本方案第一个版本切核方式是BNS方向均分，导致sin和cos需重复拷贝，实际拷贝量不是`S*D`而是约等于x的`B*N*S*D`，因此Vector部分的`memory copy in`开销翻倍。所以Vector部分通过参考开源仓原始的RoPE最优实现，修改Vector tiling可达成优化效果。 由于 `CrossCoreSetFlag`仅支持核内同步（比如说20个Cube和40个Vector，Cube0仅能和Vector0和Vector1同步），所以我们需要同步的将matmul的tiling修改为切S轴的方式。
+ 通过注释掉matmul组件代码，仅执行Vector的profiling，可发现 `Vector memory copy in`的开销比预期的要高1倍有余，通过对比我们的实现和原版的RoPE融合算子（`https://gitcode.com/cann/ops-transformer/blob/master/posembedding/rotary_position_embedding/rotate_half_bf16.h`），我们发现tiling的差异：由于x的维度`[B,N,S,D]`, sin/cos维度`[1,1,S,D]`，本方案第一个版本切核方式是BNS方向均分，导致sin和cos需重复拷贝，实际拷贝量不是`S*D`而是约等于x的`B*N*S*D`，因此Vector部分的`memory copy in`开销翻倍。所以Vector部分通过参考开源仓原始的RoPE最优实现，修改Vector tiling可达成优化效果。由于 `CrossCoreSetFlag`仅支持核内同步（比如说20个Cube和40个Vector，Cube0仅能和Vector0和Vector1同步），所以我们需要同步的将matmul的tiling修改为切S轴的方式。
 
 ```
 以[B,N,S,D]=[1,24,28799,128]， Cube20核，Vector40核为例：
@@ -128,7 +128,7 @@ at::Tensor rope_matrix_kernel_bf16(at::Tensor x, at::Tensor y, at::Tensor sin, a
 **(2)  matmul优化：右矩阵缓存复用。**
 
  通过profiling，我们识别到matmul执行时的memory copy in(MTE2)开销远大于预期(理论copy in值为`左矩阵+右矩阵*corenum`)。基于对昇腾硬件的了解，一般memory copy in开销过大的原因为左矩阵和右矩阵多次拷贝（笔者觉得大部分场景copy in开销远大于预期就是该原因）。
- 通过分析发现，本算法执行过程中右矩阵一直保持的不变，且大小为[D,D]，Transformer网络D的大小一般为64、128、192，这样右矩阵是小于100K的，这种小的存储开销可以一直缓存在L1甚至L0B(此处需要对昇腾硬件有所了解)上。 所以我们最终选择了右矩阵缓存复用。 万幸的是，高阶API提供了该功能(`https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/API/ascendcopapi/atlasascendc_api_07_0614.html`)。
+ 通过分析发现，本算法执行过程中右矩阵一直保持的不变，且大小为[D,D]，Transformer网络D的大小一般为64、128、192，这样右矩阵是小于100K的，这种小的存储开销可以一直缓存在L1甚至L0B(此处需要对昇腾硬件有所了解)上。所以我们最终选择了右矩阵缓存复用。万幸的是，高阶API提供了该功能(`https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/API/ascendcopapi/atlasascendc_api_07_0614.html`)。
  优化前：
 
 ```
@@ -180,7 +180,7 @@ Matmul<aType, bType, cType, biasType> matmulObj;
 #### 三、开源贡献：从pybind(ACLRT_LAUNCH_KERNEL)-> experimental仓"<<<>>>"模式
 
 作为一个优秀的算法设计和实现，我们认为应该将算法贡献到开源社区以供更多的用户参考和使用。
- 通过官方引导，我们识别到开源贡献仓地址：`https://gitcode.com/cann/ops-transformer`。最终本算法也是交付到该开源仓：`https://gitcode.com/cann/ops-transformer/blob/master/experimental/posembedding/rope_matrix/README.md`， 下文将详细介绍开源流程。
+ 通过官方引导，我们识别到开源贡献仓地址：`https://gitcode.com/cann/ops-transformer`。最终本算法也是交付到该开源仓：`https://gitcode.com/cann/ops-transformer/blob/master/experimental/posembedding/rope_matrix/README.md`，下文将详细介绍开源流程。
 
 ##### Step1：与开源仓Owner沟通贡献方式
 
@@ -194,7 +194,7 @@ Matmul<aType, bType, cType, biasType> matmulObj;
 可以参考`https://gitcode.com/cann/ops-transformer/pull/299`。我们主要做了以下调整：
 
 1. 更新了CANN和torch版本：
-   CANN为最新的版本，torch需要>2.4， 且建议从https://gitcode.com/Ascend/pytorch/releases路径下载后pip install指定该下载；
+   CANN为最新的版本，torch需要>2.4，且建议从https://gitcode.com/Ascend/pytorch/releases路径下载后pip install指定该下载；
 2. 更新gcc版本：
    gcc>9，注意需要ccec -v查询确认ccec链接到正确的版本；
 3. 删除了torch编译相关项：
@@ -206,9 +206,9 @@ Matmul<aType, bType, cType, biasType> matmulObj;
 5. 自定义typedef uint8_t char_t; ：
    否则使用高阶API的时候编译会报错；
 6. 二级的namespace：
-   所有的文件都使用一级的namespace npu_ops_transformer_ext以及用户自定义的二级namespace， 二级namespace需相同，且所有文件需要如此，否则编译不过；
+   所有的文件都使用一级的namespace npu_ops_transformer_ext以及用户自定义的二级namespace，二级namespace需相同，且所有文件需要如此，否则编译不过；
 7. namespace显式调用:
-   由于kernel和host不同的namespace内有重名的结构，而新的编译方式不区分kernel和host侧，所以using namespace matmul_tiling; using namespace matmul; using namespace AscendC; 不能同时使用，否则会编译工程报错。 为此代码需要调整为显示的调用命名空间中类和结构，如：TPosition修改为matmul_tiling::TPosition；
+   由于kernel和host不同的namespace内有重名的结构，而新的编译方式不区分kernel和host侧，所以using namespace matmul_tiling; using namespace matmul; using namespace AscendC; 不能同时使用，否则会编译工程报错。为此代码需要调整为显示的调用命名空间中类和结构，如：TPosition修改为matmul_tiling::TPosition；
 8. CMakeLists文件重写：
    请参考库上代码，COMPILE_FLAGS “–npu-arch=dav-2201 -xasc -ltiling_api -lplatform -lregister” 是为了MIX融合算子编译通过，如果Vector算子可参考ops-math仓的编译工程；
 9. 重写的torch_interface.cpp，如下所示
@@ -219,7 +219,7 @@ Matmul<aType, bType, cType, biasType> matmulObj;
 "m.def("rope_matrix(Tensor x, Tensor y, Tensor sin, Tensor cos) ->Tensor");"
 ```
 
-(2) torch_interface.cpp中新增TORCH_LIBRARY_IMPL注册函数， 函数类型必须和上面一一对应，如果有多个TORCH_LIBRARY_IMPL注册，注意每个函数都需要满足该条件，且函数间如果有’&’ 引用符号需要同时保持有无
+(2) torch_interface.cpp中新增TORCH_LIBRARY_IMPL注册函数，函数类型必须和上面一一对应，如果有多个TORCH_LIBRARY_IMPL注册，注意每个函数都需要满足该条件，且函数间如果有’&’ 引用符号需要同时保持有无
 
 ```
 // Register Ascend implementations for RopeMatrix

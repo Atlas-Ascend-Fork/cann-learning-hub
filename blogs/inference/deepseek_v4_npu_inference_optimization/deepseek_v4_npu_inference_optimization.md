@@ -2,7 +2,7 @@
 
 DeepSeek团队发布了最新的模型DeepSeek-V4系列模型，包含DeepSeek-V4 Flash和DeepSeek-V4 Pro两种规格。通过Compressed Sparse Attention (CSA)和 Heavily Compressed Attention (HCA)，在不同层间交织使用KV Cache滑窗、压缩和稀疏算法，减少Attention的计算和访存开销，大幅提升长序列的计算效率，降低推理的成本。本实践0 Day支持了DeepSeek-V4的模型推理部署，并适配支持`Atlas A3`和`950PR/DT`多代际昇腾芯片，提供长达1M序列的高性能推理能力。
 
-针对新模型结构特点，实践打造了低时延、高吞吐的部署方案，创新设计高性能NPU融合Kernel和多流并行方案，大幅提升推理性能。在量化支持上，本实践在`Atlas A3`芯片适配了W8A8C16（Int8）量化方案，在`950PR/DT`芯片上支持了原生Hybrid FP8-MXFP4混合量化模式，以及硬件亲和的Hybrid MXFP8-MXFP4模式，充分发挥不同硬件的算力优势。本实践同步开源了TileLang和PyPTO实现，为高效算子开发提供可直接参考的样例，仅需几百行代码即可完成复杂融合kernel的开发工作。 针对DeepSeek-V4模型的新结构，本次开源提供了一系列高性能融合算子，主要包括：
+针对新模型结构特点，实践打造了低时延、高吞吐的部署方案，创新设计高性能NPU融合Kernel和多流并行方案，大幅提升推理性能。在量化支持上，本实践在`Atlas A3`芯片适配了W8A8C16（Int8）量化方案，在`950PR/DT`芯片上支持了原生Hybrid FP8-MXFP4混合量化模式，以及硬件亲和的Hybrid MXFP8-MXFP4模式，充分发挥不同硬件的算力优势。本实践同步开源了TileLang和PyPTO实现，为高效算子开发提供可直接参考的样例，仅需几百行代码即可完成复杂融合kernel的开发工作。针对DeepSeek-V4模型的新结构，本次开源提供了一系列高性能融合算子，主要包括：
 
 - 针对多Layer交织的Window/Sparse/Compress Attention，提供了SparseAttnSharedKV (SAS)统一接口支持多种Attention计算。
 
@@ -284,7 +284,7 @@ MLAProlog KV Cache的量化策略使用了动态存8算16。在超长序列情�
 
 #### AICPU Scheduler算子多流并行
 
-Attention及LI这类算子在计算时依赖实际上下文长度，本次实践中提供了对应的AICPU Scheduler算子，可以在算子执行前计算出分核策略，减少算子执行负担，提升性能。 以SparseAttnSharedkv为例，提供如下接口：
+Attention及LI这类算子在计算时依赖实际上下文长度，本次实践中提供了对应的AICPU Scheduler算子，可以在算子执行前计算出分核策略，减少算子执行负担，提升性能。以SparseAttnSharedkv为例，提供如下接口：
 
 - npu_sparse_attn_sharedkv_metadata：根据`cu_seqlens_q`、`seqused_kv`、`cmp_ratio`等算子入参得到包含关键负载均衡信息的Tiling；
 
