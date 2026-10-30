@@ -11,7 +11,7 @@
 | **学时安排** | **64 学时**（理论 28 + 实践 36）：第一部分 20 学时（第 1~5 周）＋ 第二部分 36 学时（第 6~14 周）＋ 第三部分 8 学时（第 15~16 周）；第一、二部分每讲 2h 理论 + 2h 实践，第三部分为纯项目实践 |
 | **授课对象** | 计算机/人工智能相关专业本科高年级、研究生 |
 | **先修要求** | Python/C/C++ 基础；线性代数基础；了解深度学习基本概念 |
-| **配套讲义** | 第一部分 7 个 PPT；第二部分双路线（A2/A3 9 个、Ascend 950 12 个）；第三部分结业大作业 1 份 |
+| **配套讲义** | 第一部分 7 个 PPT；第二部分双路线（A2/A3 10 个、Ascend 950 12 个）；第三部分结业大作业 1 份 |
 | **实践平台** | cann-learning-hub（教程型跟练 Notebook）＋ CANNJudge（判题型自动评测） |
 | **结业标准** | 通过各讲 CANNJudge 判题（至少通过基础判题）；提交结业大作业（作业 1 算子开发 ＋ 作业 2 模型集成替换与实训报告）并通过答辩；作业 3 开源贡献为加分项 |
 | **双架构路线** | 路线 A（Atlas A2/A3）与路线 B（Ascend 950）二选一或并行开课，每讲学时与内容对应 |
@@ -189,7 +189,7 @@
 | 第 6 讲 | Ascend C 算子快速入门 | SIMD Hello World & Add 算子快速入门 | A：`01_simd_cpp_api/00_introduction`；B：`02_simd_c_api/00_introduction` | 待补充 |
 | 第 7 讲 | Ascend C 矢量算子编程 | Add 算子、Softmax 算子判题 | A：`01_simd_cpp_api/00_introduction`；B：`01_simd_cpp_api/07_tensor_api/experimental/reg_vector_compute` | 待补充 |
 | 第 8 讲 | Ascend C 矩阵算子编程 | Matmul 算子判题 | A：`01_simd_cpp_api/00_introduction`；B：`01_simd_cpp_api/07_tensor_api` | 待补充 |
-| 第 9 讲 | Ascend C 融合算子编程 | Matmul+LeakyRelu 算子判题 | A：`01_simd_cpp_api/00_introduction/03_fusion_operation/matmul_leakyrelu_basic_api`；B：`01_simd_cpp_api/07_tensor_api`、`03_simt_api` | 待补充 |
+| 第 9 讲 | Ascend C 融合算子编程 | Matmul+LeakyRelu 算子判题 | A：`01_simd_cpp_api/00_introduction/03_fusion_operation/matmul_leakyrelu_basic_api`；B：`01_simd_cpp_api/07_tensor_api`、`03_simt_api` | [MatmulLeakyRelu](https://cannjudge.cn/public/vector/matmulleakyrelu) |
 | 第 10 讲 | 调试工具链操作题（Profile/仿真） | Profile 使用方法、仿真性能统计方法、SIMD 算子最佳实践 | A/B：`01_simd_cpp_api/01_utilities/04_profiling`、`01_simd_cpp_api/01_utilities/08_simulator`、`01_simd_cpp_api/05_best_practices` | 待补充 |
 | 第 11 讲 | Ascend C算子调用 | PyTorch 单算子调用实践 | A：`01_simd_cpp_api/02_features/00_framework/00_pytorch`；B：待补充 | 待补充 |
 | 第 12 讲 | AclGraph/GE 入图流程题 | Ascend C 算子入图实践 | A/B：`01_simd_cpp_api/02_features/00_framework/00_pytorch`、`04_aclgraph`、`03_ge` | 待补充 |
