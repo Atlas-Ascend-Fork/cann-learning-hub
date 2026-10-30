@@ -81,6 +81,7 @@ bash scripts/run_profiling.sh 512 --output prof
 ├── 08.01_chapter_intro.ipynb   # 章节介绍
 ├── 08.02_attention_operator_lab.ipynb  # 动手实验
 ├── 08.03_chapter_test.ipynb    # 章节实践与测试
+├── 910b_guide.md               # 910B 平台运行指南
 ├── answer/                     # 参考答案
 ├── images/                     # 示意图（数据流 / 工程流程 / O(S²) 曲线）
 └── src/attention_op/           # 算子工程源码
@@ -89,3 +90,5 @@ bash scripts/run_profiling.sh 512 --output prof
     ├── scripts/                # 构建 / 打包 / 部署 / 性能采集脚本
     └── data/                   # 测试数据与 torch 参考输出
 ```
+
+> CANNLab / 910B 平台运行指引见 [910b_guide.md](./910b_guide.md)。
