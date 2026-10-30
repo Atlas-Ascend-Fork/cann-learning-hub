@@ -5,6 +5,7 @@
 - 学习指导书、教程
 - 示例代码与配套说明
 - 专题讲解（如算子开发、性能调优等）
+- 参考实践案例（端到端工程案例，见 [reference_practice/](./reference_practice/)）
 
 ## 投稿说明
 
@@ -22,9 +23,9 @@
 
 ```
 contrib/
-├── tutorials/          # 教程类
-├── examples/           # 示例代码
-└── guides/             # 专题指导
+├── tutorials/           # 教程类
+├── reference_practice/  # 参考实践案例
+└── blogs/               # 博客
 ```
 
 具体结构可随投稿内容灵活调整。
