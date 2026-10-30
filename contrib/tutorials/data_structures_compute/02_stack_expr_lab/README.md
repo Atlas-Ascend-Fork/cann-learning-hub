@@ -104,7 +104,10 @@ msopgen gen -i ops.json -c ai_core-ascend910_93 -op InfixToPostfixLite -m 1
 ├── 02.01_chapter_intro.ipynb   # 章节介绍
 ├── 02.02_stack_expr_lab.ipynb  # 动手实验
 ├── 02.03_chapter_test.ipynb    # 课后测试
+├── 910b_guide.md               # 910B 平台运行指南
 ├── answer/                     # 参考答案
 ├── images/                     # 示意图
 └── src/stack_expr_lab/         # 算子源码
 ```
+
+> CANNLab / 910B 平台运行指引见 [910b_guide.md](./910b_guide.md)。
