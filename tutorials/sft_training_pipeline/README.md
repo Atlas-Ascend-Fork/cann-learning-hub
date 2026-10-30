@@ -134,7 +134,7 @@
 ## 参考链接
 
 - Prime-RL、verifiers 和 torchtitan-npu 的版本应与当前 CANNLab 镜像及教程配套说明保持兼容；本 README 不固定具体 commit。
-- [Prime-RL Wordle 示例](https://github.com/PrimeIntellect-ai/prime-rl/tree/main/examples/wordle)
+- [Prime-RL Wordle 示例](https://github.com/PrimeIntellect-ai/prime-rl/tree/main/examples/basic/wordle)
 - [torchtitan-npu 仓库](https://gitcode.com/cann/torchtitan-npu)
 - [torchtitan-npu 安装指南](https://gitcode.com/cann/torchtitan-npu/blob/master/docs/user-guides/installation.md)
 - [SFT Recipe 附录](https://gitcode.com/cann/torchtitan-npu/blob/master/docs/recipe/sft.md)
