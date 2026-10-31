@@ -16,6 +16,7 @@
 | 🧠 **大模型开发者** | [大模型训练](#mainline-training) · [大模型推理](#mainline-inference) · [SwanLab 微调案例](#swanlab) |
 | ⚙️ **算子开发工程师** | [算子开发](#mainline-operator) — Ascend C 编程与自定义算子实战 |
 | 📱 **应用开发工程师** | [应用开发（离线推理）](#mainline-appdev) — ATC 编译、ACL 推理与性能调优 |
+| 🧩 **AI 应用开发者** | [AI 应用开发实践](#mainline-ai-appdev) — RAG 知识库问答端到端实践 |
 | 📊 **推荐算法工程师** | [推荐系统](#mainline-recsys) — CTR 排序 + 召回全链路 |
 | 🏫 **高校老师** | [高校教学方案专区](#university)  |
 | 🏆 **竞赛选手** | [赛事备考专区](#competition) — CANNJudge 题库、大赛报名、备赛路径 |
@@ -409,6 +410,12 @@
 <tr>
 <td><b>📱 应用开发</b></td>
 <td colspan="3" align="center"><a href="./reference_practice/yolov13_offline_inference">YOLOv13 离线推理</a></td>
+</tr>
+<tr>
+<td><a id="mainline-ai-appdev"></a><b>🧩 AI 应用开发</b></td>
+<td><a href="./reference_practice/ai_application_development">AI 应用开发实践</a> · <a href="./reference_practice/ai_application_development/rag_knowledge_base.ipynb">RAG 知识库问答</a><br/><sub>文档处理、向量检索、本地模型服务、来源引用与问答验证</sub></td>
+<td>—</td>
+<td>—</td>
 </tr>
 <tr>
 <td><b>🤖 CANNBot</b></td>
@@ -817,6 +824,8 @@
 │   ├── 03_new_courses            # 新增课程
 │   └── 04_new_books              # 教材区
 ├── reference_practice            # 参考实践
+│   └── ai_application_development # AI 应用开发实践
+│       └── rag_knowledge_base.ipynb # RAG 知识库问答
 ├── blogs                         # 技术博客（算子 23 / 推理 23 / 训练 3）
 ├── contrib                       # 社区贡献
 │   ├── tutorials                 # 外部教程（15+）
