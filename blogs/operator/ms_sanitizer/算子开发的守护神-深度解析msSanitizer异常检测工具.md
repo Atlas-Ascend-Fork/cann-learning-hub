@@ -334,6 +334,6 @@ msSanitizer虽然只是一个工具，但正是这样的工具，让我们的算
 
 **参考资料：**
 - CANN社区版 9.0.0-beta.2 开发文档 - 异常检测（msSanitizer）
-- 本文代码案例参考：https://gitcode.com/cann/asc-devkit/blob/master/examples/01_simd_cpp_api/01_utilities/05_sanitizer/msSanitizer
+- 本文代码案例参考：https://gitcode.com/cann/asc-devkit/blob/master/examples/01_simd_cpp_api/01_utilities/05_sanitizer/ms_sanitizer
 
 （本文基于CANN asc-devkit样例整理，支持Atlas A3/A2训练和推理系列产品）
