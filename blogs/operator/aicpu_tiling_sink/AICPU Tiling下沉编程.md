@@ -280,7 +280,7 @@
 
 ##### 三. 性能调优
 
-- 该方案中由于把Tiling计算移动到了AICPU上，因此Tilingkey无法在Host上获取，只能将原本的Tilingkey分发逻辑移动到AICORE Kernel中进行判断；在实际开发dequant_swiglu_quant算子时，初步性能测试时发现这一改动导致了额外的icache miss，算子整体性能下降5%。
+- 该方案中由于把Tiling计算移动到了AICPU上，因此TilingKey无法在Host上获取，只能将原本的TilingKey分发逻辑移动到AICORE Kernel中进行判断；在实际开发dequant_swiglu_quant算子时，初步性能测试时发现这一改动导致了额外的icache miss，算子整体性能下降5%。
 
 ```cpp
 __global__ __aicore__ __attribute__((aiv)) void dequant_swiglu_quant(GM_ADDR x, GM_ADDR weight_scale, GM_ADDR activation_scale, GM_ADDR bias, GM_ADDR quant_scale, GM_ADDR quant_offset, GM_ADDR y, GM_ADDR scale, GM_ADDR tiling_data) {
@@ -307,7 +307,7 @@ __global__ __aicore__ __attribute__((aiv)) void dequant_swiglu_quant(GM_ADDR x, 
   }
 ```
 
-- 针对这一现象，可以使用Ascend C提供的ICachePreLoad接口将代码段预加载到ICache中，使得该算子整体性能相较于原本提升了15%。
+- 针对这一现象，可以使用Ascend C提供的ICachePreLoad接口将代码段预加载到ICache中，使得该算子在受 Host-Bound 影响显著的大 case 场景下整体性能相较于原本提升约15%（各数据类型具体提速见下方对比表）。需说明：该结论以大 case 为主的实际业务场景为口径，小 case 因固定开销占比更高，Tiling 下沉收益有限，部分数据类型甚至会略慢（见下表说明）。
 
  ```cpp
  template <int BufferNum>
@@ -321,6 +321,8 @@ __global__ __aicore__ __attribute__((aiv)) void dequant_swiglu_quant(GM_ADDR x, 
   op.process();
  }
  ```
+
+  > 说明：本文「大case」指受 Host-Bound 影响显著的大 shape 场景，「小case」指 shape 较小的场景。小 case 因固定开销（如核间同步、分发判断）占比更高，Tiling 下沉带来的计算收益有限，FP16/BF16 甚至会因 AICORE 侧额外的分支判断而略微变慢；而大 case 中计算占比高，ICachePreLoad 的收益得以充分体现。
 
   - AICPU Tiling+ICachePreLoad耗时：
 
@@ -337,6 +339,8 @@ __global__ __aicore__ __attribute__((aiv)) void dequant_swiglu_quant(GM_ADDR x, 
 | FP16     | 69.08      | 9.46       |
 | BF16     | 69.48      | 8.56       |
 | INT32    | 105        | 12.96      |
+
+  > 性能小结：大 case 下 FP16 提速约 12%、BF16 约 10%、INT32 约 19%，三项平均约 14%，与「整体提升约 15%」吻合；小 case 下 INT32 仍提速约 12%，但 FP16（9.6 vs 9.46）、BF16（9.2 vs 8.56）因固定开销占比高而略慢，属预期内现象，不影响大 case 主导业务场景的整体收益。
 
 
 
