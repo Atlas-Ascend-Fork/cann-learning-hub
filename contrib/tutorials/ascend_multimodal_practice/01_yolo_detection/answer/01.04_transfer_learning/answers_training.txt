@@ -19,3 +19,13 @@ patience=10 是早停（Early Stopping）机制的耐心值：
   2. 节省时间和算力——不必傻等满 50 个 epoch，可能 20-30 epoch 就已收敛；
   3. 自动选择最优时机停止，避免人工判断。
 如果设 patience=0 则关闭早停，必须跑满 epochs 轮。实际应用建议设 10-20。
+
+练习 4 答案：B
+解析：ultralytics 内部的 check_amp() 等函数硬编码调用 torch.cuda API 检查/操作
+显卡，而 NPU 版 PyTorch（torch_npu）不含 CUDA 模块，一执行就抛
+"Torch not compiled with CUDA enabled" 崩溃。NPU 环境（is_npu=True）时传
+amp=False 关闭混合精度，可完全跳过 check_amp 路径；配合训练代码开头的
+monkey-patch 补丁（替换 _get_memory / _clear_memory，见"开始前：NPU 兼容补丁"
+一节），训练即可在 NPU 上稳定运行。NPU 上 AMP 支持本就不完善，关闭反而更稳；
+GPU 环境（is_npu=False）仍正常开启 AMP。A 错（NPU 有自己的混合精度实现，只是
+ultralytics 没适配）；C 错（与显存无关）；D 错（AMP 在支持的设备上能加速训练）。
