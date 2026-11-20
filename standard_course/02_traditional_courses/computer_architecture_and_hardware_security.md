@@ -195,8 +195,8 @@
 | 1—2 | NPU 架构认知与"CPU 困境"实测 | 课堂交互式走读：为什么需要 NPU / CPU vs NPU 算力差距 / NPU vs GPU 架构对比；课后实测 CPU vs NPU 矩阵乘性能对比，用数据印证课时结论 | 课堂：[quick_start/cann_basics](../../quick_start/cann_basics/) `02_what_is_npu`；课后：`04_npu_practice` 第 1—2 题 |
 | 3—4 | AI Core 内部结构观测 | 走读 NPU 内部结构与 AI Core 三要素（计算 / 存储 / 控制单元）及多核并行小节，对照课时讲解标注多级存储层次；查看 NPU 实时状态 | [quick_start/cann_basics](../../quick_start/cann_basics/) `02_what_is_npu` 第 5—7 节 |
 | 5 | 首次算子 API 调用（**＝课程实验 1 上机环节**） | 按单算子 API 全流程调用算子：ACL 初始化 → 申请内存 → 传输数据 → 构造 Tensor → 执行 → 同步等待 → 释放资源，记录 Host—Device 数据流；实验 1 提交运行记录与接口图 | [quick_start/first_operator_api_call](../../quick_start/first_operator_api_call/) |
-| 6—7 | 首个 Ascend C 自定义算子 | Add 类矢量算子全流程跟练：tiling 结构体 → 核函数类 → CopyIn/Compute/CopyOut → 编译运行与结果比对；进阶变体：静态 Tensor 矢量算子、SIMT 与混合编程一瞥 | 跟练：[quick_start/first_custom_operator](../../quick_start/first_custom_operator/)；进阶：[tutorials/ascendc_operator_development_light/02_AscendC_basic](../../tutorials/ascendc_operator_development_light/02_AscendC_basic/)（Add 核函数 / 矢量算子 / 练习） |
-| 8 | 算子调试调优初体验 | 精度比对与算子调试流程；性能剖析：采集 → 单元利用率 / 流水图 → 定位一处可优化点并说明依据 | [tutorials/ascendc_operator_development_light/04_debug](../../tutorials/ascendc_operator_development_light/04_debug/)；进阶：[tutorials/ascendc_operator_development/08_performance_optimization](../../tutorials/ascendc_operator_development/08_performance_optimization/) |
+| 6—7 | 首个 Ascend C 自定义算子 | Add 类矢量算子全流程跟练：tiling 结构体 → 核函数类 → CopyIn/Compute/CopyOut → 编译运行与结果比对；进阶变体：静态 Tensor 矢量算子、SIMT 与混合编程一瞥 | 跟练：[quick_start/first_custom_operator](../../quick_start/first_custom_operator/)；进阶：[tutorials/ascendc_operator_development_light/02_simd_basics_and_vector_operator](../../tutorials/ascendc_operator_development_light/02_simd_basics_and_vector_operator/)（Add 核函数 / 矢量算子 / 练习） |
+| 8 | 算子调试调优初体验 | 精度比对与算子调试流程；性能剖析：采集 → 单元利用率 / 流水图 → 定位一处可优化点并说明依据 | [tutorials/ascendc_operator_development_light/05_debug_and_profile](../../tutorials/ascendc_operator_development_light/05_debug_and_profile/)；进阶：[tutorials/ascendc_operator_development/08_performance_optimization](../../tutorials/ascendc_operator_development/08_performance_optimization/) |
 
 ### 5.3 实验要点与约束
 

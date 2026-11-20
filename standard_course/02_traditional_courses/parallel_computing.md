@@ -118,7 +118,7 @@
 | 课时 | 实践主题 | 实践内容 | 实践路径（cann-learning-hub） |
 |------|---------|---------|------------------------------|
 | 1 | CPU 与 NPU 异构计算 · NPU 架构认知 | 课堂交互式走读：为什么需要 NPU / CPU vs NPU 算力差距 / AI Core 三要素与多级存储层次；课后实测 CPU vs NPU 矩阵乘性能对比，与实验 1 的 OpenMP 加速比曲线并读 | 课堂：[quick_start/cann_basics](../../quick_start/cann_basics/) `02_what_is_npu`；课后：`04_npu_practice` 第 1—2 题 |
-| 2 | 首个 Ascend C 自定义算子 | Add 类矢量算子全流程跟练：tiling 结构体 → 核函数类 → CopyIn/Compute/CopyOut → 编译运行与结果比对；进阶：静态 Tensor 矢量算子、SIMT 一瞥 | 跟练：[quick_start/first_custom_operator](../../quick_start/first_custom_operator/)；进阶：[tutorials/ascendc_operator_development_light/02_AscendC_basic](../../tutorials/ascendc_operator_development_light/02_AscendC_basic/) |
+| 2 | 首个 Ascend C 自定义算子 | Add 类矢量算子全流程跟练：tiling 结构体 → 核函数类 → CopyIn/Compute/CopyOut → 编译运行与结果比对；进阶：静态 Tensor 矢量算子、SIMT 一瞥 | 跟练：[quick_start/first_custom_operator](../../quick_start/first_custom_operator/)；进阶：[tutorials/ascendc_operator_development_light/02_simd_basics_and_vector_operator](../../tutorials/ascendc_operator_development_light/02_simd_basics_and_vector_operator/) |
 
 ### 5.3 实验要点与约束
 
