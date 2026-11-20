@@ -14,7 +14,7 @@
 | **学时安排** | **48 学时**（16 周 × 3 学时）：第一部分 24 学时（第 1~8 周，嵌入式/实时系统传统主体）＋ 第二部分 **18 学时**（第 9~14 周，6 次 × 3 课时 Ascend C 主讲，**方案一/方案二二选一**，见 4.2）＋ 第三部分 6 学时（第 15~16 周，大作业与答辩） |
 | **授课对象** | 计算机/软件/自动化/微电子相关专业本科高年级 |
 | **先修要求** | C 语言、操作系统基础（进程/调度/中断）、计算机组成原理 |
-| **配套讲义** | 第一部分沿用现有实时系统讲义；第二部分复用《AI 计算与神经网络计算架构实践》Part2 讲义（方案一：a2a3 系列 7 个 ＋ 950 系列 3 个；方案二：950 系列 7 个，见第四章链接） |
+| **配套讲义** | 第一部分沿用现有实时系统讲义；第二部分复用《AI 计算与神经网络计算架构实践》Part2 讲义（方案一：a2a3 系列 7 个 ＋ 950 系列 1 个；方案二：950 系列 7 个，见第四章链接） |
 | **实践平台** | cann-learning-hub（跟练 Notebook）＋ CANNJudge（判题型自动评测）＋ 按方案选择硬件环境（方案一 Atlas A2/A3；方案二 Ascend 950） |
 | **结业标准** | 完成第二部分算子判题作业（Add/Softmax 级）＋ 结业大作业：`Sigmoid` 判题 ＋ **算子时延确定性分析报告**（本课特色，见 6.2；学有余力递进至 `add_rms_norm` 开发与 Qwen3-1.7B 模型接入） |
 
@@ -92,7 +92,7 @@
 | 11 | 3 | Ascend C SIMD 矩阵编程 + 融合算子编程 | Cube 单元、矩阵分块 Tiling、数据布局；GEMM 完整流程；算子融合思想与 AIC/AIV 分离式编程 | 2h 理论 + 1h 实践 | [04 矩阵](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/04_a2a3_ascend_c_simd_matrix_operator_programming.pptx)、[05 融合](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/05_a2a3_ascend_c_simd_fused_operator_programming.pptx) |
 | 12 | 4 | Ascend C 算子调试调优与最佳实践 | 常见功能调试方法与问题定位思路；性能采集与分析工具；算子性能调优方法论与常见问题优化 | 2h 理论 + 1h 实践 | [06 调试调优](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/06_a2a3_ascend_c_operator_debugging_tuning_and_best_practices.pptx) |
 | 13 | 5 | Ascend C PyTorch 单算子调用与实践 + 基于 CANN Bot 的 Ascend C 算子开发与实践 | PyTorch 单算子调用原理、算子注册与绑定、调用验证；CANN Bot 核心能力与 Agent 辅助开发范式 | 2h 理论 + 1h 实践 | [07 PyTorch 单算子](../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/07_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx)、[CANN Bot](../01_bootcamp/two_days_course/05_cannbot_highlights_open_source_community_edition_0.5h.pptx)（暂借用启航营讲义） |
-| 14 | 6 | Ascend C 950 新增特性介绍：SIMD Reg 矢量编程、SIMT 编程、SIMD 与 SIMT 高级编程 | 950 SIMD/SIMT 双执行模型；Reg 矢量编程（寄存器级计算）；SIMT 执行模型与线程级编程；SIMD/SIMT 混合编程方法与高级特性 | 3h 理论 | [02_2 Reg 矢量](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_02_ascend_c_simd_programming_2_reg_vector_operator.pptx)、[03 SIMT 编程](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_03_ascend_c_simt_programming.pptx)、[07 SIMD&SIMT 高级编程](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950/Ascend950_07_ascend_c_simd_simt_advanced_programming.pptx) |
+| 14 | 6 | 基于 Ascend 950 的 Ascend C 算子编程概述 | 950 架构总览与代际跃迁（新同构 / Reg 矢量 / 低比特 / NDDMA）；编程模型演进（SIMD 为主、SIMT 为辅与多级 API）；SIMD / SIMT / 混合编程三套模型概述 | 3h 理论 | [950 算子编程概述](../00_atomic_courses/04_ops_programming/01_ascendc/ascend950_ascend_c_operator_programming_overview.pptx) |
 
 #### 方案二：Ascend 950 主线（可选）
 

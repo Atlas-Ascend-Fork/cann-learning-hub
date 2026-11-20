@@ -17,7 +17,7 @@
 | **计算机网络**（华东师范大学） | M2 单元植入 | "AI 集群通信"专题 2 学时 + 分布式大模型通信分析大作业 | [computer_network.md](./computer_network.md) |
 | **AI 芯片技术**（华东师范大学） | M2 主讲 + 实验融入 | 达芬奇架构实例解剖 3 学时 + CANN-Lab 双模实验（真板跑分/仿真解剖） | [ai_chip_technology.md](./ai_chip_technology.md) |
 | **人工智能通识课程**（课程十三） | ● 整课植入 | "从图灵到 CANN"4 学时通识讲座（75 页课件已就绪：AI 来龙去脉 → 大模型计算本质 → 昇腾 NPU/CANN 底座）+ quick_start 体验实践 | [ai_general_education.md](./ai_general_education.md) |
-| **CANN 基础介绍**（课程九；高校公选 / 新生研讨 / 企业入门培训，16 学时） | ● 整课复用 | 独立 CANN 入门课（非学科融入课）：4 次上课 × 4 课时，理论讲义、实践作业与 CANNJudge 判题**全部复用启航营两天营成熟素材**（生态架构 → 训推 → 矢量算子 → PyTorch/CANNBot），教师零改造开课；亦为 [AI 通识三讲](../03_new_courses/ai_general_education.md)（03_new_courses）的进阶出口 | [cann_basics_introduction.md](./cann_basics_introduction.md) |
+| **CANN 基础介绍**（课程九；高校公选 / 新生研讨 / 企业入门培训，16 学时） | ● 整课复用 | 独立 CANN 入门课（非学科融入课）：4 次上课 × 4 课时，理论讲义、实践作业与 CANNJudge 判题**全部复用启航营两天营成熟素材**（生态架构 → 训推 → 矢量算子 → PyTorch/CANNBot），教师零改造开课；亦为 [AI 通识三讲](../03-cann-signature-courses/ai_general_education.md)（03-cann-signature-courses）的进阶出口 | [cann_basics_introduction.md](./cann_basics_introduction.md) |
 | **AI背后的中国芯——国产AI芯片与智能计算**（校企共建通识课，16 学时） | ● 整课共建（换芯不换课） | 四模块课序（AI 浪潮 → 算力底座 → 行业与格局 → 挑战未来）；第 5 次**"一键部署大模型"**高光实践（GitCode Notebook / ModelArts，零代码）；考核：参与 20 + 实践 30 + 产业短文 20 + 方案展示 30 | [chinas_chips_behind_ai.md](./chinas_chips_behind_ai.md) |
 | 其余学科方向（DL 系统 / 图像处理 / 编译 / OS / 嵌入式 / 数值 / 计算科学 / 数据科学 / HPC 等） | M2–M4 | 方向性规划（见第七章全学科覆盖总表） | 待立项后逐课建文 |
 

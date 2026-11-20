@@ -151,7 +151,7 @@
 
 | 相关课程/资源 | 关系 | 说明 |
 |--------------|------|------|
-| [三个问题，看懂 AI——人工智能通识三讲](../03_new_courses/ai_general_education.md)（03_new_courses） | **同一定位的两个深度档位** | 三讲版 = 3 × 45 分钟问题驱动**精简版**（cann_basics 精简课件，零公式零代码，最轻量入口）；本课程 = 4 学时 **75 页完整版**（含 Prefill/Decode、量化、FlashAttention、SPMD、AI Core、超节点等技术细节）。学时紧或纯文科受众选三讲版；希望学生建立完整"算法-算力"图景选本版。两版可串行使用（三讲版打底 → 本版深化） |
+| [三个问题，看懂 AI——人工智能通识三讲](../03-cann-signature-courses/ai_general_education.md)（03-cann-signature-courses） | **同一定位的两个深度档位** | 三讲版 = 3 × 45 分钟问题驱动**精简版**（cann_basics 精简课件，零公式零代码，最轻量入口）；本课程 = 4 学时 **75 页完整版**（含 Prefill/Decode、量化、FlashAttention、SPMD、AI Core、超节点等技术细节）。学时紧或纯文科受众选三讲版；希望学生建立完整"算法-算力"图景选本版。两版可串行使用（三讲版打底 → 本版深化） |
 | `quick_start/` | **出口实践** | 本课程结业即完成 cann_basics；顺流而下可继续 first_llm_inference / first_custom_operator |
 | [启航营 Bootcamp](../01_bootcamp/README.md)（01_bootcamp） | **进阶衔接** | 学有余力者的下一步：两天/两周/四周营，进入 Ascend C 算子开发实战 |
 | 体系结构课三幕剧（本目录 [README.md](./README.md) 第二章） | **专业课深水区** | 本课程页 50~54（CPU 困境/异构计算）是其零基础预告片；计算机专业学生可继续选修体系结构课三幕剧 |

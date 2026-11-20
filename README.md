@@ -482,7 +482,7 @@
 | **00 原子课程** | **基础积木**：技术栈四层 × 难度三级的原子粒度课程 | 体系基础 | 135 门 | [原子课程总纲](./standard_course/00_atomic_courses/README.md) |
 | **01 启航营** | 短期集训：两天/两周两营递进，快速入门与实战 | 原子课程**节选** | 两天营 ≈14h / 两周营 ≈60h | [启航营课程总览](./standard_course/01_bootcamp/README.md) |
 | **02 传统学科课程** | 学科融入：CANN 知识融入大学传统学分课程，换芯不换课 | 原子课程**教学化** | 计组 + 体系结构 + 12 学科 | [传统学科课程目录](./standard_course/02_traditional_courses/README.md) |
-| **03 新增课程** | 高校学分课：六门系统课程 | 原子课程**拼装** | 已排课 2 + 规划 4 | [CANN 新增课程汇总](./standard_course/03_new_courses/README.md) |
+| **03 新增课程** | 高校学分课：六门系统课程 | 原子课程**拼装** | 已排课 2 + 规划 4 | [CANN 新增课程汇总](./standard_course/03-cann-signature-courses/README.md) |
 | **04 教材区** | 经典书籍：双教材支撑课程体系 | 原子课程**系统化** | 教材一 + 教材二 | [CANN 教材区概览](./standard_course/04_new_books/README.md) |
 
 <details>
@@ -540,12 +540,12 @@
 
 | # | 课程 | 学时 | 状态 | 课程大纲 |
 | :---: | :--- | :--- | :---: | :--- |
-| 一 | AI 计算与神经网络计算架构实践 | 64（16 周） | ✅ 已排课 | [课程大纲](./standard_course/03_new_courses/ai_computing_and_neural_network_architecture_practice/syllabus.md) |
-| 二 | 昇腾 AI 与复杂系统数据智能 | ≈32（16 周） | ✅ 已排课 | [课程大纲](./standard_course/03_new_courses/ascend_ai_and_complex_system_data_intelligence/syllabus.md) |
-| 三 | 加速计算 | 32–48 | 🆕 规划 | [课程大纲](./standard_course/03_new_courses/accelerated_computing.md) |
-| 四 | 数据科学 | 24–32 | 🆕 规划 | [课程大纲](./standard_course/03_new_courses/data_science.md) |
-| 五 | 深度学习 | 32–48 | 🆕 规划 | [课程大纲](./standard_course/03_new_courses/deep_learning.md) |
-| 六 | 生成式 AI | 32 | 🆕 规划 | [课程大纲](./standard_course/03_new_courses/generative_ai.md) |
+| 一 | AI 计算与神经网络计算架构实践 | 64（16 周） | ✅ 已排课 | [课程大纲](./standard_course/03-cann-signature-courses/ai_computing_and_neural_network_architecture_practice/syllabus.md) |
+| 二 | 昇腾 AI 与复杂系统数据智能 | ≈32（16 周） | ✅ 已排课 | [课程大纲](./standard_course/03-cann-signature-courses/ascend_ai_and_complex_system_data_intelligence/syllabus.md) |
+| 三 | 加速计算 | 32–48 | 🆕 规划 | [课程大纲](./standard_course/03-cann-signature-courses/accelerated_computing.md) |
+| 四 | 数据科学 | 24–32 | 🆕 规划 | [课程大纲](./standard_course/03-cann-signature-courses/data_science.md) |
+| 五 | 深度学习 | 32–48 | 🆕 规划 | [课程大纲](./standard_course/03-cann-signature-courses/deep_learning.md) |
+| 六 | 生成式 AI | 32 | 🆕 规划 | [课程大纲](./standard_course/03-cann-signature-courses/generative_ai.md) |
 
 </details>
 
@@ -821,7 +821,7 @@
 │   ├── 00_atomic_courses         # 原子课程总纲（135 门）
 │   ├── 01_bootcamp               # 启航营
 │   ├── 02_traditional_courses    # 传统学科课程
-│   ├── 03_new_courses            # 新增课程
+│   ├── 03-cann-signature-courses            # 新增课程
 │   └── 04_new_books              # 教材区
 ├── reference_practice            # 参考实践
 │   └── ai_application_development # AI 应用开发实践

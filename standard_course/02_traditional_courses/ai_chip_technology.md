@@ -2,7 +2,7 @@
 
 > 本文件为「AI 芯片技术」（传统课程清单·课程十二，华东师范大学）**单课程落地文件**；总规划见本目录 [README.md](./README.md)。
 > 课程定位：**神经网络与 AI 芯片设计传统课 + 昇腾商用案例植入**——第一部分 AI 芯片设计理论主体不动（每章以昇腾作 ◐ 对照案例），第二部分 3 课时 ● 主讲「现代 AI 芯片架构：昇腾达芬奇实例解剖」，课后以 **CANN-Lab 双模实验**（真板跑分 + 仿真解剖）把课堂上的每个架构概念落到实测流水上。
-> 开课成本：第二部分讲义**已就绪**——[《算力之源：AI 负载、昇腾架构与 Ascend C 编程》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming.pptx)（107 页，含昇腾架构与 Ascend C 编程完整篇章，页码映射见 4.2）；实验代码复用 asc-devkit 仓现成 Matmul 高性能样例，学生零起点开箱。
+> 开课成本：第二部分讲义**已就绪**——[《算力之源：AI 负载、昇腾架构与 Ascend C 编程》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming_V1.0.pptx)（107 页，含昇腾架构与 Ascend C 编程完整篇章，页码映射见 4.2）；实验代码复用 asc-devkit 仓现成 Matmul 高性能样例，学生零起点开箱。
 
 ---
 
@@ -15,7 +15,7 @@
 | **学时安排** | **48 学时**（16 周 × 3 学时）：第一部分 39 学时（第 1~13 周，神经网络与 AI 芯片设计传统主体）＋ 第二部分 3 学时（第 14 周，昇腾架构主讲 ●）＋ 第三部分 6 学时（第 15~16 周，CANN-Lab 实验指导、报告与总结）＋ 课后实验 4~6 学时（课外上机，计入大作业） |
 | **授课对象** | 大三集成电路学院学生为主；**熟悉 C 语言，不太了解 C++/Python**（实验按此学情适配，见第五章「学情适配」） |
 | **先修要求** | 数字电路、计算机组成原理、C 语言；了解基本线性代数（矩阵乘法） |
-| **配套讲义** | 第一部分沿用现有 AI 芯片设计讲义；第二部分使用 [《算力之源：AI 负载、昇腾架构与 Ascend C 编程》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming.pptx)（107 页，三课时页码映射见 4.2） |
+| **配套讲义** | 第一部分沿用现有 AI 芯片设计讲义；第二部分使用 [《算力之源：AI 负载、昇腾架构与 Ascend C 编程》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming_V1.0.pptx)（107 页，三课时页码映射见 4.2） |
 | **实践平台** | **CANN-Lab**（课后实验）：昇腾物理板卡（真板跑分）＋ 仿真模式（流水解剖）；样例代码取自 [asc-devkit](https://gitcode.com/cann/asc-devkit) 仓 |
 | **结业标准** | 期末考试 + CANN-Lab 实验报告（真板利用率数据 + 仿真流水依赖分析 + 优化建议，见 6.2） |
 
@@ -84,11 +84,11 @@
 ### 4.2 第二部分：现代 AI 芯片架构介绍（3 学时，第 14 周 ● 主讲）
 
 > 专题名建议：**《现代 AI 芯片架构：昇腾达芬奇实例解剖》**——把第一部分十三周的原理课「装进一颗真实芯片」。
-> 三课时教材**统一使用** [《算力之源：AI 负载、昇腾架构与 Ascend C 编程》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming.pptx)（107 页），按篇章裁剪使用即可，无需另行开发。
+> 三课时教材**统一使用** [《算力之源：AI 负载、昇腾架构与 Ascend C 编程》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming_V1.0.pptx)（107 页），按篇章裁剪使用即可，无需另行开发。
 
 | 时段 | 讲次 | 主题 | 内容要点 | 教材 PPT |
 |------|------|------|---------|---------|
-| **第 14 周（3 学时 ● 主讲）** | 第 1~3 讲 | 现代AI芯片架构：昇腾达芬奇实例解剖 | ① 达芬奇计算与存储架构：三核异构（Cube=磨盘 / Vector=排刀 / Scalar=主厨）、多级存储（UB/L1/L0）、三级数据搬运（MTE：GM↔UB↔L0）、NDDMA 与数据布局；② 编程模型与软件栈：SPMD（一份核函数、千百个执行副本）、Ascend C 多级 API（C API=手动挡 / Tensor API=自动挡）、CANN 分层架构——芯片人视角看「软件栈如何释放硬件」；③ 代际演进与系统扩展：950 新架构（SIMD 为主、SIMT 为辅的融合设计）、超节点互联（HCCS / 多芯扩展）——架构演进如何响应大模型需求 | 3h，[《算力之源》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming.pptx)（107 页）：第二篇"昇腾架构"P29~85（①：计算 P29~49 / 存储 P50~74 / 搬运 P75~85）＋ 第三篇"Ascend C 编程"P87~105（②：CANN 架构总览 P88 / C API P95 / Tensor API P96 / SPMD P97 / SIMD 核函数 P98~99 / 混合编程 P102~103 / CANNBot P104）＋ 950 进化史 P33~40（③）；第一篇"算力之问"P5~27 作开场导入或课前预习 |
+| **第 14 周（3 学时 ● 主讲）** | 第 1~3 讲 | 现代AI芯片架构：昇腾达芬奇实例解剖 | ① 达芬奇计算与存储架构：三核异构（Cube=磨盘 / Vector=排刀 / Scalar=主厨）、多级存储（UB/L1/L0）、三级数据搬运（MTE：GM↔UB↔L0）、NDDMA 与数据布局；② 编程模型与软件栈：SPMD（一份核函数、千百个执行副本）、Ascend C 多级 API（C API=手动挡 / Tensor API=自动挡）、CANN 分层架构——芯片人视角看「软件栈如何释放硬件」；③ 代际演进与系统扩展：950 新架构（SIMD 为主、SIMT 为辅的融合设计）、超节点互联（HCCS / 多芯扩展）——架构演进如何响应大模型需求 | 3h，[《算力之源》](../00_atomic_courses/04_ops_programming/05_npu_architecture/source_of_computing_power_ai_workloads_ascend_architecture_and_ascend_c_programming_V1.0.pptx)（107 页）：第二篇"昇腾架构"P29~85（①：计算 P29~49 / 存储 P50~74 / 搬运 P75~85）＋ 第三篇"Ascend C 编程"P87~105（②：CANN 架构总览 P88 / C API P95 / Tensor API P96 / SPMD P97 / SIMD 核函数 P98~99 / 混合编程 P102~103 / CANNBot P104）＋ 950 进化史 P33~40（③）；第一篇"算力之问"P5~27 作开场导入或课前预习 |
 
 > **关键节点说明：**
 > - 第 1 讲以第一篇"算力之问"（P5~27，大模型负载画像）作开场导入或课前预习——先看清"芯片为什么长这样"，再解剖"芯片长什么样"；
