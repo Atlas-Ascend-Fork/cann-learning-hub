@@ -25,7 +25,7 @@ sudo ./build
 **方式二：从源码仓库克隆**
 
 ```bash
-git clone https://gitcode.com/orangepi/wiringOP.git
+git clone https://github.com/orangepi-xunlong/wiringOP.git
 cd wiringOP
 sudo ./build
 ```
