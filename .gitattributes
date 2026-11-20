@@ -2,3 +2,4 @@ standard_course/**/*.pptx filter=lfs diff=lfs merge=lfs -text
 standard_course/**/**/*.pptx filter=lfs diff=lfs merge=lfs -text
 tutorials/llm_inference/slides/advance/** filter=lfs diff=lfs merge=lfs -text
 tutorials/llm_inference/slides/intermediate/** filter=lfs diff=lfs merge=lfs -text
+contrib/tutorials/data_structure_for_hpc/02_parallel_computing/trades.txt filter=lfs diff=lfs merge=lfs -text
