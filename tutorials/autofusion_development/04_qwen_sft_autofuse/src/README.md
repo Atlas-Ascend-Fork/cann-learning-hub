@@ -3,10 +3,10 @@
 本例在 Linux aarch64 主机的两张 Ascend NPU 上运行 AF OFF/ON 短训练和 profiling，并生成中文
 `report.md`。结果是单轮 Quick 方向性证据，不等价于多轮正式收益。
 
-以下命令均在本目录执行，并建议在同一个 Bash 终端中按顺序运行：
+从 CANN Learning Hub 仓库根目录进入样例目录。后续命令建议在同一个 Bash 终端中按顺序执行：
 
 ```bash
-cd autofuse/examples/af_sft_quickstart
+cd tutorials/autofusion_development/04_qwen_sft_autofuse/src
 ```
 
 ## 前置条件
@@ -193,7 +193,8 @@ Profiling 状态：
 新终端，只设置目标 `CANN_ROOT`，再激活 venv 并加载目标 CANN。不要在同一终端依次加载多个 CANN：
 
 ```bash
-cd autofuse/examples/af_sft_quickstart
+# 从 CANN Learning Hub 仓库根目录执行
+cd tutorials/autofusion_development/04_qwen_sft_autofuse/src
 export CANN_ROOT=/usr/local/Ascend/ascend-toolkit/latest
 source third_party/venv/bin/activate
 source "$CANN_ROOT/set_env.sh"
