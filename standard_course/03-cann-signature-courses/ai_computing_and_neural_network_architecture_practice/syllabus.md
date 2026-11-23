@@ -98,7 +98,7 @@
 | 10 | 第 10 讲 | Ascend C 算子调试调优与最佳实践 | 算子常见功能调试方法与问题定位思路；性能采集与分析工具的使用；算子性能调优的基本方法论；SIMD 算子常见性能问题的调试与优化 | 2h+2h, [06 调试调优与最佳实践](../../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/06_a2a3_ascend_c_operator_debugging_tuning_and_best_practices.pptx) |
 | 11 | 第 11 讲 | Ascend C PyTorch 单算子调用与实践 | PyTorch 单算子调用的基本原理与方法；算子注册与绑定；调用验证与测试 | 2h+2h, [07 PyTorch 单算子调用](../../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/07_a2a3_ascend_c_operator_pytorch_single_operator_call.pptx) |
 | 12 | 第 12 讲 | Ascend C 接入 GE、AclGraph、PyTorch 图模式实践 | GE、AclGraph、PyTorch 图模式的核心概念；将 Ascend C 算子接入图模式的完整流程；端到端验证 | 2h+2h, [08 图模式接入](../../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/08_a2a3_ascend_c_operator_graph_integration_pytorch_aclgraph_ge.pptx) |
-| 13 | 第 13 讲 | Ascend C 算子优化实践 | Ascend C算子性能优化实践 | 2h+2h, [Ascend C 算子优化实践] (待补充) |
+| 13 | 第 13 讲 | Ascend C 算子优化实践 | 以 MatMul 算子为例的极致性能优化路径案例剖析；四流水性能建模与 Bound 判定；「先对后快」单变量迭代方法论 | 2h+2h, [MatMul 极致性能优化案例](../../00_atomic_courses/04_ops_programming/01_ascendc/a2a3/a2a3_matmul_optimization.pptx) |
 | 14 | 第 14 讲 | 基于 CANN Bot 的 Ascend C 算子开发与实践 | CANN Bot 的基本概念与核心能力；基于 Agent 的算子自动化开发与优化方法 | 2h+2h, [CANN Bot](../../01_bootcamp/two_days_course/05_cannbot_highlights_open_source_community_edition_0.5h.pptx)（暂借用启航营讲义） |
 
 ### 4.3 第二部分·路线 B（Ascend 950 系列）：Ascend C 算子编程模型与实践（36 学时，第 6~14 周）
@@ -147,7 +147,7 @@
 | 第 10 讲 | 调试调优实战 | **易**：Profile/仿真调优跟练；**中**：解读剖析报告并指出瓶颈；**难**：慢算子诊断并优化达标（附前后数据） | `tutorials/ascendc_operator_development_light/04_debug` |
 | 第 11 讲 | PyTorch 单算子调用 | **易**：单算子调用跟练；**中**：自定义算子注册调用；**难**：调用精度/性能双校验报告 | `tutorials/ascendc_operator_development_light/02_AscendC_basic` |
 | 第 12 讲 | 图模式接入 | **易**：入图流程跟练；**中**：自定义算子入图验证；**难**：算子入图（PyTorch-AclGraph-GE）并端到端验证 | `tutorials/ascendc_operator_development_light/02_AscendC_basic` |
-| 第 13 讲 | Ascend C算子优化实践 | 待补充 | `tutorials/ascendc_operator_development` |
+| 第 13 讲 | Ascend C算子优化实践 | **易**：MatMul 基线版本跑通并校验；**中**：单变量迭代复现优化路径；**难**：Matmul 判题（性能达基线 x%） | `tutorials/ascendc_operator_development` |
 | 第 14 讲 | CANN Bot 智能开发 | **易**：CANNBot 教程跟练；**中**：Agent 生成算子并人工校验；**难**：生成-校验-优化闭环完成一道判题 | `tutorials/CANNBot` |
 
 ### 5.3 第二部分·路线 B（Ascend 950）
@@ -193,7 +193,7 @@
 | 第 10 讲 | 调试工具链操作题（Profile/仿真） | Profile 使用方法、仿真性能统计方法、SIMD 算子最佳实践 | A/B：`01_simd_cpp_api/01_utilities/04_profiling`、`01_simd_cpp_api/01_utilities/08_simulator`、`01_simd_cpp_api/05_best_practices` | 待补充 |
 | 第 11 讲 | Ascend C算子调用 | PyTorch 单算子调用实践 | A：`01_simd_cpp_api/02_features/00_framework/00_pytorch`；B：待补充 | 待补充 |
 | 第 12 讲 | AclGraph/GE 入图流程题 | Ascend C 算子入图实践 | A/B：`01_simd_cpp_api/02_features/00_framework/00_pytorch`、`04_aclgraph`、`03_ge` | 待补充 |
-| 第 13 讲 | Ascend C 算子优化实践 | 待补充 | 待补充| 待补充 |
+| 第 13 讲 | Ascend C 算子优化实践 | 算子性能优化方法概念题 | A: `matmul_story/matmul_tutorials/arch22`；B：`01_simd_cpp_api/07_tensor_api` | [MatMul](https://cannjudge.cn/public/cube/matmul) |
 | 第 14 讲 | CANN Bot 功能概念题 | 基于 CANN Bot 开发 AddRmsNorm | A/B：learning-hub: `tutorials/CANNBot` | 待补充 |
 | 第 15~16 讲 | —（结业冲刺） | —（进入结业大作业） | — | — |
 
