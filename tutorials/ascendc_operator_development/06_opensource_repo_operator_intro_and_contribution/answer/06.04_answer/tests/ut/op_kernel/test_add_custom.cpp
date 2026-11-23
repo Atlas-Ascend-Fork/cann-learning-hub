@@ -46,7 +46,7 @@ TEST_F(AddCustomKernelTest, test_case_0)
     ReadFile(input1, xByteSize, x, xByteSize);
 
     uint8_t* y = (uint8_t*)AscendC::GmAlloc(yByteSize);
-    ReadFile(input2, yByteSize, y, xByteSize);
+    ReadFile(input2, yByteSize, y, yByteSize);
 
     uint8_t* z = (uint8_t*)AscendC::GmAlloc(zByteSize);
     uint8_t* workspace = (uint8_t*)AscendC::GmAlloc(32);
