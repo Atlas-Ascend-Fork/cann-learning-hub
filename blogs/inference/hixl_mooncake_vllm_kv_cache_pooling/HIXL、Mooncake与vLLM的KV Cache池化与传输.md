@@ -37,4 +37,4 @@ HIXL秉持极简易用的设计原则，具备高度可集成性，并积极融�
 
    我们期待，随着昇腾 CANN 开源组件的持续完善，更多开发者能够在此基础上，自由探索并构建出服务于千行百业的 AI 应用。
 
-**HIXL开源仓库链接：https://gitcode.com/cann/hixl**
+**HIXL开源仓库链接**：<https://gitcode.com/cann/hixl>

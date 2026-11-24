@@ -125,7 +125,7 @@
 | CANN Learning Hub | <https://gitcode.com/cann/cann-learning-hub/> | 实践主载体（`quick_start` 在线 Notebook，第 3、4、5 次课） |
 | CANN 开源社区 | <https://gitcode.com/cann> | 全栈开源仓库与社区动态（第 5、7 次课） |
 | cann-recipes-infer | <https://gitcode.com/cann/cann-recipes-infer> | 大模型推理样例库（第 6、8 次课参考素材） |
-| torch_npu 开源项目 | <https://gitcode.com/cann/torch_npu> | 昇腾接入 PyTorch 的开源实现（第 4 次课延伸） |
+| torch_npu 开源项目 | <https://gitcode.com/ascend/pytorch> | 昇腾接入 PyTorch 的开源实现（第 4 次课延伸） |
 | 昇腾社区 | <https://www.hiascend.com> | 在线体验、认证与昇腾 AI 训练营 |
 | CANN 算子领域样例仓库 | <https://gitcode.com/cann/cann-samples/tree/master/Samples/> | 进阶自学 |
 | 教材《Ascend C 异构并行程序设计》 | <https://gitcode.com/HIT1920/AscendCBook> | 有志深入算子开发的下一步 |
