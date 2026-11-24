@@ -63,3 +63,4 @@ Host 侧的 `BLOCK_DIM` 常量会根据 `TARGET` 环境变量被 `build_ops.sh` 
 ├── answer/                     # 参考答案
 ├── images/                     # 拓扑图  
 └── src/reduce_lab/             # 算子源码
+```
