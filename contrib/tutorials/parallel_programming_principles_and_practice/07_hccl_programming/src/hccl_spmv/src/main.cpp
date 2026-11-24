@@ -17,12 +17,31 @@ int main(int ac,char**av){
   if(!CSRMatrix::load(path,&matrix,&error)){if(o.rank==0){matrix=generate_matrix(o.matrix);if(!matrix.save(path,&error))throw std::runtime_error(error);}else{bool loaded=false;for(int attempt=0;attempt<600&&!loaded;++attempt){loaded=CSRMatrix::load(path,&matrix,&error);if(!loaded&&attempt<599)std::this_thread::sleep_for(std::chrono::milliseconds(100));}if(!loaded)throw std::runtime_error("matrix cache is not ready: "+path);}}error.clear();
   const auto x=generate_x(matrix.cols);std::vector<float> reference;spmv_cpu(matrix,x,&reference);
   HcclContext context;if(!context.initialize(o.device,o.rank,o.world,o.rank_table,&error)||!context.real_hccl())throw std::runtime_error(error.empty()?"real ACL+HCCL backend is required":error);
+  std::vector<float> global(6, 0.0f);
   double total=0,communication=0,transfer=0,launch_overhead=0,synchronization=0,launch_to_complete=0;std::vector<float> output(static_cast<size_t>(matrix.rows));
   {
    const int chunk=(matrix.rows+o.world-1)/o.world;const int first=std::min(matrix.rows,o.rank*chunk),last=std::min(matrix.rows,first+chunk);
    DeviceSpmv device_spmv;if(!device_spmv.prepare(context,matrix,first,last,chunk,&error))throw std::runtime_error(error);
    for(int i=0;i<o.warmup;++i){Timings t;if(!distributed_spmv(context,device_spmv,x,&output,&t,&error))throw std::runtime_error(error);}
-   for(int i=0;i<o.repeat;++i){Timings t;if(!distributed_spmv(context,device_spmv,x,&output,&t,&error))throw std::runtime_error(error);total+=t.total_ms;communication+=t.communication_ms;transfer+=t.transfer_ms;launch_overhead+=t.kernel_launch_overhead_ms;synchronization+=t.synchronization_ms;launch_to_complete+=t.local_spmv_launch_to_complete_ms;}
+   for (int i = 0; i < o.repeat; ++i) {
+    Timings t;
+    if (!distributed_spmv(context, device_spmv, x, &output, &t, &error)) throw std::runtime_error(error);
+    total += t.total_ms;
+    communication += t.communication_ms;
+    transfer += t.transfer_ms;
+    launch_overhead += t.kernel_launch_overhead_ms;
+    synchronization += t.synchronization_ms;
+    launch_to_complete += t.local_spmv_launch_to_complete_ms;
+    const std::vector<float> local = {
+        static_cast<float>(t.total_ms), static_cast<float>(t.kernel_launch_overhead_ms),
+        static_cast<float>(t.local_spmv_launch_to_complete_ms), static_cast<float>(t.communication_ms),
+        static_cast<float>(t.transfer_ms), static_cast<float>(t.synchronization_ms)};
+    std::vector<float> maximum;
+    // This reporting collective is outside distributed_spmv's timing interval.
+    if (!context.allreduce_max(local, &maximum, &error)) throw std::runtime_error(error);
+    for (std::size_t field = 0; field < global.size(); ++field) global[field] += maximum[field];
+   }
+   for (float& value : global) value /= o.repeat;
   }
   const double scale=1.0/o.repeat,error_value=max_relative_error(reference,output);
   const double local_total=total*scale,local_comm=communication*scale,local_transfer=transfer*scale;
@@ -35,12 +54,12 @@ int main(int ac,char**av){
            <<"Local HCCL Communication="<<local_comm<<" ms\n"
            <<"Local Data Transfer="<<local_transfer<<" ms\n"
            <<"Local Synchronization="<<local_sync<<" ms\n";
-  // Wall-time aggregation: MAX across ranks gives the distributed critical-path
-  // time; a SUM/world_size rank mean would understate the true wall time.
-  const std::vector<float> local={static_cast<float>(local_total),static_cast<float>(local_launch),static_cast<float>(local_ltc),static_cast<float>(local_comm),static_cast<float>(local_transfer),static_cast<float>(local_sync)};
-  std::vector<float> global;
-  if(!context.allreduce_max(local,&global,&error))throw std::runtime_error(error);
-  if(o.rank==0)std::cout<<"Matrix="<<o.matrix<<" rows="<<matrix.rows<<" cols="<<matrix.cols<<" nnz="<<matrix.nnz()<<"\nActual Compute Backend=Ascend C FP32 RTC\nCommunication Backend=ACL+HCCL\nTotal Time (MAX across ranks)="<<std::fixed<<std::setprecision(6)<<global[0]<<" ms\nKernel launch overhead (MAX)="<<global[1]<<" ms\nLocal SpMV launch-to-complete (MAX)="<<global[2]<<" ms\nHCCL Communication (MAX)="<<global[3]<<" ms\nData Transfer (MAX)="<<global[4]<<" ms\nSynchronization (MAX)="<<global[5]<<" ms\nCPU Reference Error="<<std::scientific<<std::setprecision(9)<<error_value<<"\nCorrectness="<<(error_value<1e-6?"PASS":"FAIL")<<"\n";
-  context.finalize();return error_value<1e-6?0:1;
+  std::vector<float> global_error;
+  if (!context.allreduce_max({static_cast<float>(error_value)}, &global_error, &error)) {
+    throw std::runtime_error(error);
+  }
+  const double checked_error = global_error[0];
+  if(o.rank==0)std::cout<<"Matrix="<<o.matrix<<" rows="<<matrix.rows<<" cols="<<matrix.cols<<" nnz="<<matrix.nnz()<<"\nActual Compute Backend=Ascend C FP32 RTC\nCommunication Backend=ACL+HCCL\nTotal Time (mean of per-repeat MAX across ranks)="<<std::fixed<<std::setprecision(6)<<global[0]<<" ms\nKernel launch overhead (MAX)="<<global[1]<<" ms\nLocal SpMV launch-to-complete (MAX)="<<global[2]<<" ms\nHCCL Communication (MAX)="<<global[3]<<" ms\nData Transfer (MAX)="<<global[4]<<" ms\nSynchronization (MAX)="<<global[5]<<" ms\nCPU Reference Error="<<std::scientific<<std::setprecision(9)<<checked_error<<"\nCorrectness="<<(checked_error<1e-6?"PASS":"FAIL")<<"\n";
+  context.finalize();return checked_error<1e-6?0:1;
  }catch(const std::exception&e){std::cerr<<"hccl_spmv: "<<e.what()<<"\n";return 2;}
 }

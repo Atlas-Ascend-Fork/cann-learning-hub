@@ -28,10 +28,36 @@ private: void* data_ = nullptr; std::size_t bytes_ = 0;
 };
 class Runtime {
 public:
-    explicit Runtime(int device) { ACL_CHECK(aclInit(nullptr)); initialized_=true; ACL_CHECK(aclrtSetDevice(device)); ACL_CHECK(aclrtCreateContext(&context_,device)); ACL_CHECK(aclrtSetCurrentContext(context_)); ACL_CHECK(aclrtCreateStream(&stream_)); }
-    ~Runtime(){ if(stream_) aclrtDestroyStream(stream_); if(context_) aclrtDestroyContext(context_); if(initialized_) aclFinalize(); }
+    explicit Runtime(int device) : device_(device) {
+        try {
+            ACL_CHECK(aclInit(nullptr));
+            initialized_ = true;
+            ACL_CHECK(aclrtSetDevice(device_));
+            device_set_ = true;
+            ACL_CHECK(aclrtCreateContext(&context_, device_));
+            ACL_CHECK(aclrtSetCurrentContext(context_));
+            ACL_CHECK(aclrtCreateStream(&stream_));
+        } catch (...) {
+            cleanup();
+            throw;
+        }
+    }
+    ~Runtime() { cleanup(); }
+    Runtime(const Runtime&) = delete;
+    Runtime& operator=(const Runtime&) = delete;
     aclrtStream stream() const { return stream_; }
-private: bool initialized_=false; aclrtContext context_=nullptr; aclrtStream stream_=nullptr;
+private:
+    void cleanup() noexcept {
+        if (stream_) aclrtDestroyStream(stream_);
+        if (context_) aclrtDestroyContext(context_);
+        if (device_set_) aclrtResetDevice(device_);
+        if (initialized_) aclFinalize();
+    }
+    int device_;
+    bool initialized_ = false;
+    bool device_set_ = false;
+    aclrtContext context_ = nullptr;
+    aclrtStream stream_ = nullptr;
 };
 inline void copy_to_device(const DeviceBuffer& d,const void* h,std::size_t n){ ACL_CHECK(aclrtMemcpy(d.data(),d.bytes(),h,n,ACL_MEMCPY_HOST_TO_DEVICE)); }
 inline void copy_to_host(void* h,std::size_t n,const DeviceBuffer& d){ ACL_CHECK(aclrtMemcpy(h,n,d.data(),d.bytes(),ACL_MEMCPY_DEVICE_TO_HOST)); }

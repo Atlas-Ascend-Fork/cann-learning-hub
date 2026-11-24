@@ -43,8 +43,8 @@ cmake -S . -B build-host -DSPMV_REAL_ASCENDC=OFF
 
 该模式生成的 Host Prototype 数据不是 Ascend 实测。
 
-## 验收字段
+## 读取结果
 
-正式运行必须记录：日志 `Actual Backend=Ascend C RTC`（CSV 中 `actual_backend=ascend_c`）、Device ID、矩阵规模、H2D（`ascendc_transfer_in_ms`）、Kernel+Sync（`ascendc_launch_to_complete_ms`，launch-to-complete 口径）、D2H（`ascendc_transfer_out_ms`）、CPU Reference Error 和退出码。FP32 相对误差阈值为 `1e-6`。仓库历史 CSV 来自旧 Host 模拟实现，仅用于了解旧字段，不代表当前 Kernel 结果；真实数据必须由上述命令重新生成。
+日志显示 `Actual Backend=Ascend C RTC`，CSV 中 `actual_backend=ascend_c`。FP32 相对误差应小于 `1e-6`。
 
-Ascend 950 SIMT 内容仍为独立的待验证模板，不能用 910B3 RTC 结果代替。
+`ascendc_transfer_in_ms`、`ascendc_launch_to_complete_ms` 和 `ascendc_transfer_out_ms` 分别表示输入传输、提交至同步完成、输出回读。FP16/BF16 与 persistent 字段对应 CPU 原型。

@@ -12,5 +12,17 @@ static std::pair<int,int> shape(const std::string& n){if(n=="U1"||n=="L1"||n=="B
 CSRMatrix generate_matrix(const std::string& name){auto [rows,cols]=shape(name);int64_t target=(rows==100000?1000000:10000000);CSRMatrix m;m.rows=rows;m.cols=cols;m.row_ptr.resize(static_cast<size_t>(rows)+1);std::mt19937 rng(42);std::uniform_real_distribution<float> val(name[0]=='L'?0.25f:0.5f,name[0]=='B'?1.0f:1.5f);int base=static_cast<int>(target/rows),rem=static_cast<int>(target%rows);for(int r=0;r<rows;++r)m.row_ptr[r+1]=m.row_ptr[r]+base+(r<rem);m.col_idx.resize(target);m.values.resize(target);std::uniform_int_distribution<int> col(0,cols-1);for(int r=0;r<rows;++r){int b=m.row_ptr[r],e=m.row_ptr[r+1];for(int p=b;p<e;++p){m.col_idx[p]=static_cast<int32_t>((static_cast<uint64_t>(r)*1315423911u+p*2654435761u)%static_cast<uint64_t>(cols));m.values[p]=val(rng);}}return m;}
 std::vector<float> generate_x(int32_t cols){std::mt19937 rng(42);std::uniform_real_distribution<float>d(0,1);std::vector<float>x(cols);for(auto&v:x)v=d(rng);return x;}
 void spmv_cpu(const CSRMatrix&m,const std::vector<float>&x,std::vector<float>*y,int32_t first,int32_t last){if(last<0||last>m.rows)last=m.rows;if(first<0)first=0;if(y->size()!=static_cast<size_t>(m.rows))y->assign(m.rows,0);for(int r=first;r<last;++r){float s=0;for(int p=m.row_ptr[r];p<m.row_ptr[r+1];++p)s+=m.values[p]*x[m.col_idx[p]];(*y)[r]=s;}}
-double max_relative_error(const std::vector<float>&a,const std::vector<float>&b){if(a.size()!=b.size())return std::numeric_limits<double>::infinity();double e=0;for(size_t i=0;i<a.size();++i)e=std::max(e,std::abs(double(a[i])-b[i])/std::max(std::abs(double(a[i])),1e-12));return e;}
+double max_relative_error(const std::vector<float>& reference,
+                          const std::vector<float>& candidate) {
+    if (reference.size() != candidate.size()) return std::numeric_limits<double>::infinity();
+    double error = 0.0;
+    for (std::size_t i = 0; i < reference.size(); ++i) {
+        if (!std::isfinite(reference[i]) || !std::isfinite(candidate[i])) {
+            return std::numeric_limits<double>::infinity();
+        }
+        const double difference = std::abs(double(reference[i]) - candidate[i]);
+        error = std::max(error, difference / std::max(std::abs(double(reference[i])), 1e-12));
+    }
+    return error;
+}
 }

@@ -28,6 +28,7 @@ struct AveragedResult {
     double total_simulation_ms = 0.0;
     double matrix_assembly_ms = 0.0;
     double solution_error_vs_cpu = 0.0;
+    double solution_error_vs_expected = 0.0;
     ascend_gmres::GmresResult linear;
 };
 
@@ -36,7 +37,7 @@ double per_iteration(double value, std::int32_t iterations) {
 }
 
 std::string csv_header() {
-    return "matrix,rows,cols,nnz,solver,total_simulation_ms,matrix_assembly_ms,linear_solver_ms,iterations,final_residual,converged,speedup_vs_cpu_single,solution_error_vs_cpu,spmv_ms,dot_ms,axpy_ms,norm_ms,givens_ms,residual_ms,other_ms,device_transfer_ms,hccl_ms,kernel_launch_ms,synchronization_ms,avg_spmv_per_iteration,avg_dot_per_iteration,avg_axpy_per_iteration";
+    return "matrix,rows,cols,nnz,solver,total_simulation_ms,matrix_assembly_ms,linear_solver_ms,iterations,final_residual,converged,speedup_vs_cpu_single,solution_error_vs_cpu,spmv_ms,dot_ms,axpy_ms,norm_ms,givens_ms,residual_ms,other_ms,device_transfer_ms,hccl_ms,kernel_launch_ms,synchronization_ms,avg_spmv_per_iteration,avg_dot_per_iteration,avg_axpy_per_iteration,solution_error_vs_expected";
 }
 
 std::string csv_row(const std::string& matrix_name, const ascend_gmres::CSRMatrix& matrix, const AveragedResult& result, double cpu_single_total_ms) {
@@ -80,7 +81,9 @@ std::string csv_row(const std::string& matrix_name, const ascend_gmres::CSRMatri
         << profiler.synchronization_ms << ','
         << per_iteration(profiler.spmv_ms, linear.iterations) << ','
         << per_iteration(profiler.dot_ms, linear.iterations) << ','
-        << per_iteration(profiler.axpy_ms, linear.iterations);
+        << per_iteration(profiler.axpy_ms, linear.iterations) << ',';
+    precision();
+    out << result.solution_error_vs_expected;
     return out.str();
 }
 
@@ -116,6 +119,7 @@ AveragedResult run_solver_repeated(const ascend_gmres::CSRMatrix& matrix,
         averaged.matrix_assembly_ms += result.matrix_assembly_ms;
         averaged.linear.total_ms += result.linear_result.total_ms;
         averaged.solution_error_vs_cpu += result.solution_error_vs_cpu;
+        averaged.solution_error_vs_expected += result.solution_error_vs_expected;
         profiler_sum.accumulate(result.linear_result.profiler);
         residual_sum += result.linear_result.final_relative_residual;
         iteration_sum += result.linear_result.iterations;
@@ -127,6 +131,7 @@ AveragedResult run_solver_repeated(const ascend_gmres::CSRMatrix& matrix,
     averaged.matrix_assembly_ms *= scale;
     averaged.linear.total_ms *= scale;
     averaged.solution_error_vs_cpu *= scale;
+    averaged.solution_error_vs_expected *= scale;
     profiler_sum.scale(scale);
     averaged.linear.profiler = profiler_sum;
     averaged.linear.final_relative_residual = static_cast<float>(residual_sum * scale);
@@ -144,7 +149,8 @@ void print_solver(const AveragedResult& result, double cpu_single_ms) {
               << " | iter=" << linear.iterations
               << " | residual=" << std::scientific << std::setprecision(9) << linear.final_relative_residual
               << " | speedup=" << std::fixed << (result.total_simulation_ms > 0.0 ? cpu_single_ms / result.total_simulation_ms : 0.0)
-              << " | solution_error_vs_cpu=" << std::scientific << result.solution_error_vs_cpu << std::fixed << '\n';
+              << " | solution_error_vs_cpu=" << std::scientific << result.solution_error_vs_cpu
+              << " | solution_error_vs_expected=" << result.solution_error_vs_expected << std::fixed << '\n';
     ascend_gmres::print_profiler_breakdown(std::cout, result.solver_name, linear.profiler, linear.total_ms, linear.iterations);
 }
 

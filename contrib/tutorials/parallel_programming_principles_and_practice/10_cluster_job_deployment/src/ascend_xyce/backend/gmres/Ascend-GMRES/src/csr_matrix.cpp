@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace ascend_gmres {
 
@@ -35,8 +36,12 @@ double relative_error(const std::vector<float>& reference,
                       const std::vector<float>& candidate) {
     double numerator = 0.0;
     double denominator = 0.0;
-    const std::size_t size = std::min(reference.size(), candidate.size());
+    if (reference.size() != candidate.size()) return std::numeric_limits<double>::infinity();
+    const std::size_t size = reference.size();
     for (std::size_t index = 0; index < size; ++index) {
+        if (!std::isfinite(reference[index]) || !std::isfinite(candidate[index])) {
+            return std::numeric_limits<double>::infinity();
+        }
         const double difference = static_cast<double>(reference[index]) -
                                   static_cast<double>(candidate[index]);
         numerator += difference * difference;

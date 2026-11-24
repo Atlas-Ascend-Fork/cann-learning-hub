@@ -104,7 +104,7 @@ def analyze_smoke(args: argparse.Namespace, smoke_a: str, smoke_b: str) -> dict:
     smoke_traces_a, smoke_traces_b = traces(smoke_a), traces(smoke_b)
     smoke_checks = {
         "path_a_marker": MARKER_A in smoke_a and MARKER_B not in smoke_a,
-        "path_b_marker": MARKER_B in smoke_b,
+        "path_b_marker": MARKER_B in smoke_b and MARKER_A not in smoke_b,
         "flash_stats": actual_stats == expected_stats,
         "token_exact": bool(smoke_traces_a)
         and smoke_traces_a == smoke_traces_b,
@@ -130,7 +130,25 @@ def performance_run(text: str) -> PerformanceRun:
 
 def performance_checks(path_a: PerformanceRun, path_b: PerformanceRun) -> dict:
     expected_ids = [1, 2, 3, 4]
+    def valid_work(run: PerformanceRun) -> bool:
+        if len(run.samples) != 4 or len(run.traces) != 4:
+            return False
+        for sample, trace in zip(run.samples, run.traces):
+            if sample["tokens"] <= 0 or sample["time_ms"] <= 0 or len(trace) != sample["tokens"]:
+                return False
+            expected = sample["tokens"] * 1000.0 / sample["time_ms"]
+            # The executable prints throughput with six significant digits.
+            if not math.isclose(sample["tokens_per_s"], expected, rel_tol=1e-5):
+                return False
+        return len({item["tokens"] for item in run.samples}) == 1
+
     return {
+        "path_a_marker": MARKER_A in path_a.text and MARKER_B not in path_a.text,
+        "path_b_marker": MARKER_B in path_b.text and MARKER_A not in path_b.text,
+        "workload_valid": valid_work(path_a) and valid_work(path_b)
+        and [item["tokens"] for item in path_a.samples]
+        == [item["tokens"] for item in path_b.samples],
+        "no_fallback": not re.search(r"(?:fallback|flash_fallback_count)=[1-9]\d*", path_a.text + path_b.text),
         "samples_1_to_4": [item["sample"] for item in path_a.samples] == expected_ids
         and [item["sample"] for item in path_b.samples] == expected_ids,
         "three_measured_samples": path_a.mean is not None and path_b.mean is not None,

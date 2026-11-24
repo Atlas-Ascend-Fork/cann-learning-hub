@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -139,6 +140,9 @@ static float MaxAbsError(const std::vector<double>& ref, const float* dev, int32
 {
     double maxErr = 0.0;
     for (int32_t p = 0; p < n; ++p) {
+        if (!std::isfinite(ref[p]) || !std::isfinite(dev[p])) {
+            return std::numeric_limits<float>::infinity();
+        }
         const double err = std::fabs(static_cast<double>(dev[p]) - ref[p]);
         if (err > maxErr) {
             maxErr = err;

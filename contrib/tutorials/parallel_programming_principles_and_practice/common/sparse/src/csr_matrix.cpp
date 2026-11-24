@@ -551,6 +551,9 @@ double relative_error(const std::vector<float>& reference, const std::vector<flo
     for (std::size_t i = 0; i < reference.size(); ++i) {
         const double ref = static_cast<double>(reference[i]);
         const double cand = static_cast<double>(candidate[i]);
+        if (!std::isfinite(ref) || !std::isfinite(cand)) {
+            return std::numeric_limits<double>::infinity();
+        }
         const double denominator = std::abs(ref);
         const double difference = std::abs(ref - cand);
         double error = difference / 1e-12;

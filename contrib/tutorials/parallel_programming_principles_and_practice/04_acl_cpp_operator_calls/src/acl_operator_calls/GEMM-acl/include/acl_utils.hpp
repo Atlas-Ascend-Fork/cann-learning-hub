@@ -73,22 +73,34 @@ private:
 
 class Runtime {
 public:
-    explicit Runtime(int device) {
-        ACL_CHECK(aclInit(nullptr));
-        initialized_ = true;
-        ACL_CHECK(aclrtSetDevice(device));
-        ACL_CHECK(aclrtCreateContext(&context_, device));
-        ACL_CHECK(aclrtSetCurrentContext(context_));
-        ACL_CHECK(aclrtCreateStream(&stream_));
+    explicit Runtime(int device) : device_(device) {
+        try {
+            ACL_CHECK(aclInit(nullptr));
+            initialized_ = true;
+            ACL_CHECK(aclrtSetDevice(device_));
+            device_set_ = true;
+            ACL_CHECK(aclrtCreateContext(&context_, device_));
+            ACL_CHECK(aclrtSetCurrentContext(context_));
+            ACL_CHECK(aclrtCreateStream(&stream_));
+        } catch (...) {
+            cleanup();
+            throw;
+        }
     }
-    ~Runtime() {
-        if (stream_) aclrtDestroyStream(stream_);
-        if (context_) aclrtDestroyContext(context_);
-        if (initialized_) aclFinalize();
-    }
+    ~Runtime() { cleanup(); }
+    Runtime(const Runtime&) = delete;
+    Runtime& operator=(const Runtime&) = delete;
     aclrtStream stream() const { return stream_; }
 private:
+    void cleanup() noexcept {
+        if (stream_) aclrtDestroyStream(stream_);
+        if (context_) aclrtDestroyContext(context_);
+        if (device_set_) aclrtResetDevice(device_);
+        if (initialized_) aclFinalize();
+    }
+    int device_;
     bool initialized_ = false;
+    bool device_set_ = false;
     aclrtContext context_ = nullptr;
     aclrtStream stream_ = nullptr;
 };

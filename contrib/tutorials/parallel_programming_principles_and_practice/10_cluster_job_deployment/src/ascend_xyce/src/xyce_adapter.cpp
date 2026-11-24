@@ -4,6 +4,7 @@
 #include "include/gmres.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <stdexcept>
@@ -161,12 +162,12 @@ XyceSimulationResult XyceApplicationWrapper::run(LinearSolverKind kind, const Xy
     // reference is checked when supplied. Exceeding the documented threshold
     // throws, so the benchmark exits nonzero and never writes a pass row.
     simulation.solution_error_vs_expected = ascend_gmres::relative_error(expected_solution_, x);
-    if (simulation.solution_error_vs_expected > kSolutionErrorTolerance) {
+    if ((!std::isfinite(simulation.solution_error_vs_expected) || simulation.solution_error_vs_expected > kSolutionErrorTolerance)) {
         throw std::runtime_error(solver.name() + " solution error vs expected exceeded " +
                                  std::to_string(kSolutionErrorTolerance) + ": " +
                                  std::to_string(simulation.solution_error_vs_expected));
     }
-    if (cpu_reference_solution != nullptr && simulation.solution_error_vs_cpu > kSolutionErrorTolerance) {
+    if (cpu_reference_solution != nullptr && (!std::isfinite(simulation.solution_error_vs_cpu) || simulation.solution_error_vs_cpu > kSolutionErrorTolerance)) {
         throw std::runtime_error(solver.name() + " solution error vs CPU reference exceeded " +
                                  std::to_string(kSolutionErrorTolerance) + ": " +
                                  std::to_string(simulation.solution_error_vs_cpu));

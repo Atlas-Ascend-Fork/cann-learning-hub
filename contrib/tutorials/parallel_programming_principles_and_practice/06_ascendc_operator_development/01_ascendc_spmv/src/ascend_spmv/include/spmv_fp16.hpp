@@ -35,7 +35,7 @@ public:
     std::size_t fp32_csr_bytes() const { return fp32_csr_bytes_; }
     std::size_t fp16_csr_bytes() const { return fp16_csr_bytes_; }
     double compression_ratio() const {
-        return fp32_csr_bytes_ == 0 ? 0.0 : static_cast<double>(fp16_csr_bytes_) / static_cast<double>(fp32_csr_bytes_);
+        return fp16_csr_bytes_ == 0 ? 0.0 : static_cast<double>(fp32_csr_bytes_) / static_cast<double>(fp16_csr_bytes_);
     }
 
 private:

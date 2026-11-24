@@ -1,3 +1,4 @@
+#include <cmath>
 #include "benchmark.hpp"
 #if SPMV_REAL_ASCENDC
 #include "ascendc_spmv.hpp"
@@ -525,7 +526,7 @@ void benchmark_ascendc_backend(const CSRMatrix& matrix, const std::vector<float>
               << "Kernel+Sync=" << timing.kernel_ms << " ms\n"
               << "D2H=" << timing.transfer_out_ms << " ms\n"
               << "CPU Reference Error=" << format_error(record->ascendc_error) << '\n';
-    if (record->ascendc_error >= 1e-6) {
+    if (!std::isfinite(record->ascendc_error) || record->ascendc_error >= 1e-6) {
         throw std::runtime_error("Ascend C correctness check failed");
     }
 #else

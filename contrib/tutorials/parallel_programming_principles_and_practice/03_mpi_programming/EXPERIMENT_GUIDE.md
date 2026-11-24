@@ -14,18 +14,21 @@ MPI_Gatherv(local_y.data(), local_rows, MPI_FLOAT, /* ... */, MPI_COMM_WORLD);
 
 ## 2. 编译与单机实验
 
+在第 03 章目录打开终端。进程数不超过分配的 CPU 核心数，使用不同 CSV 文件保存各次结果。
+
 ```bash
 cd src/mpi_spmv
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx
 cmake --build build -j
-mpirun -np 1 ./build/spmv_mpi
-mpirun -np 2 ./build/spmv_mpi
-mpirun -np 4 ./build/spmv_mpi
+mkdir -p results
+mpirun -np 1 ./build/spmv_mpi --matrix U1 --repeat 3 --csv results/U1_1p.csv
+mpirun -np 2 ./build/spmv_mpi --matrix U1 --repeat 3 --csv results/U1_2p.csv
+mpirun -np 4 ./build/spmv_mpi --matrix U1 --repeat 3 --csv results/U1_4p.csv
 ```
 
 单机多进程用于验证 Rank 划分、Broadcast/Gatherv 和正确性，不能替代多节点扩展性实验。
 
-## 3. 多节点实验
+## 3. 多节点实验（选做）
 
 创建 `hostfile`：
 
@@ -42,12 +45,14 @@ mpirun -np 4 --hostfile hostfile ./build/spmv_mpi
 
 ## 4. 验证、记录与分析
 
-以 `-np 1` 的 CPU 结果为 reference，比较 2/4 个进程（rank）的最大相对误差，阈值 `1e-6`。逐进程记录通信域规模（size）、row range、compute/communication/total time；负载不均衡定义为 `(max_rank_compute-avg_rank_compute)/avg_rank_compute`。
+每次运行都与当次 CPU 串行结果比较，检查绝对 L2 误差小于 `1e-6`，同时记录最大绝对误差。逐进程记录通信域规模（size）、row range、compute/communication/total time；负载不均衡定义为 `(max_rank_compute-avg_rank_compute)/avg_rank_compute`，这里先求每个 rank 的平均 compute，再跨 rank 取最大值和平均值；取数用 `.per_rank.csv`，而非汇总行的 compute。
 
-| Ranks | Compute (ms) | Communication (ms) | Total (ms) | Imbalance | Relative error | Pass |
+| Ranks | Compute (ms) | Communication (ms) | Total (ms) | Imbalance | Absolute L2 error | Pass |
 |---:|---:|---:|---:|---:|---:|:---:|
-| 1 | | | | | 0 | |
+| 1 | | | | | | |
 | 2 | | | | | | |
 | 4 | | | | | | |
 
-练习：比较按行数与按 nnz 划分，解释通信占比为何随 Rank 数增长。参考答案见 `answer/`。
+计时先取每轮各 rank 的最大值，再对重复取平均。total 包含每轮广播、计算与汇集；一次性 CSR 分发和轮首 Barrier 不在 total 内。各阶段最大值可能来自不同 rank，不要求它们之和等于 total。
+
+练习：手算同一个小矩阵按行数与按 nnz 划分的负载差异；现有程序按 nnz 划分，没有分区切换参数。再用实测解释通信占比随 rank 数的变化。参考答案见 `answer/`。

@@ -98,7 +98,9 @@ python3 -m py_compile scripts/generate_rank_table.py
 
 ## 输出与正确性
 
-每个 rank 输出自己的最小本地摘要（`[rank r] observed global residual / local solution relative error / local total / local SpMV / local HCCL comm / local AllReduce calls`），保留每 rank 的可审计证据；rank 0 再输出全局关键路径摘要。`last_result.residual` 是 solver 的全局收敛残差（每个 rank 相同），在 rank 摘要中标注为 observed global residual，不冒充 local residual；`local solution relative error` 是本 rank 分片相对真实解的误差。分布式耗时是 wall-time 性质：`total_ms` 及全部阶段耗时通过 communicator 上的 `HcclAllReduce(MAX)` 聚合（关键路径 = 各 rank 的最大值），并用于 speedup；rank 均值（SUM/world_size）不是 wall time，绝不冒充端到端耗时。调用次数（`AllReduce/AllGather calls`）同样取各 rank 的最大单-rank 次数（一次 solver 的逻辑 collective 调用数），不是跨 rank 总和。
+每个 rank 输出自己的局部时间、工作量和解误差，rank 0 再输出全局摘要。`residual` 为全局收敛残差，`local solution relative error` 为本地解误差。
+
+各阶段时间取 rank 的最大值，用于表示最慢进程的耗时；调用次数也取单个 rank 的最大值。
 
 rank 0 输出基础信息和如下分解（除计数外均为 MAX 聚合；计数为最大单-rank 次数）：
 
@@ -109,7 +111,7 @@ rank 0 输出基础信息和如下分解（除计数外均为 MAX 聚合；计�
 - `synchronization`：`aclrtSynchronizeStream` 等待时间；
 - `AllReduce / AllGather calls`：输出两个计数；当前 Device 路径不使用 AllGather（全局向量经 Device placement + AllReduce 形成），其计数为 0。
 
-结果写入 `results/dis_gmres.csv`，各进程日志写入 `results/rank_<rank>.log`。有效结果必须同时满足：
+结果写入 `results/dis_gmres.csv`，各进程日志写入 `results/rank_<rank>.log`。成功运行时：
 
 ```text
 backend = ACL + HCCL          # 远程多设备实验

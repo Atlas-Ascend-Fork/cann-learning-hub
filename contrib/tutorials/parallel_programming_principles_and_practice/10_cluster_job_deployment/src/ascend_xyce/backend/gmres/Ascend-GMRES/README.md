@@ -10,7 +10,7 @@
 
 测试目标是验证在迭代科学计算场景中，`CSR persistent`、`BF16 CSR compression` 和 `Host prototype BLAS-1 / SpMV acceleration` 能否显著提升 GMRES 求解性能。
 
-> **Legacy 边界（课程上下文）**：本目录是随 Ascend-Xyce vendored 的独立实验项目，保留其原始 Host prototype 实验与历史数据。08 章 wrapper 中 active 的 `AscendDevice` 求解器并不编译本目录源码：CMake 目标 `xyce_npu_solver` 直接编译第 07 章 `dis_gmres` 源码，`XyceLinearSolverAdapter::solve` 调用 `dis_gmres::distributed_gmres`。本目录仅提供 CPU baselines 与 legacy Host prototype 源码（如 `spmv/npu_spmv.cpp`），其文件名不是 active `AscendDevice` 的 NPU 证据；其 `run.sh` 默认 `--warmup 3` 也只属于 vendored 项目本身，不是当前 wrapper 的默认（wrapper 默认 `ASCEND_XYCE_WARMUP=0`）。本目录内的历史数值均为 Host 原型数据，非当前 NPU 实测。
+> **Legacy 边界（课程上下文）**：本目录是随 Ascend-Xyce vendored 的独立实验项目，保留其原始 Host prototype 实验与历史数据。第 10 章 wrapper 中 active 的 `AscendDevice` 求解器并不编译本目录源码：CMake 目标 `xyce_npu_solver` 直接编译第 09 章 `dis_gmres` 源码，`XyceLinearSolverAdapter::solve` 调用 `dis_gmres::distributed_gmres`。本目录仅提供 CPU baselines 与 legacy Host prototype 源码（如 `spmv/npu_spmv.cpp`），其文件名不是 active `AscendDevice` 的 NPU 证据；其 `run.sh` 默认 `--warmup 3` 也只属于 vendored 项目本身，不是当前 wrapper 的默认（wrapper 默认 `ASCEND_XYCE_WARMUP=0`）。本目录内的历史数值均为 Host 原型数据，非当前 NPU 实测。
 
 GMRES 求解的问题形式：
 

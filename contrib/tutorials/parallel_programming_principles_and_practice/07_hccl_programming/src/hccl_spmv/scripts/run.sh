@@ -10,19 +10,21 @@ if [[ "$NPUS" -le 1 ]]; then
   if [[ -n "$TABLE" ]]; then exec env RANK_ID=0 RANK_SIZE=1 DEVICE_ID="${ASCEND_DEVICE_ID:-0}" "${BIN}" "${EXTRA[@]}" --rank-table "$TABLE"; fi
   exec env RANK_ID=0 RANK_SIZE=1 DEVICE_ID="${ASCEND_DEVICE_ID:-0}" "${BIN}" "${EXTRA[@]}"
 fi
-ROOT_INFO_FILE="/tmp/hccl_spmv_root_info_${PPID}.bin"
-rm -f "${ROOT_INFO_FILE}"
+RUN_DIR="$(mktemp -d "${ROOT_DIR}/results/run.XXXXXX")"
+ROOT_INFO_FILE="$RUN_DIR/root_info.bin"
+trap 'rm -f -- "$ROOT_INFO_FILE"' EXIT
+echo "Rank logs: $RUN_DIR"
 PIDS=(); for ((r=0;r<NPUS;r++)); do
   args=(--rank "$r" --world-size "$NPUS" --device "$r" "${EXTRA[@]}")
   if [[ -n "$TABLE" ]]; then args+=(--rank-table "$TABLE"); fi
-  RANK_ID="$r" RANK_SIZE="$NPUS" DEVICE_ID="$r" RANK_TABLE_FILE="$TABLE" HCCL_SPMV_ROOT_INFO_FILE="$ROOT_INFO_FILE" "${BIN}" "${args[@]}" >"${ROOT_DIR}/results/rank_${r}.log" 2>&1 & PIDS+=("$!")
+  RANK_ID="$r" RANK_SIZE="$NPUS" DEVICE_ID="$r" RANK_TABLE_FILE="$TABLE" HCCL_SPMV_ROOT_INFO_FILE="$ROOT_INFO_FILE" "${BIN}" "${args[@]}" >"$RUN_DIR/rank_${r}.log" 2>&1 & PIDS+=("$!")
 done
 status=0; for p in "${PIDS[@]}"; do wait "$p" || status=$?; done
-# Every case keeps the per-rank logs (results/rank_N.log) and the aggregated
+# Every case keeps the per-rank logs (results/run.XXXXXX/rank_N.log) and the aggregated
 # console output below shows each rank's full log in rank order, so rank 1+
 # evidence is never hidden behind rank 0's summary.
 for ((r=0;r<NPUS;r++)); do
   echo "===== rank ${r} ====="
-  cat "${ROOT_DIR}/results/rank_${r}.log"
+  cat "$RUN_DIR/rank_${r}.log"
 done
 exit "$status"

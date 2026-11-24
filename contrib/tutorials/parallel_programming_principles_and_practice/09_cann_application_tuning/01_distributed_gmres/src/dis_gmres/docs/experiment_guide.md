@@ -18,7 +18,7 @@
 
 每组使用 `--warmup 0`（矩阵读取/分区与 communicator 初始化在 repeat 外只做一次；每次 solve 重建 solver 内的 RTC/Device 状态；warmup 只是丢弃额外 solver 调用，不是 warm cache 稳态指标）、`--repeat 10`，报告中同时给出平均值与离散程度。加速比使用完全相同参数的单设备 wall time 除以分布式 wall time；并行效率为 `speedup / N`。
 
-分布式 wall time 的定义：每个 rank 输出自己的本地摘要（`[rank r] observed global residual / local solution relative error / local total / local SpMV / local HCCL comm / local AllReduce calls`），rank 0 的 `total_ms` 与各阶段耗时是 communicator 上的 MAX 聚合（关键路径 = 各 rank 的最大值）；SUM/world_size 的 rank 均值不是 wall time，不得作为 total 或 speedup 依据。AllReduce/AllGather 调用次数同样取各 rank 的最大单-rank 次数（一次 solver 的逻辑 collective 调用数），不是跨 rank 总和，避免随 world size 人为放大而干扰 MGS/CGS 对比。`residual` 是全局收敛残差，rank 摘要中标注为 observed global residual；`local solution relative error` 是本 rank 分片的真实解误差。
+每个 rank 输出局部摘要，rank 0 的总时间和阶段时间取各 rank 的最大值。调用次数取最大单-rank 次数。`residual` 为全局残差，`local solution relative error` 为本地解误差。
 
 ## 正确性门槛
 

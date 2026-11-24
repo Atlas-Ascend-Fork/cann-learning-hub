@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="920" height="860" viewBox="0 0 920 860">
   <title>pyACL 调用 SpMV / GEMM 执行流程</title>
-  <desc>Host/Device 调用链：初始化、数据搬运、算子执行、同步、结果拷回与回收。910B3/CANN9 上 SpMV 为 AI CPU。</desc>
+  <desc>Host/Device 调用链：初始化、数据搬运、算子执行、同步、结果拷回与回收。Ascend910_9362/CANN9 上 SpMV 为 AI CPU。</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
@@ -9,7 +9,7 @@
   </defs>
 
   <!-- 标题 -->
-  <text x="460" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a1a">pyACL 调用 SpMV / GEMM 执行流程（Ascend 910B3 / CANN 9）</text>
+  <text x="460" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a1a">pyACL 调用 SpMV / GEMM 执行流程（Ascend910_9362 / CANN 9）</text>
 
   <!-- Host 区 -->
   <rect x="30" y="60" width="360" height="770" rx="10" fill="#eef4fb" stroke="#7fa8d9" stroke-width="1.5"/>
@@ -59,7 +59,7 @@
   <!-- 7 -->
   <rect x="545" y="180" width="300" height="46" rx="8" fill="#ffffff" stroke="#333" stroke-width="1.2"/>
   <text x="695" y="198" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">7. acl.rt.memcpy H2D</text>
-  <text x="695" y="216" text-anchor="middle" font-size="11" fill="#555">Host→Device 拷贝输入（numpy_to_ptr）</text>
+  <text x="695" y="216" text-anchor="middle" font-size="11" fill="#555">Host→Device 拷贝输入（bytes_to_ptr）</text>
 
   <!-- 8 -->
   <rect x="545" y="250" width="300" height="70" rx="8" fill="#fff8e1" stroke="#b8860b" stroke-width="1.6"/>
@@ -108,7 +108,7 @@
   <rect x="50" y="640" width="795" height="126" rx="10" fill="#f4f4f4" stroke="#999" stroke-width="1"/>
   <text x="70" y="666" font-size="13" font-weight="bold" fill="#333">说明</text>
   <text x="70" y="690" font-size="12" fill="#444">· 步骤 8 是异步提交：调用返回后算子可能尚未完成，必须步骤 9 同步后才可读输出。</text>
-  <text x="70" y="712" font-size="12" fill="#444">· Host 数组指针必须用 acl.util.numpy_to_ptr(array) 获取后再 memcpy，不能直接用 raw 指针。</text>
-  <text x="70" y="734" font-size="12" fill="#444">· 910B3/CANN9 上 SpMV（SparseTensorDenseMatMul）实测为 AI CPU（tf_kernel）路径，</text>
+  <text x="70" y="712" font-size="12" fill="#444">· 输入转为 bytes 后用 bytes_to_ptr；输出复制到 Host 内存，再用 ptr_to_bytes 读取。</text>
+  <text x="70" y="734" font-size="12" fill="#444">· Ascend910_9362/CANN9 上 SpMV（SparseTensorDenseMatMul）实测为 AI CPU（tf_kernel）路径，</text>
   <text x="70" y="754" font-size="12" fill="#444">  backend_classification=AICPU，aicore_accelerated=false，不等于 AI Core 加速。</text>
 </svg>

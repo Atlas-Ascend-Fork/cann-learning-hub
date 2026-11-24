@@ -82,7 +82,7 @@ std::uint16_t float32_to_fp16_bits(float value) {
         ++half_mantissa;
         if (half_mantissa == 0x400u) {
             half_mantissa = 0;
-            ++half_exponent;
+            half_exponent += 0x400u;
             if (half_exponent >= 0x7c00u) {
                 return static_cast<std::uint16_t>(sign | 0x7c00u);
             }

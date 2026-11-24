@@ -82,7 +82,7 @@ void run_gemm(const Options& o,const std::vector<float>& a,const std::vector<flo
     output->resize(static_cast<std::size_t>(o.m*o.n)); acl_demo::copy_to_host(output->data(),output->size()*sizeof(float),dout);
     std::cout << "Actual Backend=ACL/CANN\nDevice ID=" << o.device
               << "\nWorkspace bytes=" << last_workspace_size
-              << "\nTiming scope=aclnnGemm launch + stream synchronize"
+              << "\nTiming scope=workspace query + allocation + aclnnGemm launch + stream synchronize + workspace free"
               << "\nACL GEMM:\n  time = " << std::fixed << std::setprecision(6) << total_ms/o.repeat << " ms\n";
 }
 } // namespace

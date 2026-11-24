@@ -103,7 +103,7 @@ for matrix in U1 U2 L1 L2 B1 B2; do
 done
 ```
 
-结果保存在 `results/<matrix>_<n>npu.log`。`run.sh` 在全部子进程结束后按 rank 顺序回放每个 `results/rank_N.log`（带 `===== rank N =====` 标题），因此每个 case 的日志文件都保留所有 rank 的完整证据，不会只显示 rank 0 摘要；`results/rank_N.log` 同时保留本次运行的每 rank 原文。
+结果保存在 `results/<matrix>_<n>npu.log`，每个 rank 的原始日志位于本次打印的 `results/run.XXXXXX/rank_N.log`。
 
 调度器分别启动进程时，每个进程设置不同的 `RANK_ID`（0 到 N-1），并传入相同的 `RANK_SIZE`、`DEVICE_ID` 和 rank table。所有 rank 必须同时进入 Broadcast/AllGather；超时先检查 IP、rank 数、端口和设备映射。
 
@@ -123,7 +123,7 @@ done
 
 HCCL 的 Broadcast 和 AllGather 缓冲区使用 ACL device memory。缓冲区在第一次迭代分配，之后复用，避免把反复 `aclrtMalloc/aclrtFree` 的成本计入 steady-state（warmup 是可复用 buffer/steady-state 语义，无需强制为 0）。当前输出字段含义：
 
-- 每个 rank 先输出自己的本地摘要（`Local Total Time`、`Local HCCL Communication`、`Local Data Transfer` 等），保留每 rank 的可审计证据。
+- 每个 rank 先输出自己的本地摘要（`Local Total Time`、`Local HCCL Communication`、`Local Data Transfer` 等）。
 - 汇总耗时是 wall-time 性质，rank 0 通过 `HcclAllReduce(MAX)` 取各 rank 的最大值（关键路径）：`Total Time (MAX across ranks)`、`Kernel launch overhead (MAX)`、`Local SpMV launch-to-complete (MAX)`、`HCCL Communication (MAX)`、`Data Transfer (MAX)`、`Synchronization (MAX)`。MAX 才是分布式端到端 wall time；SUM/world_size 的 rank 均值会低估真实墙钟时间，不作为 total 或 scaling 结论。
 - `HCCL Communication`：Broadcast、AllGather 及相应 stream synchronize 的时间。
 - `Data Transfer`：collective 前后的 H2D/D2H 拷贝时间。
@@ -162,7 +162,7 @@ HCCL 的 Broadcast 和 AllGather 缓冲区使用 ACL device memory。缓冲区�
 
 ### 正确性
 
-历史记录中的误差仅说明旧实现的数据划分与拼接口径。真实 Ascend C + HCCL 路径必须在当前 NPU 环境重新运行，并以 `< 1e-6` 阈值、退出码和 Rank 日志重新验收。
+上表使用旧版 CPU 局部计算加 HCCL 通信。当前 Ascend C 版本以自己的运行结果为准，相对误差应小于 `1e-6`。
 
 ### 小矩阵 U1/L1/B1（历史 Host-local 分析）
 
@@ -202,6 +202,6 @@ ACL transfer 在大矩阵上约 2.9--7.0 ms。历史实现中，本地计算还�
 
 ## 输出与复现实验
 
-rank 0 输出矩阵尺寸、NPU 数量、分布式总时间（MAX 聚合的关键路径 wall time）、通信时间、SpMV 时间、加速比和误差（要求 `<1e-6`）；`results/rank_*.log` 保存各 rank 日志（含每 rank 本地 `Local ...` 摘要）。
+rank 0 输出矩阵尺寸、NPU 数量、分布式总时间（MAX 聚合的关键路径 wall time）、通信时间、SpMV 时间、加速比和误差（要求 `<1e-6`）；`results/run.XXXXXX/rank_*.log` 保存各 rank 日志（含每 rank 本地 `Local ...` 摘要）。
 
 课程复现流程：初始化当前 CANN 环境 → `npu-smi info` → 准备与 communicator size 匹配的 rank table → `HCCL_SPMV_REQUIRE_REAL=1 bash scripts/build.sh` → `bash scripts/run.sh --npus N --rank-table FILE`。上表属于原实验工程随附的历史记录，不要求学习者复现相同数值。

@@ -29,7 +29,7 @@ Ascend AI Core
 solve(A, b, x)
 ```
 
-Device solver 复用第 07 章 `dis_gmres` 的 ACL RTC/HCCL 实现；CPU single/OpenMP solver 仅作为基线。该 wrapper 证明求解热点进入 NPU，但不等于完整 Xyce 二进制已经运行。
+Device solver 复用第 09 章 `dis_gmres` 的 ACL RTC/HCCL 实现；CPU single/OpenMP solver 仅作为基线。该 wrapper 证明求解热点进入 NPU，但不等于完整 Xyce 二进制已经运行。
 
 ## 运行环境
 
@@ -205,12 +205,9 @@ cat results/xyce_benchmark.csv
 column -s, -t < results/xyce_benchmark.csv | less -S
 ```
 
-## 验收门禁
+## 检查结果
 
-- **残差门禁**：每个 solver 必须收敛（相对残差 `< 1e-6`），否则 `XyceApplicationWrapper::run` 抛错、benchmark 退出非零。
-- **解误差门禁**：`kSolutionErrorTolerance = 1.0e-3`（与 dis_gmres 章节的 solution-error 门禁一致）。每个 solver 结果在返回/写 CSV 前必须同时满足“相对构造的 `expected_solution` 的真实解误差”与（提供 CPU reference 时）“相对 CPU reference 的误差”都低于该阈值；任何一项超限都明确报错并返回非零，不会留下 pass 数据。CPU reference 不是唯一门禁：`expected_solution` 始终独立校验，CPU reference（提供时）也独立校验，避免 reference 掩盖真实解误差。
-- **行数门禁**：运行结束后校验 CSV 行数：每个选中的矩阵必须恰好有 3 行 solver 结果（CPU single / CPU OpenMP16 / Ascend Device），只写表头或行数不符都会返回非零。
-- **CSV 精度**：正确性字段（`final_residual`、`solution_error_vs_cpu`）以 scientific 格式输出且至少 9 位有效数字；timing 字段保持 fixed 6 位小数，两种格式互不污染。
+每种求解器应收敛，相对残差不超过 `1e-6`、相对已知解的误差不超过 `1e-3`。OpenMP 和 Device 还会与 CPU 解比较。程序自动检查这些条件，并为每个矩阵写出三行求解结果。
 
 ## Solver 对比
 
@@ -268,7 +265,7 @@ values
 - `final_residual`：最终相对残差（scientific，≥9 位有效数字）。
 - `converged`：是否收敛。
 - `speedup_vs_cpu_single`：相对 CPU single 的总模拟加速比。
-- `solution_error_vs_cpu`：相对 CPU single 解的误差（scientific，≥9 位有效数字）；`run()` 同时校验相对构造 `expected_solution` 的真实解误差并执行 1e-3 门禁。
+- `solution_error_vs_cpu`：相对 CPU single 解的误差（scientific，≥9 位有效数字）；`run()` 同时校验相对构造 `expected_solution` 的真实解误差并执行 1e-3 检查。
 - `spmv_ms`：GMRES 内部 SpMV 总时间。
 - `dot_ms`：Dot product 总时间。
 - `axpy_ms`：AXPY 总时间。
@@ -286,7 +283,7 @@ values
 
 ## 最新实验结果
 
-> **历史 Host 原型数据，非 NPU 实测。** 以下表格仅保留用于复现实验结构和比较 CPU 实现；所有 “Host prototype” 数值均来自 CPU/OpenMP。它们不能证明 HBM、NPU persistent kernel 或 Ascend 加速效果，也不能代表当前 `AscendDevice` 求解器的 NPU 实测；当前版本的 NPU 结果必须在昇腾真机重新采集，并同时记录设备型号、CANN 版本和 profiler 证据。
+> 以下为旧版 CPU 原型数据。当前 Device 求解器的性能请查看本次生成的 CSV。
 
 运行命令：
 
@@ -451,4 +448,4 @@ Host prototype optimized 中，Dot 和 AXPY 占比：
 - Givens/Hessenberg 不是瓶颈。
 - CPU OpenMP16 是强 baseline，Host prototype optimized 与其整体接近，并在部分矩阵上超过。
 
-上述结论只属于历史 Host prototype 版本，不能证明 Ascend NPU 已参与计算。当前版本已实现真实设备 backend：`LinearSolverKind::AscendDevice` 经 `XyceLinearSolverAdapter::solve` 调用 `dis_gmres::distributed_gmres`（CMake 目标 `xyce_npu_solver` 直接编译第 07 章 `dis_gmres` 源码，vendored `backend/gmres/Ascend-GMRES` 只是 CPU baselines/legacy Host prototype 源码）；NPU 加速结论必须以当前真机运行时 backend/device 输出、数值误差和 profiler 时间线重新验收。
+以上分析属于旧版 CPU 原型。当前设备求解器调用第 09 章的 `dis_gmres::distributed_gmres`；源码调用关系见本章 Notebook。

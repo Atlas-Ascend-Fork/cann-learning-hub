@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
-  <title>SpMV 与 GEMM 数据合同</title>
-  <desc>GEMM 五输入合同与 SparseTensorDenseMatMul 四输入合同的形状、类型与 pyACL 调用接口。</desc>
+  <title>SpMV 与 GEMM 输入输出要求</title>
+  <desc>GEMM 五个输入与 SparseTensorDenseMatMul 四个输入的形状、类型与 pyACL 调用接口。</desc>
   <defs>
     <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
     </marker>
   </defs>
 
-  <text x="500" y="34" text-anchor="middle" font-size="19" font-weight="bold" fill="#1a1a1a">SpMV 与 GEMM 的 singleop 数据合同（910B3/CANN 9 实机验证合同）</text>
+  <text x="500" y="34" text-anchor="middle" font-size="19" font-weight="bold" fill="#1a1a1a">SpMV 与 GEMM 的单算子输入、输出与类型要求</text>
 
   <!-- ================= GEMM 面板 ================= -->
   <rect x="30" y="60" width="450" height="510" rx="10" fill="#eef4fb" stroke="#7fa8d9" stroke-width="1.5"/>
@@ -78,9 +78,9 @@
   <text x="745" y="462" text-anchor="middle" font-size="12" font-weight="bold" fill="#1d6b42">输出：y [m, 1] float</text>
   <text x="745" y="480" text-anchor="middle" font-size="11" fill="#555">attr: adjoint_a=false, adjoint_b=false</text>
 
-  <!-- 910B3 边界提示 -->
+  <!-- 本节后端提示 -->
   <rect x="540" y="515" width="410" height="42" rx="8" fill="#fdeaea" stroke="#c0392b" stroke-width="1.4"/>
-  <text x="745" y="533" text-anchor="middle" font-size="12" font-weight="bold" fill="#a5281b">910B3/CANN9：backend_classification = AICPU（tf_kernel）</text>
+  <text x="745" y="533" text-anchor="middle" font-size="12" font-weight="bold" fill="#a5281b">Ascend910_9362 / CANN 9：AICPU（tf_kernel）</text>
   <text x="745" y="549" text-anchor="middle" font-size="11" fill="#a5281b">aicore_accelerated=false —— AI CPU 不等于 AI Core 加速</text>
 
   <!-- 语义提示 -->

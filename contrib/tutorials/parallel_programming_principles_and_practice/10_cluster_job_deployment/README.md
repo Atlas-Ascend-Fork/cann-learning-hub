@@ -1,50 +1,35 @@
-![集群作业部署与管理：Xyce](./images/readme_cover.png)
+# 线性求解器部署与分析
 
----
+部署并运行 Ascend-Xyce 线性求解器测试程序，比较 CPU 单线程、OpenMP 和设备求解器。学习准备依赖、构建、配置输入输出和分析日志。
 
-# 集群作业部署与管理（CANN 模块 5.3）
+## 开始前
 
-## 课程简介
-
-本课程对应 CANN 教学体系模块 5.3，学习 CANN/HPC 应用的集群部署与管理。课程以 Ascend-Xyce wrapper/adapter 为实验对象，覆盖 Xyce 应用与 Adapter 结构、依赖与构建部署、benchmark 启动与配置、日志结果管理与故障定位。实验材料基于 Ascend-Xyce wrapper/adapter 与 Ascend-GMRES 工程。
-
-## 适合人群与前置要求
-
-面向具备 C/C++、CMake 与 HPC 应用构建部署基础的学习者，建议先完成 5.2 CANN 应用调优课程；本课程覆盖 Ascend-Xyce wrapper/adapter 的构建部署与作业管理，不涉及完整 netlist 仿真。
+完成第 09 章，了解 C++ 与 CMake。CPU 求解器随本章提供，设备求解器引用第 09 章源码，请保留完整课程目录。
 
 ## 学习目标
 
-- 理解 Ascend-Xyce wrapper/adapter 的应用接入结构与边界；
-- 完成依赖准备与构建部署，识别运行时依赖关系；
-- 掌握 benchmark 启动与配置管理方法；
-- 能够依据日志与结果进行故障定位，不虚构完整 netlist 仿真或调度器作业。
+- 追踪应用、适配器和求解器的调用。
+- 完成编译运行，检查收敛和误差。
+- 比较矩阵装配、求解和总时间。
+- 按日志定位故障；有集群队列时选做作业提交。
 
-## 课程章节目录
+## 学习顺序
 
-章节目录：`本目录`（含 answer / images / src 子目录）
+按下表打开 Notebook。每个实验已包含相关原理、编译运行和结果分析；做完实验后再完成章节练习。
 
-| 章节 | 说明 | 相对链接 |
-|------|------|----------|
-| 10.1 章节介绍 | 课程总览 | [10.01_chapter_intro.ipynb](./10.01_chapter_intro.ipynb) |
-| 10.2 Xyce 应用与 Adapter | 接入结构与边界 | [10.02_xyce_application_and_adapter.ipynb](./10.02_xyce_application_and_adapter.ipynb) |
-| 10.3 依赖与构建部署 | 依赖与构建流程 | [10.03_dependency_and_build_deployment.ipynb](./10.03_dependency_and_build_deployment.ipynb) |
-| 10.4 Benchmark 启动与配置 | 启动与参数管理 | [10.04_benchmark_launch_and_configuration.ipynb](./10.04_benchmark_launch_and_configuration.ipynb) |
-| 10.5 结果与故障定位 | 日志、结果与排障 | [10.05_logs_results_and_troubleshooting.ipynb](./10.05_logs_results_and_troubleshooting.ipynb) |
-| 10.6 章节实践 | 章节测试 | [10.06_chapter_test.ipynb](./10.06_chapter_test.ipynb) |
+| 顺序 | Notebook | 内容 |
+|---|---|---|
+| 1 | [线性求解器部署实验](10_lab.ipynb) | 准备环境、理解原理、运行并分析结果 |
+| 2 | [第 10 章练习](10_practice.ipynb) | 检查理解、完成编程与分析题 |
 
-## 课程支持的硬件产品与已验证的在线体验环境
+## 实验环境
 
-| 项目 | 说明 |
-|------|------|
-| 支持硬件 | Atlas A3（SoC Ascend910_9362）；课程 wrapper/adapter 与 Device GMRES 热点已在 A3 通过；完整 upstream Xyce 整链未实现/未验证 |
-| CANNLab 环境 | A3，SoC `Ascend910_9362`，CANN 9.0，Device 0 |
-| 镜像模板 | `cann_9.0.0-py3.11-A3-arm-20260829` |
-| Notebook 内核 | `Python 3.11.4 (CANN)`，kernelspec 为 `python3` |
-| CANNLab 指南 | [CANNLab 环境体验指南](../../../../docs/CANNLab_env_experience_guide.md) |
+课程使用 CANNLab Atlas A3（SoC `Ascend910_9362`）、CANN 9.0，镜像为 `cann_9.0.0-py3.11-A3-arm-20260829`，Notebook 内核为 `Python 3.11.4`。平台使用方法见[CANNLab 环境体验指南](../../../../docs/CANNLab_env_experience_guide.md)。
 
-## 实验环境说明
+默认在 CANNLab 的 Notebook 中逐个点击运行代码单元格，不需要调度器。实验手册也保留了终端命令。测试程序比较线性求解器；完整 Xyce 电路仿真另需 Xyce、第三方依赖和电路网表，属于扩展内容。
 
-- 历史实验验证硬件为 Ascend 910B/910B3，历史实验记录使用的 CANN 版本为 CANN 9.0.0；部署实验还依赖 Xyce 及其第三方依赖的构建环境。
-- 使用 `$ASCEND_TOOLKIT_HOME`、`$ASCEND_HOME_PATH` 等环境变量定位实际安装，不假定固定路径。
-- Notebook 为教学重组内容，本地开发阶段保持未执行状态；实现、构建方式与参考结果来自对应原实验工程的 README、源码、脚本、CSV 与历史运行记录，不将历史日志或静态检查写成当前机器真机 PASS。课程教授 Ascend-Xyce wrapper/adapter 的依赖部署与 benchmark 管理，不虚构完整 netlist 仿真或调度器作业。
-- 本课程当前只覆盖 Ascend-Xyce wrapper/adapter 的构建、部署与作业管理；本轮课程 wrapper/adapter 与 Device GMRES 热点已在 A3 通过；完整 upstream Xyce netlist、Newton/time-step、Trilinos/Epetra 与 `TYPE=ASCEND` 整链未实现/未验证，不得写成完整 Xyce 已通过。
+## 阅读源码
+
+先看 [xyce_benchmark.cpp](src/ascend_xyce/benchmark/xyce_benchmark.cpp)怎样配置输入和启动测试，再看 [xyce_adapter.cpp](src/ascend_xyce/src/xyce_adapter.cpp)怎样构造方程、选择求解器并检查结果。
+
+CPU 求解器随本章提供，设备求解器使用第 09 章的 GMRES。10.2 节说明它们的调用关系，10.3 节完成构建，10.4 节运行并保存 CSV。

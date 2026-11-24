@@ -198,6 +198,7 @@ struct MpiTimings {
 };
 
 struct LocalTimings {
+    double rank_max[4] = {};  // Sum of each iteration's cross-rank maxima.
     double total = 0.0;
     double broadcast = 0.0;
     double compute = 0.0;
@@ -239,6 +240,16 @@ LocalTimings measure_iterations(const Distribution& distribution, int rank,
         timing.broadcast += broadcast_end - total_start;
         timing.compute += compute_end - broadcast_end;
         timing.gather += gather_end - compute_end;
+        const double local[4] = {gather_end - total_start,
+                                 broadcast_end - total_start,
+                                 compute_end - broadcast_end,
+                                 gather_end - compute_end};
+        double maximum[4] = {};
+        // Aggregate outside the measured iteration, then average over repeats.
+        MPI_Reduce(local, maximum, 4, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+        if (rank == 0) {
+            for (int field = 0; field < 4; ++field) timing.rank_max[field] += maximum[field];
+        }
     }
     return timing;
 }
@@ -288,16 +299,16 @@ void emit_rank_records(const Distribution& distribution,
 
 MpiTimings reduce_timings(const Distribution& distribution,
                           const LocalTimings& local, double scale, int rank) {
-    double local_values[4] = {local.total, local.broadcast, local.compute, local.gather};
-    double maximum_values[4] = {};
-    MPI_Reduce(local_values, maximum_values, 4, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    const double* maximum_values = local.rank_max;
     double compute_sum = 0.0;
     MPI_Reduce(&local.compute, &compute_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     const double average = rank == 0
                                 ? compute_sum * scale / distribution.row_counts.size() : 0.0;
-    const double maximum = maximum_values[2] * scale;
+    double maximum_compute_sum = 0.0;
+    MPI_Reduce(&local.compute, &maximum_compute_sum, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    const double maximum = maximum_compute_sum * scale;
     const double imbalance = average > 0.0 ? (maximum - average) / average : 0.0;
-    return {maximum_values[0] * scale, maximum_values[1] * scale, maximum,
+    return {maximum_values[0] * scale, maximum_values[1] * scale, maximum_values[2] * scale,
             maximum_values[3] * scale, average, imbalance};
 }
 

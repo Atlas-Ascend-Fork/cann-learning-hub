@@ -1,5 +1,6 @@
 #include "benchmark.hpp"
 
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -112,6 +113,10 @@ BenchmarkResult run_benchmark(const spmv::CSRMatrix& matrix,
     result.openmp_ms = benchmark(&openmp, matrix, x, config, &parallel,
                                  &result.openmp_info);
     result.error = spmv::relative_error(reference, parallel);
+    if (!std::isfinite(result.error) || result.error >= 1e-6) {
+        throw std::runtime_error("OpenMP correctness check failed: relative_error=" +
+                                 std::to_string(result.error));
+    }
     result.speedup = result.openmp_ms > 0.0 ? result.serial_ms / result.openmp_ms : 0.0;
     result.efficiency = result.openmp_info.actual_threads > 0
                             ? result.speedup / result.openmp_info.actual_threads : 0.0;
@@ -133,7 +138,8 @@ void print_result(const spmv::MatrixSpec& spec, const BenchmarkResult& result) {
               << result.openmp_info.schedule_chunk << ')'
               << "\n  parallel_efficiency = " << result.efficiency
               << "\n  estimated_bandwidth_gbps = " << result.bandwidth_gbps
-              << "\n  relative_error = " << result.error << '\n';
+              << "\n  relative_error = " << std::scientific << result.error
+              << std::fixed << "\n  Correctness=PASS\n";
 }
 
 void write_result(std::ofstream* csv, const spmv::MatrixSpec& spec,
@@ -142,7 +148,8 @@ void write_result(std::ofstream* csv, const spmv::MatrixSpec& spec,
          << ',' << result.openmp_info.actual_threads << ',' << result.schedule << ','
          << result.openmp_info.schedule_chunk << ',' << result.serial_ms << ','
          << result.openmp_ms << ',' << result.speedup << ',' << result.efficiency << ','
-         << result.bandwidth_gbps << ',' << result.error << '\n';
+         << result.bandwidth_gbps << ',' << std::scientific << std::setprecision(9)
+         << result.error << std::fixed << '\n';
 }
 
 bool run_selected(const spmv::BenchmarkConfig& config, const std::string& matrix_filter,
