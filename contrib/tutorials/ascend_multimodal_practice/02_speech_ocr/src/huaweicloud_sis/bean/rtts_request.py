@@ -7,8 +7,7 @@ class RttsRequest:
     def __init__(self, text):
         """
             实时语音转写请求初始化
-        :param audio_format:   音频格式，详见api文档
-        :param model_property: 属性字符串，language_sampleRate_domain, 如chinese_8k_common，详见api文档
+        :param text: 待实时转写的文本参数（初始化必选参数）
         """
         self._text = text
         self._command = 'START'

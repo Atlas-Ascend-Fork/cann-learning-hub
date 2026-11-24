@@ -6,7 +6,8 @@ class RegisterVoiceRequest:
     def __init__(self, data, voice_name):
         """
             声音复刻注册请求初始化
-        :param text: 需要合成的文本
+        :param data: 待注册声音的音频数据（Base64 编码）
+        :param voice_name: 注册声音名称
         """
         self._data = data
         self._voice_name = voice_name
