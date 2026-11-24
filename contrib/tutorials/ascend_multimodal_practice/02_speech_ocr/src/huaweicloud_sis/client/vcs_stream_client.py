@@ -224,7 +224,7 @@ class VcsStreamClient:
             raise ClientException(error_msg)
         if self._status == WebsocketStatus.STATE_CONNECTED:
             return True
-        logger.error("status {} can't send request", self._status)
+        logger.error("status %s can't send request", self._status)
         return False
 
     def _get_headers(self, url, origin_headers):
