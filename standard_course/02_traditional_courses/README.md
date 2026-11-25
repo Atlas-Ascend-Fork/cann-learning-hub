@@ -19,6 +19,7 @@
 | **人工智能通识课程**（课程十三） | ● 整课植入 | "从图灵到 CANN"4 学时通识讲座（75 页课件已就绪：AI 来龙去脉 → 大模型计算本质 → 昇腾 NPU/CANN 底座）+ quick_start 体验实践 | [ai_general_education.md](./ai_general_education.md) |
 | **CANN 基础介绍**（课程九；高校公选 / 新生研讨 / 企业入门培训，16 学时） | ● 整课复用 | 独立 CANN 入门课（非学科融入课）：4 次上课 × 4 课时，理论讲义、实践作业与 CANNJudge 判题**全部复用启航营两天营成熟素材**（生态架构 → 训推 → 矢量算子 → PyTorch/CANNBot），教师零改造开课；亦为 [AI 通识三讲](../03-cann-signature-courses/ai_general_education.md)（03-cann-signature-courses）的进阶出口 | [cann_basics_introduction.md](./cann_basics_introduction.md) |
 | **AI背后的中国芯——国产AI芯片与智能计算**（校企共建通识课，16 学时） | ● 整课共建（换芯不换课） | 四模块课序（AI 浪潮 → 算力底座 → 行业与格局 → 挑战未来）；第 5 次**"一键部署大模型"**高光实践（GitCode Notebook / ModelArts，零代码）；考核：参与 20 + 实践 30 + 产业短文 20 + 方案展示 30 | [chinas_chips_behind_ai.md](./chinas_chips_behind_ai.md) |
+| **现代电子技术基础**（人工智能专业基础课，40 学时） | M2 前沿拓展单元 + ◐ 对照卡 | 传统电子技术主体（电路 / 模电 / 数电 / 数模混合 30 学时 + 仿真实验 3 个）＋ 前沿拓展 6 学时"**AI 芯片与 NPU 认知**"（●：电子技术视角 NPU 映射总表 1 讲 → CANNLab 上机 4 学时：npu-smi 对照 + CPU vs NPU 对比 + 认知报告）；贯穿全课的 ◐ 昇腾对照卡（SRAM ↔ UB/L1/L0、CMOS 功耗 ↔ TOPS/W、加法器 ↔ Cube、量化 ↔ INT8/FP8 等） | [modern_electronics_fundamentals.md](./modern_electronics_fundamentals.md) |
 | 其余学科方向（DL 系统 / 图像处理 / 编译 / OS / 嵌入式 / 数值 / 计算科学 / 数据科学 / HPC 等） | M2–M4 | 方向性规划（见第七章全学科覆盖总表） | 待立项后逐课建文 |
 
 ---
