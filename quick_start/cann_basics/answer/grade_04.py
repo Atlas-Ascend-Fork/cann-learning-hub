@@ -154,10 +154,13 @@ def _check_practice_4(g):
         print(f"  CPU 与 NPU 最大差异: {diff:.6f}")
         print(f"  结果一致: {'✓' if consistent else '✗'}")
 
-        # 检查是否在 NPU 上执行
+        # 检查是否在 NPU 上执行（NPU 运行时间缺失或为 0 说明未完成 NPU 卷积）
         npu_time = g.get("npu_time")
         cpu_time = g.get("cpu_time")
-        if npu_time and cpu_time:
+        if not npu_time:
+            print("  ✗ 未检测到有效的 NPU 运行时间，请完成 NPU 卷积计时。")
+            return False
+        if cpu_time:
             speedup = cpu_time / npu_time
             print(f"  CPU: {cpu_time*1000:.2f} ms, NPU: {npu_time*1000:.2f} ms, 加速比: {speedup:.1f}x")
 
