@@ -2,6 +2,8 @@
 
 本章节讲解智能系统部署方案与流程、CANN 异构计算架构与核心组件、Ascend C 算子开发，并通过实验完成从算子开发到模型转换部署的完整链路。
 
+> **说明**：本章节部分教程引用了 Gitee 的 `ascend/samples` 样例仓库，该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann) 获取。
+
 ## 理论课程（Lecture）
 
 | Lecture | 内容概要 | 链接 |

@@ -230,6 +230,8 @@ std::vector<float> &y)
 
 https://gitee.com/ascend/samples/blob/master/operator/ascendc/0_introduction/25_simple_add/add_custom.asc
 
+> 注：该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann)。
+
 **3.编译并执行代码**
 
 ```

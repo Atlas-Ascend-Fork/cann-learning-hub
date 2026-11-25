@@ -2,6 +2,8 @@
 
 本章节系统介绍智能硬件系统的核心架构与关键技术，涵盖 SoC 片上系统、CPU、协处理加速单元、存储器与接口，并重点解析华为昇腾 AI 处理器的硬件系统、达芬奇架构与开发应用平台。
 
+> **说明**：本章节部分教程引用了 Gitee 的 `ascend/samples` 样例仓库，该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann) 获取。
+
 ## 理论课程（Lecture）
 
 | Lecture | 内容概要 | 链接 |

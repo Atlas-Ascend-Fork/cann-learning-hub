@@ -12,6 +12,8 @@
 - 第 05 章：DeepSeek-LLM-7B LoRA 微调实战（心理健康多轮对话，LoRA + SDPA/FlashAttention）
 - 第 06 章：算子优化实验（Conv+BN 算子融合，优化前/后性能对比）
 
+> **说明**：本章节部分教程引用了 Gitee 的 `ascend/samples` 样例仓库，该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann) 获取。
+
 ## 适用学习人群
 
 - 已掌握 Python 与 PyTorch 基础（张量、nn.Module、自动求导、训练循环、DataLoader）

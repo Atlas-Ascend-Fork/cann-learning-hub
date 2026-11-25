@@ -36,6 +36,8 @@
  由于我们的目标算子是个MIX（同时有矩阵乘操作和向量操作）融合算子，所以遍历了整个路径，从中选取了一个看起来较为完善的MIX融合算子编程过程作为参考：
  `https://gitee.com/ascend/samples/blob/master/operator/ascendc/0_introduction/22_baremix_kernellaunch/BareMixInvocation/baremix_custom.cpp`
 
+ > 注：该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann)。
+
 ##### Step2：算子开发
 
 实现流程设计：由于910系列 CV分离(Cube上的数据传入Vector必须经过L2或高带宽内存)的特性，我们分析发现matmul计算和Vector计算理论上都是memory bound，所以我们决策采用先计算matmul后再计算Vector的方式完成编程。
@@ -61,6 +63,8 @@
 ##### Step3：适配torch
 
 遍历`https://gitee.com/ascend/samples/tree/master/operator/ascendc/0_introduction`，我们通过测试找到了（参考13_matmulleakyrelu_kernellaunch和22_baremix_kernellaunch）一个可以支持MIX融合算子编译的cmake以及torch对应的适配和编译方式，并对其做了精简，保留其中核心的两项:
+
+ > 注：该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann)。
 
  **1. 编译功能**
  

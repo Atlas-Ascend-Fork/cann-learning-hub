@@ -2,6 +2,8 @@
 
 本章节拆开昇腾的软件操作系统，讲解嵌入式操作系统概念、昇腾全栈软件体系架构、驱动开发与应用软件开发流程，并通过 PyTorch + torch_npu 感受昇腾异构计算能力。
 
+> **说明**：本章节部分教程引用了 Gitee 的 `ascend/samples` 样例仓库，该仓库已停止维护，最新样例请前往 [gitcode.com/cann](https://gitcode.com/cann) 获取。
+
 ## 理论课程（Lecture）
 
 | Lecture | 内容概要 | 链接 |
