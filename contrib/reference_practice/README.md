@@ -14,7 +14,7 @@
 
 | 案例名称 | 案例描述 | 链接 | 状态 |
 |----------|----------|------|------|
-| （待收录） | — | — | — |
+| [YOLOv13 pyACL 免编译离线推理](./yolov13_pyacl_inference/README.md) | 官方案例 yolov13_offline_inference 第 3 章 C++ 推理程序的免编译备选，基于 pyACL 复用第 2 章产物（OM + BIN）直接推理，输出格式与 C++ 程序一致 | [案例目录](./yolov13_pyacl_inference/) | 已验证（Atlas 300I Duo / 310P + CANN 8.0.0） |
 
 ## 投稿说明
 
