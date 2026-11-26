@@ -176,7 +176,7 @@ pip install opencv-python==4.10.0.84
 pip install numpy==1.24.3
 
 # 机械臂控制
-pip install jkrc  # JAKA机械臂SDK
+# JAKA 机械臂 SDK（jkrc.so 已随课程提供在 4-FruitSorter/ 目录，无需 pip 安装）
 
 # 语音录音/识别/播报（缺少则降级为键盘输入）
 pip install SpeechRecognition pyaudio   # 麦克风录音
