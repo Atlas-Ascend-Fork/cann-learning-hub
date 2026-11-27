@@ -85,7 +85,7 @@ static ge::graphStatus TilingFunc(gert::TilingContext* context)
 
 **模板参数定义：**
 
-[https://www.hiascend.com/document/detail/zh/canncommercial/82RC1/API/ascendcopapi/atlasascendc_api_07_00011.html](https://weibo.cn/sinaurl?u=https%3A%2F%2Fwww.hiascend.com%2Fdocument%2Fdetail%2Fzh%2Fcanncommercial%2F82RC1%2FAPI%2Fascendcopapi%2Fatlasascendc_api_07_00011.html)
+[Ascend C 模板参数定义（atlasascendc_api_07_00011）](https://www.hiascend.com/document/detail/zh/canncommercial/82RC1/API/ascendcopapi/atlasascendc_api_07_00011.html)
 
 ```
 
